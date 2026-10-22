@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Urnas ao Vivo</title>
+<style>
+:root{--bg:#0b0e17;--bg2:#121828;--card:#161d30;--tx:#f1f4fb;--mut:#8f9bb5;--bd:#26304a;--a:#ff4d63;--b:#4d8dff;--cx:#5b6783;--ok:#2ee59d;--warn:#ffc83d;--glow:0 0 24px}
+:root[data-theme=light]{--bg:#eef1f7;--bg2:#e5e9f2;--card:#fff;--tx:#12182a;--mut:#5a6785;--bd:#d6dce9;--a:#d6283a;--b:#1f5fd6;--cx:#8a94a8;--ok:#0f9d63;--warn:#b57b00;--glow:0 0 0}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(1200px 500px at 50% -150px,var(--bg2),var(--bg));background-color:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;padding:14px 16px 60px}
+header{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.logo{font-weight:900;letter-spacing:.06em;font-size:18px}.logo small{display:block;font-weight:500;letter-spacing:0;color:var(--mut);font-size:12px}
+.tools{display:flex;gap:8px;align-items:center}
+.pill,.btn{display:inline-flex;gap:6px;align-items:center;padding:6px 12px;border-radius:99px;background:var(--card);border:1px solid var(--bd);font-size:13px;color:var(--tx);cursor:pointer}
+.pill{cursor:default}.dot{width:9px;height:9px;border-radius:50%;background:var(--mut)}.live .dot{background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pu 1.2s infinite}.err .dot{background:var(--a)}
+@keyframes pu{50%{opacity:.35}}
+nav{display:flex;gap:6px;margin:14px 0;overflow:auto}
+nav button{flex:1;min-width:110px;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--mut);font-weight:700;font-size:15px;cursor:pointer}
+nav button[aria-pressed=true]{color:var(--tx);border-color:var(--tx);box-shadow:var(--glow) rgba(120,150,255,.25)}
+.warn{background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--warn);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--mut);margin-bottom:12px}
+.warn b{color:var(--tx)}.warn a{color:var(--b)}
+.view[hidden]{display:none}
+/* cabo de guerra */
+.arena{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:16px;position:relative;overflow:hidden}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
+.side{min-width:0}.side.r{text-align:right}
+.side .num{font-size:12px;color:var(--mut)}.side .nm{font-weight:800;font-size:clamp(15px,3.6vw,22px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side .pc{font-size:clamp(34px,10vw,64px);font-weight:900;line-height:1;font-variant-numeric:tabular-nums}.side .vt{color:var(--mut);font-size:13px;font-variant-numeric:tabular-nums}
+.side.a{color:var(--a)}.side.b{color:var(--b)}.side .nm{color:var(--tx)}
+.mid{font-weight:900;color:var(--mut);font-size:14px;padding-bottom:20px}
+.rope{position:relative;height:30px;margin:16px 4px 6px;border-radius:99px;background:linear-gradient(90deg,var(--a) 0 50%,var(--b) 50% 100%);box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+.rope .fill{position:absolute;inset:0;border-radius:99px;overflow:hidden}
+.rope .fill i{position:absolute;top:0;bottom:0;left:0;background:var(--a);transition:width .8s cubic-bezier(.2,.9,.3,1)}
+.rope .fill u{position:absolute;top:0;bottom:0;right:0;background:var(--b);text-decoration:none;transition:width .8s cubic-bezier(.2,.9,.3,1)}
+.rope .mk{position:absolute;top:-6px;width:12px;height:42px;margin-left:-6px;border-radius:6px;background:#fff;box-shadow:0 0 14px #fff;transition:left .8s cubic-bezier(.2,.9,.3,1)}
+.rope .half{position:absolute;left:50%;top:-4px;bottom:-4px;border-left:2px dashed rgba(255,255,255,.55)}
+.lead{display:flex;justify-content:center;gap:8px;align-items:center;margin-top:12px;font-weight:800;font-size:15px;flex-wrap:wrap;text-align:center}
+.seal{padding:3px 12px;border-radius:99px;background:var(--ok);color:#04150d;font-weight:900;font-size:13px;letter-spacing:.04em}
+.seal.go{animation:sealpop .6s}
+@keyframes sealpop{0%{transform:scale(.4)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+/* HUD */
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px 12px;min-width:0}
+.stat .k{color:var(--mut);font-size:12px}.stat .v{font-size:clamp(17px,4.6vw,24px);font-weight:900;font-variant-numeric:tabular-nums}.stat .s{font-size:12px;color:var(--mut)}
+.meter{height:8px;border-radius:9px;background:var(--bd);position:relative;margin-top:6px;overflow:hidden}.meter i{position:absolute;left:0;top:0;bottom:0;border-radius:9px}
+.meter .t{background:var(--cx)}.meter .u{background:var(--ok);height:50%;top:25%}
+@media(max-width:640px){.hud{grid-template-columns:1fr 1fr}}
+h2{font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:20px 0 8px}
+/* mapa */
+.map{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-width:640px;margin:0 auto}
+.tile{aspect-ratio:1;border-radius:10px;border:2px solid transparent;background:var(--card);color:var(--tx);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;cursor:pointer;font-weight:900;font-size:clamp(11px,2.6vw,16px);padding:0;transition:transform .15s}
+.tile:hover{transform:scale(1.07)}.tile small{font-weight:600;font-size:clamp(8px,1.8vw,11px);opacity:.9}
+.map.p{max-width:520px}.map.p .tile{border-color:var(--bd);background:var(--bg)}
+.tile.dec::after{content:"✓";position:absolute;top:2px;right:5px;font-size:11px}
+.tile.sel{border-color:#fff;box-shadow:0 0 0 2px var(--tx)}
+.tile.flash{animation:fl 1.2s}
+@keyframes fl{0%,100%{transform:scale(1)}30%{transform:scale(1.25);box-shadow:0 0 22px #fff}}
+.tile .pk{position:absolute;bottom:2px;left:3px;font-size:10px;padding:0 4px;border-radius:5px;background:#fff;color:#000}
+.legend{display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--mut);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
+.detail{max-width:640px;margin:12px auto 0;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;font-size:14px}
+/* timeline */
+.feed{display:flex;flex-direction:column;gap:6px}
+.ev{background:var(--card);border:1px solid var(--bd);border-left:5px solid var(--cx);border-radius:10px;padding:8px 12px;font-size:14px;display:flex;gap:10px;align-items:baseline}
+.ev time{color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* governadores */
+.gov{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.gc{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px}
+.gc h3{margin:0 0 8px;font-size:16px;display:flex;justify-content:space-between;align-items:center}
+.gc .row{display:flex;justify-content:space-between;gap:8px;font-size:14px;margin:2px 0;font-variant-numeric:tabular-nums}
+.gc .bar{height:12px;border-radius:99px;background:var(--bd);display:flex;overflow:hidden;margin:8px 0}.gc .bar i{transition:width .6s}
+.gc .sm{font-size:12px;color:var(--mut)}
+/* palpites */
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:16px}
+input[type=text]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font-size:16px}
+.picks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pick{padding:14px 10px;border-radius:14px;border:2px solid var(--bd);background:var(--bg);color:var(--tx);font-weight:800;font-size:16px;cursor:pointer}
+.pick[aria-pressed=true]{border-color:currentColor;box-shadow:0 0 18px currentColor}
+.pick.a{color:var(--a)}.pick.b{color:var(--b)}.pick span{color:var(--tx)}
+.go{padding:12px 16px;border-radius:12px;border:0;background:var(--ok);color:#04150d;font-weight:900;font-size:16px;cursor:pointer;width:100%}
+.go:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:13px;color:var(--mut);margin-top:6px}
+table.rk{width:100%;border-collapse:collapse;font-size:14px}table.rk td,table.rk th{padding:7px 6px;border-bottom:1px solid var(--bd);text-align:left}table.rk th{color:var(--mut);font-size:12px}
+table.rk .n{text-align:right;font-variant-numeric:tabular-nums}table.rk tr.me{background:rgba(46,229,157,.12);font-weight:800}
+.gp{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.gp .g{display:flex;gap:6px;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:6px 8px;font-size:13px}
+.gp .g div{display:flex;gap:4px}.gp .g button{padding:5px 8px;border-radius:8px;border:2px solid var(--bd);background:var(--card);color:var(--tx);font-weight:700;cursor:pointer;font-size:12px}
+.gp .g button[aria-pressed=true]{border-color:currentColor}
+.foot{color:var(--mut);font-size:12px;margin:24px 0}
+/* aviso e confete */
+.toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-120px);background:var(--card);border:2px solid var(--tx);border-radius:14px;padding:10px 16px;font-weight:800;z-index:20;transition:transform .4s;max-width:92vw;text-align:center}
+.toast.on{transform:translate(-50%,0)}
+.cf{position:fixed;top:-12px;width:9px;height:14px;z-index:19;pointer-events:none;animation:fall 3.2s linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.8}}
+@media (prefers-reduced-motion:reduce){.cf{display:none}.rope .mk,.rope .fill i,.rope .fill u{transition:none}}
+/* ===== motor do jogo: batalha + mapa ===== */
+.bt{position:relative;border-radius:18px;overflow:hidden;background:#12121a;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.bt.shake{animation:btsh .5s}
+@keyframes btsh{20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(2px)}}
+.bt-bar{position:relative;display:flex;height:34px}
+.bt-fa,.bt-fb{display:flex;align-items:center;transition:width .9s cubic-bezier(.2,.9,.3,1);min-width:0;overflow:hidden}
+.bt-fa{background:linear-gradient(90deg,color-mix(in srgb,var(--a) 70%,#000),var(--a));justify-content:flex-start;padding-left:12px}
+.bt-fb{background:linear-gradient(90deg,var(--b),color-mix(in srgb,var(--b) 70%,#000));justify-content:flex-end;padding-right:12px}
+.bt-fa b,.bt-fb b{font:900 clamp(14px,3.8vw,19px)/1 system-ui,sans-serif;font-variant-numeric:tabular-nums;text-shadow:0 1px 3px rgba(0,0,0,.5);white-space:nowrap}
+.bt-spark{position:absolute;top:50%;transform:translate(-50%,-50%);transition:left .9s cubic-bezier(.2,.9,.3,1);background:#fff;color:#111;font:900 13px system-ui,sans-serif;padding:5px 8px;border-radius:10px;box-shadow:0 0 14px #fff,0 0 30px #ffd84d;z-index:2}
+.bt-arena{display:grid;grid-template-columns:1fr auto 1fr;min-height:250px}
+.bt-side{position:relative;display:flex;flex-direction:column;align-items:center;padding:16px 8px 14px;text-align:center;overflow:hidden;transition:filter .6s,opacity .6s}
+.bt-side.a{background:linear-gradient(160deg,color-mix(in srgb,var(--a) 55%,#12121a),#12121a 85%)}
+.bt-side.b{background:linear-gradient(200deg,color-mix(in srgb,var(--b) 55%,#12121a),#12121a 85%)}
+.bt-glow{position:absolute;inset:0;opacity:0;transition:opacity .6s;pointer-events:none}
+.bt-side.a .bt-glow{box-shadow:inset 0 0 60px var(--a)}.bt-side.b .bt-glow{box-shadow:inset 0 0 60px var(--b)}
+.bt-side.lider .bt-glow{opacity:1;animation:btgl 1.6s ease-in-out infinite}
+@keyframes btgl{50%{opacity:.45}}
+.bt-side.perde{filter:grayscale(.85);opacity:.65}
+.bt-crown{font-size:30px;height:34px;opacity:0;transform:translateY(8px) scale(.6);transition:all .5s cubic-bezier(.2,1.6,.4,1)}
+.bt-side.lider .bt-crown{opacity:1;transform:none}
+.bt-face{position:relative;width:clamp(92px,24vw,140px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.08);border:4px solid rgba(255,255,255,.85)}
+.bt-side.a .bt-face{border-color:var(--a)}.bt-side.b .bt-face{border-color:var(--b)}
+.bt-side.lider .bt-face{box-shadow:0 0 22px #ffd84d}
+.bt-face svg{width:100%;height:100%}
+.bt-foto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 25%;border-radius:50%;background:#2a2a35}
+.bt-badge{position:absolute;bottom:-6px;right:-4px;background:#fff;color:#111;font:900 15px system-ui,sans-serif;padding:3px 8px;border-radius:99px;border:3px solid currentColor}
+.bt-side.a .bt-badge{color:var(--a)}.bt-side.b .bt-badge{color:var(--b)}
+.bt-nm{font:900 clamp(15px,4vw,22px)/1.1 system-ui,sans-serif;margin-top:10px;text-transform:uppercase;letter-spacing:.03em}
+.bt-pc{font:900 clamp(26px,8vw,44px)/1 system-ui,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+.bt-top{font-size:12px;opacity:.85;margin-top:8px;line-height:1.35;max-width:100%}
+.bt-mid{display:flex;align-items:center;font-size:30px;padding:0 2px;filter:drop-shadow(0 0 8px #ffd84d);animation:btmid 1.2s ease-in-out infinite}
+@keyframes btmid{50%{transform:scale(1.25) rotate(-8deg)}}
+.bt-fx{position:absolute;inset:0;pointer-events:none}
+.bt-plus{position:absolute;left:50%;top:6%;z-index:2;transform:translateX(-50%);font:900 22px system-ui,sans-serif;color:#ffe066;text-shadow:0 2px 6px rgba(0,0,0,.6);animation:btplus 1.8s ease-out forwards;white-space:nowrap}
+@keyframes btplus{0%{opacity:0;transform:translate(-50%,20px) scale(.6)}15%{opacity:1;transform:translate(-50%,0) scale(1.2)}100%{opacity:0;transform:translate(-50%,-90px) scale(1)}}
+.bt-em{position:absolute;bottom:-10px;font-size:22px;animation:btem 2.4s ease-out forwards;opacity:0}
+@keyframes btem{0%{opacity:0;transform:translate(0,0) scale(.5)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx),-230px) scale(1.2)}}
+.bt-time{position:relative;min-height:30px;display:flex;align-items:center;justify-content:center;padding:5px 10px;background:#24242f}
+.bt-time i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#0b6b45,#12915e);transition:width .9s}
+.bt-time span{position:relative;z-index:1;text-align:center;line-height:1.3;font:900 clamp(11px,3.3vw,14px)/1.3 system-ui,sans-serif;color:#fff;letter-spacing:.01em;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+@media (max-width:440px){.bt-time .sx{display:none}}
+.bt-banner{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.3);opacity:0;font:900 clamp(26px,8vw,48px)/1 system-ui,sans-serif;padding:10px 22px;border-radius:14px;white-space:nowrap;pointer-events:none;z-index:3;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.bt-banner.a{background:var(--a)}.bt-banner.b{background:var(--b)}
+.bt-banner.on{animation:btbn 1.8s ease-out}
+.bt-banner.fixo{opacity:1;transform:translate(-50%,-50%) scale(1);top:auto;bottom:30px;font-size:clamp(16px,4.5vw,24px);box-shadow:0 0 24px #ffd84d}
+@keyframes btbn{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-6deg)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(2deg)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
+@media (max-width:480px){.bt-arena{min-height:220px}.bt-top{font-size:10.5px}}
+@media (prefers-reduced-motion:reduce){.bt.shake,.bt-mid,.bt-side.lider .bt-glow{animation:none}.bt-banner.on{animation:none;opacity:1;transform:translate(-50%,-50%)}}
+.bm{display:block;width:100%;max-width:560px;height:auto;margin:0 auto}
+.bm path{stroke:var(--jg-bg);stroke-width:1.3;cursor:pointer;transition:fill .6s,opacity .2s;fill:var(--jg-ground)}
+.bm path:hover{opacity:.82}
+.bm path.sel{stroke:var(--jg-ink);stroke-width:3}
+.bm path.fl{animation:bmfl 1.3s}
+@keyframes bmfl{25%,75%{opacity:.35}50%{opacity:1}}
+.bm text{font:800 13px system-ui,sans-serif;fill:#fff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:2.5}
+.bm text.vz{fill:var(--jg-mut);stroke:none}
+.bm text.p{font-size:9.5px}
+.bm .ext circle{stroke:var(--jg-bg);stroke-width:1.5;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.tgw.shake,.bm path.fl,.tg .txt.on{animation:none}.tg .txt.on{opacity:1}}
+
+:root{--jg-ink:var(--tx);--jg-mut:var(--mut);--jg-ground:var(--bd);--jg-bg:var(--card)}
+.mapwrap{max-width:560px;margin:0 auto}
+
+details.fx{margin-top:16px;border:1px solid var(--fx-bd);border-radius:12px;padding:0 12px}
+details.fx summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 0;font-weight:700;flex-wrap:wrap}
+details.fx summary::-webkit-details-marker{display:none}
+details.fx summary::after{order:1;content:"▾";margin-left:auto;transition:transform .2s;color:var(--fx-mut)}
+details.fx[open] summary::after{transform:rotate(180deg)}
+details.fx .fxn{background:var(--fx-mut);color:var(--fx-bg);border-radius:99px;padding:1px 8px;font-size:.78rem}
+details.fx .fxu{order:2;font-weight:400;font-size:.85rem;color:var(--fx-mut);flex-basis:100%;margin-top:-4px}
+details.fx[open] .fxu{display:none}
+details.fx[open]{padding-bottom:12px}
+details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top:0}
+:root{--fx-bd:var(--bd);--fx-mut:var(--mut);--fx-bg:var(--card)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="logo">URNAS AO VIVO<small id="sub">Contagem direta dos boletins de urna (BU) · não oficial</small></div>
+  <div class="tools"><span class="pill" id="pill"><span class="dot"></span><span id="pillt">Conectando…</span></span>
+  <button class="btn" id="snd" title="Som">🔇</button><button class="btn" id="thm" title="Tema">◐</button></div>
+</header>
+<nav id="tabs">
+  <button data-v="pres" aria-pressed="true">Presidente</button>
+  <button data-v="gov" aria-pressed="false">Governadores</button>
+  <button data-v="pal" aria-pressed="false">Palpites</button>
+</nav>
+<div class="warn">Soma dos boletins de urna divulgados pelo TSE, <b>antes da totalização oficial</b>. Não substitui o resultado oficial: <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a>.<span id="demoB"> <b>Modo demonstração: números fictícios.</b></span></div>
+
+<section class="view" id="v-pres">
+  <div class="arena" id="arena"><div id="bat"></div><div id="arenaLead"></div></div>
+  <div class="hud" id="hud"></div>
+  <h2>Mapa de territórios</h2>
+  <div class="mapwrap" id="map"></div>
+  <div class="legend"><span><i style="background:var(--a)"></i><b id="lgA">A</b></span><span><i style="background:var(--b)"></i><b id="lgB">B</b></span><span><i style="background:var(--cx)"></i>sem dados / empate</span><span>✓ resultado garantido · toque no estado</span></div>
+  <div class="detail" id="detail" hidden></div>
+  <details class="fx" id="feedBox"><summary>🔄 Viradas e conquistas <span class="fxn" id="feedN">0</span><span class="fxu" id="feedU">Toque para ver</span></summary>
+  <div class="feed" id="feed"></div></details>
+</section>
+
+<section class="view" id="v-gov" hidden>
+  <div class="gov" id="govgrid"></div>
+</section>
+
+<section class="view" id="v-pal" hidden>
+  <div class="card" id="palintro"></div>
+  <div class="card"><h3>1. Seu apelido</h3><input type="text" id="apel" maxlength="20" placeholder="Ex.: Rodrigo"><div class="msg">Aparece no ranking público. Entre 2 e 20 letras.</div></div>
+  <div class="card"><h3>2. Quem vence no Brasil? <small style="color:var(--mut)">(10 pontos)</small></h3><div class="picks" id="pkBr"></div></div>
+  <div class="card"><h3>3. Quem leva cada estado? <small style="color:var(--mut)">(1 ponto cada)</small></h3><div class="msg" style="margin:0 0 8px">Toque no estado para alternar: <b style="color:var(--a)" id="plA">A</b> → <b style="color:var(--b)" id="plB">B</b> → vazio.</div><div class="mapwrap" id="pmap"></div></div>
+  <div class="card" id="govpal"><h3>4. Governadores do 2º turno <small style="color:var(--mut)">(3 pontos cada)</small></h3><div class="gp" id="gp"></div></div>
+  <div class="card"><button class="go" id="enviar">Registrar palpite</button><div class="msg" id="palmsg"></div></div>
+  <div class="card"><h3>Ranking</h3><div class="msg" id="rkinfo"></div><table class="rk" id="rk"></table></div>
+</section>
+<div class="foot" id="foot"></div>
+<div class="foot">Fotos: divulgação oficial do TSE. Mapa: Victor Cazanave (svg-maps), licença CC BY 4.0, simplificado.</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// ===== CONFIGURE AQUI =====
+const SUPABASE_URL = "https://hvabmapxzgdadjnruycj.supabase.co/rest/v1/";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2YWJtYXB4emdkYWRqbnJ1eWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NDMxMzcsImV4cCI6MjEwODExOTEzN30.ax3AWhs7hX4Esfgs6NbfMJCFaV99ITcJvMq97PNljfc";
+const TSE_ELE = "6257";                       // 1º turno 6257 · 2º turno 6258
+const LOCK_AT = "2026-10-25T08:00:00-03:00";  // fim dos palpites (igual ao SQL)
+const FALLBACK_PRES = { "13": { nm: "Lula", sg: "PT", sq: "280002542548" }, "22": { nm: "Flávio Bolsonaro", sg: "PL", sq: "280002551544" } }; // usado antes dos nomes chegarem
+const POLL_MS = 1500, TSE_POLL_MS = 10000;
+// ==========================
+const DEMO = /[?&]demo=1/.test(location.search);
+const BR_PATHS = {"ac":"m 30.7,238 -2.1,-0 0.5,-1.8 -0.2,-0.8 -0.3,-0.5 -1.3,-0.7 -0.1,-0.5 0.3,-1.1 -0.8,-1.9 -1.1,-0.6 -5.6,-1.3 -7.3,-0.2 0.3,-0.6 2.5,-2.3 0.9,-1.2 0.3,-1.2 -0.2,-1.2 -0.7,-0.9 -0.8,-0.4 -1.7,-3 -0.8,-0.4 -0.9,-0.2 -1.1,-1.1 -0.9,-2.4 -2,-1.5 -1,-3.6 -0.9,-1.6 -1.9,-1.1 -0.1,-1.2 0.8,0.1 0.4,-0.5 0.1,-0.7 -0.2,-0.4 -2.1,-0.9 -0.4,-0.7 -2.2,-1.9 0,-0.4 0.6,-0.1 0.5,-1.3 -0,-1.3 3,-0.4 0.5,-0.4 -0.2,-1.4 -1.2,-1.6 0,0 17.9,7.5 23.7,5.7 12.1,3.1 26.4,14.2 28.5,12.1 0,0 3,1.3 0,0 -0.3,0.5 -1.6,0.7 -2.1,1.6 -2.9,2.8 -1.6,0.9 -0.7,-0.2 -1.5,0.2 -0.1,0.6 -1.9,1.3 -2.1,1 -1.4,1.8 -0.4,1.2 -0.6,0.3 -1.2,-0.8 -0.8,-0.1 -2.4,0.1 -0.7,0.3 -0.6,0.5 -0.4,0.9 -2.4,3.5 -3.8,1.3 -0.8,0.7 -1.9,0.5 -1,0 0.1,-2.1 -1.4,0.2 -3.5,-0.8 -5.2,-0.5 -5.1,0.4 -0.7,-0.6 -2.3,-0.2 -3.6,1.8 -2.7,0.6 -1.7,-0.7 -1.4,-1.4 -1.6,1.2 0,-17.6 0.1,-1.1 0.5,-0.7 0.1,-2.4 -0.3,-0.9 1,-1.2 0.5,-1.1 -1.2,0.2 -3,2.6 -1.6,1 -2.1,2.4 -1.9,0.7 -0.7,1.1 -1.8,1 z","al":"m 562.2,230.6 -0.2,-0.7 -1.4,-0.8 -0.5,0.1 -1,-0.3 -0.5,-1.4 0,0 1.3,-1.1 0.6,-1.1 2.2,-0.8 2.4,-3.3 0.1,-0.7 0.8,-0.6 1,1.2 1.7,0.3 1.1,-0.1 2.5,2 1.9,2.1 1.8,1.1 1.9,0.5 2.5,-0.7 3.1,0.3 1.2,-0.1 1.9,-1.1 1.2,0.1 1.8,-1.1 2.2,-2.3 0.1,-0.5 1.6,-1.2 2,-0.2 2.2,0.8 2.6,-1.3 1.5,-0.2 1.9,0.8 2.9,0.3 0.3,0.2 0,0 -2.8,5 -4.5,5.1 -3.6,3.6 -3,4.6 -3.3,2.9 -1,2 -1.3,1.8 0,0 -0.6,-1.3 -3.6,-2.2 -0.5,-0 -1.7,-0.8 -1.8,-1.4 -1.3,-2.5 -5.4,-3.1 -3.7,-0.9 z","ap":"m 345.2,100 -0.9,-0.1 -0.8,0.3 -1.3,0.1 -2.8,-0.7 -1.4,-1 -0.4,-1.5 -1.9,-1.4 -0.1,-1.3 0.2,-0.7 -0.3,-1.6 -0.3,-0.5 -0.9,-0.2 -0.4,-0.9 0.1,-2.4 -2.9,-3.3 -0.8,0.4 -0.8,-0.2 -1.5,-3.5 0.1,-1.6 -0.6,-1.8 -0.6,-0.6 -0.7,-1.5 -0.2,-2.1 0.4,-3.1 -0.2,-0.3 -2.6,-0.7 -2,-2.3 -0.8,-2.8 0.2,-0.7 0.7,-0.2 -0.5,-1.2 -0.7,0 -2.8,-2.7 -0.9,0.1 -0.4,0.4 -1.3,0.1 -0.8,-0.3 -0.8,-1 -1.1,-0.8 -1.2,-0.1 -0.5,-1.3 -0.7,-0.8 -1.9,-1.1 -1.3,-0.5 -3.4,-0.4 -1.1,0.3 -1.2,-0 -0.3,-0.5 -0.2,-1.4 0.3,-4.5 0.6,-1.3 -0.4,-2.3 -0.6,-0.6 0,0 0.3,-0.2 1,0.3 -0,0.8 -0.3,0.2 0.3,1 1.5,-0.1 0.8,0.2 0.3,0.9 0.8,0.7 2.3,0.8 3.3,0.8 2.8,-1.8 0.3,-0.8 1.7,-1.2 0.8,-0.3 0.7,0.9 2.7,0.9 1.1,-0.1 1.7,-1 0.1,-0.4 0.3,0 1.5,1.3 -0.2,0.9 2.4,-0.2 0.5,0.5 0.9,0.2 0.6,-0 0.9,-0.5 1.7,-1.5 1.8,-1.1 1.8,-2.3 0.4,-1 -0.2,-0.5 3.1,-6.5 0.1,-1.8 1.1,-1.3 0.7,-0.2 3.6,-5.8 0.2,-1.1 0.8,-1.2 1.8,-1.6 0.6,-1.7 2.1,-1.1 0.5,-0.9 1,-0.6 0.6,1.5 0.9,1.4 -1.7,-4.8 -0.1,-1.3 0.2,-0.3 3.4,2.4 1.1,1.2 0.9,1.2 0.5,1.2 0,1.6 0.4,0.3 0.3,-0.5 0.4,-0.1 0.2,0.4 0.2,7.9 0.7,3.9 2.7,6 2.7,8.9 3.3,5 1,0.3 3.3,-0.1 2.8,0.9 1.3,0.8 0.8,2.6 -0.2,3.3 -1.3,1 -1.7,0.4 -0.4,0.3 1.8,-0.1 1,-0.4 0.3,0.2 0.1,0.6 -0.2,0.7 -5,4.1 -1.2,2.1 -2.1,1.4 -1.9,3.7 -2.9,3.5 -0.7,0.5 -0.9,-0.1 -1.4,0.5 -2.1,3 0,0 -1.3,0.1 -0.8,0.9 0,0 -1.5,1.7 -1,2.2 -1.1,1.9 -0.8,0.7 -3,3.5 -0.4,2.4 0.2,1.8 -1.9,1.8 -1,0.1 z m 23.4,-47 -0.5,-0.3 -1.1,-1.9 0.1,-0.9 0.2,-0.4 1.7,-0.5 0.4,0.4 0.8,2.3 -1,1.1 -0.7,0.2 z m 2.5,17.6 -0.4,-0.3 -0.1,-0.7 1.1,-1.1 0.9,-0.1 1.3,0.2 0.5,-0.1 0.4,-0.6 0.1,0.6 -1,1.4 -1,0.5 -1.8,0.2 z m 3.4,-2.9 -0.8,-0.2 0,-0.6 0.7,-1 1.3,-0.1 0.2,0.3 -0.1,0.5 -1.3,1.1 z m -7.2,-18.4 -0.8,-0.5 0.3,-0.8 0.9,-0.2 0.9,0.3 0,0.7 -1.3,0.5 z","am":"m 166.1,47.6 0.7,0.8 0.8,0.3 0.6,0 1.1,-0.4 0.6,0.1 0.1,1 1.2,1.2 1,0.4 0.9,-0.2 1.4,0.1 1.9,0.9 0.5,0.7 -0.9,3.3 -0.7,1.5 2.7,3.7 1.7,4.8 0.2,2.3 0.9,1.1 0.1,0.5 -1.6,1.5 0.4,1.6 0.7,1.6 -0.8,3 -0.6,1 0.3,5 0.9,2.2 1.2,0.8 0.6,0.9 1.1,4.3 -0.1,0.6 -1.1,1.3 -1.8,-0.3 -0.1,1.1 5,4.4 0.5,0 2,1.3 1.5,1.6 1,2 0.5,0.1 1.3,-0.4 2.4,1 -0.4,-2.1 0.8,-2.3 0.3,-1.7 -0.4,-1.8 0.8,-3 1,-1.3 1.3,-0.7 2.1,-0.7 0.6,-0.9 1.6,-0.1 2.8,0.9 1.9,2 0.9,2.5 1.8,0.2 1.3,-0.5 1.4,-1.4 2,-0.6 0.4,-0.4 0,-0.5 -1.1,-1.4 -0.2,-0.7 0.1,-0.7 1.1,-2.6 0.1,-1.1 1.7,-3 2.3,-3.3 -0,-0.7 18.5,0.1 0,0 0.4,4.9 -0.4,1.4 0.2,2.3 0.2,0.7 1.7,0.8 0.2,0.4 -0.3,0.7 -0.1,2.1 1.8,2 0.4,0.2 0.7,-0.2 1.8,1.2 0.6,1.8 0,0.9 0.3,0.5 4.6,3.8 4.6,2.5 0.6,0.9 1.4,1.1 1.9,0.7 2.4,1.3 2.3,0.7 1.4,0.1 1.3,0.8 0.1,0.6 1.3,1.3 2.7,1.4 1.1,2.2 1.9,0.8 0.8,-0.6 1.4,-0.3 0.2,0.5 -0.1,0.8 1.8,1.7 -29.9,64.2 -0.8,1.3 -1.4,1.1 -0.6,1 -0,1.1 0.8,2.3 0.4,0.6 1.1,0.6 1.6,1.6 0.6,1.3 0.1,2 0.6,0.6 0,0 -1.2,1.2 -0.2,0.6 -0.1,0.8 0.3,0.8 -0.3,1 -1.2,1.8 -0.9,0.6 -0.4,0.8 0.1,0.8 0.7,1.4 0.5,1.9 -1.4,4.2 -1.2,5.2 -1.2,0.7 -47.9,0.3 0,0 0,-0.7 -0.4,-0.4 -1.4,-0.3 -1.9,1.1 -0.5,1.7 -0.7,0.2 -3.2,-1.5 -0.7,-2.9 -0.6,-0.2 -1,0.1 -0.5,-0.2 -1.3,-3.3 -2.5,-1 -1.3,-1.3 -0.8,-1.9 -0.5,-0.5 -2.1,-1.1 -10.8,0.1 -1.4,2.6 -1.7,0.5 0.1,1.2 -0.3,0.2 -2.5,0.5 -1.2,1.6 -0.1,0.7 0.9,0.7 0.2,0.5 -0.4,1 -0.8,1.1 -2.1,1.2 -0.1,1.8 0.2,1.5 -3.9,-0.5 -2.1,0.4 -1.2,1.1 -1.8,-0.1 -0.8,-0.6 -0.5,-0 -1.8,1.3 -0.5,0.8 0.3,1.8 -2.5,3.2 -0.7,0.1 -0.7,-0.5 -0.6,-2.3 -0.4,-0.1 -1.8,1 -1.3,1.2 -1.4,0.4 -0.8,-0.1 -1.1,0.5 -0.4,0.5 -0.1,0.7 -1.2,0.8 -0.4,0 -2.3,-2.3 -0.7,-0.4 -2.9,0.3 -4,-0.3 0.2,1.3 -0.1,0.6 -1.6,1.8 -1.9,0.6 -3.3,2.6 0,0 -28.5,-12.1 -26.4,-14.2 -12.1,-3.1 -23.7,-5.7 -17.9,-7.5 0,0 -0.1,-0.7 0.7,-2.9 1.2,-1.4 4.9,-3.5 2.3,-0.2 0.5,-0.3 1,-1.6 0.1,-1 -1.7,-4.5 0.4,-1.2 1.2,-2.2 1.3,-1.3 0.9,-1.3 0.4,-1 0.3,-1.7 -0.3,-1.3 0.7,-2 0.3,-2.3 0.7,-0.8 3.7,-1.6 2.2,-1.2 1.1,-1 0.4,-1.4 0.8,-0.4 1.4,-0.1 1.6,-0.9 3.5,-2.7 2.4,-0.4 1.5,0.3 4.2,-1.2 1.5,-0.8 1.8,-0.4 3.3,0.4 1.3,-1.6 0.6,-1.4 1.1,-0.6 2.1,0.2 0.6,0.5 1.3,-0.2 1.1,-0.7 1.7,0.1 0.3,0.5 -0,1.2 1.6,1.3 2.8,0.1 0.6,-0.4 0.5,-0.8 -0.1,-0.4 1.2,-4.9 6.7,-37.2 1.2,-2.9 -1,-5 0.1,-0.3 -1.3,-1.1 -1.5,-2.8 -0,-0.5 0.7,-1.4 -0.5,-1.8 -0.4,-0.4 -1.7,-0.6 -3,-2.4 -1.9,-2.3 0.2,-11.5 3.9,-0.3 1.8,-1.2 3.5,-0.9 2.7,1.8 1.2,0.1 1.3,-0.4 -0.5,-1.7 0.3,-1.7 -1.4,-2.1 -0.6,-0.5 -1.1,-0.6 -1.5,0.5 -2.8,-0.6 -3.6,0.1 -0.1,-9.9 1,0 1.3,-0.6 2.3,-0.6 2.8,0.9 19,0.1 -0.5,-0.7 -0.8,-0.1 -0.4,-1.2 0.9,-1.9 1.4,0.4 0.6,1.5 0.9,1.3 0.7,0.3 0.8,0 1.6,-0.6 1.9,-2.1 0.3,-0.8 1.3,-1.2 2.5,-1.4 1.3,0.5 1.2,2.6 1.6,2 0.7,1.3 0.7,1.8 0.2,1.6 -0.5,3.6 0.2,1.8 3.2,-0.8 8.3,7.1 0.8,0.3 2.5,0.2 2.3,-1 1.7,-1.7 2.1,-1.2 2.2,-0.1 0.6,0.3 0.8,1.1 -0,1 -1.1,1.7 0.4,1 0.6,0.3 1.3,-0.7 0.6,-0.9 0.2,-1.3 1,-1.2 0.5,-0.2 1,0.2 0.6,-0.2 0.4,-0.7 0.5,-2.3 0.5,-0.4 1.5,-0.4 2.9,-1.8 1,0.6 0.9,-0.3 1.6,-1 1,-1.6 2.1,-1.2 2,0.6 2.4,-1.6 0.6,-0.8 0.4,-2.7 -0,-1.3 0.8,-0.9 1,-0.4 1.7,-0 1.3,-0.4 2.1,-1.6 1,-0.4 2.3,-0.3 z","ba":"m 527.8,365.6 -0.4,-0.8 0.7,-1.4 -0,-0.5 -0.5,-1 -4.1,-3 -0.1,-0.5 0.2,-1.5 -0.6,-1.2 -0.7,0.2 -0.2,0.5 -0.3,0.2 -0.2,-0.3 0.5,-4.4 0.8,-3.3 0.8,-0.9 2.5,0.2 1,-0.7 0,-0.4 -0.6,-1 0.2,-2.6 5,-4.2 1.5,-3.1 -0.4,-1.2 -0.8,-1 -0.9,-0.1 -0.7,-0.4 -2.8,-2.5 -2.1,0 -2.2,-0.6 -2.3,-1.1 -2.7,-0.6 -2,-0.1 -1.3,1 -1.5,0.5 -2.6,-0.5 -0.6,0.2 -0.4,-4 -6.5,-6.2 -0.4,-0.2 -4.4,1.2 -1.5,-1.2 -0.5,0.2 -0.9,-0.2 -2.5,-1.2 -2.2,-1.6 -1,0.2 -4.3,-3.6 -1.1,-0.5 -2.7,-0.8 -1.8,0.3 -1.9,0.9 -0.8,1.1 -0.6,0.2 -5.3,-1.5 -0.6,-0.5 -0.3,-1.5 0.1,-0.9 1.3,-2.7 -0.9,-0.5 -2.3,-0.5 -2.2,-0 -1.2,-0.5 -1.8,-0.1 -3.8,1.6 -4.3,3 -0.6,1.1 -3.4,1.9 -2,0.4 -0.9,1.2 -1.8,1.6 -1.4,0.5 -1,-0.1 -1.9,2.6 -1,0.8 -2.1,-0.4 -0.7,0.1 -0.7,1 -1.3,0.9 -0.4,-0.2 1.4,-3.4 -0.5,-2.4 0,0 1.5,-2 0.3,-0.8 -0.2,-1.3 -0.7,-1.7 0.1,-0.7 0.7,-1.4 -0.1,-0.5 -3.2,-2.6 -1.7,-3.5 -0.6,-3.5 0.1,-1.6 1.2,-3.8 1.6,-1 0.2,-0.4 0.1,-0.9 -1.6,-0.8 -0.1,-0.3 0.5,-2.5 1.4,-1.1 -0,-0.4 -2.7,-2.5 0,0 -0,-0.9 1.4,-2.4 -0,-1.1 -0.2,-0.4 -1.5,-0.5 -0.9,-0.7 -0.3,-1.3 0.1,-2.9 0.2,-0.8 1.9,-1.7 1.1,-0.4 1,-0.7 -0.3,-0.6 -0.6,-0.5 -0.9,-0.3 -1,0.2 -0.3,-0.3 -0.1,-0.5 0.4,-1 2,-0.8 0.6,-0.5 -0,-0.8 -1.9,-1 -3.6,-0.7 -1.9,-2 -0.2,-0.9 0.5,-1.2 1,-0.7 1.5,-3.5 0.9,-0.6 1,-0.3 0.3,-0.4 -1.3,-1.8 0.2,-0.4 3.2,-2.6 3.8,-2 0.6,-0.5 0.2,-1 0.7,-0.7 0,0 2.3,-0 1.4,1.3 0.7,1 0.5,2.2 1.8,2.5 4.2,1.9 1.8,-0.5 2.1,0.2 0.3,-0.2 0.8,-1.4 1.1,-0.4 0.7,-0.9 1.2,-0.9 2.2,-0.8 1.3,0.2 1.5,0.5 1.4,-0.4 3,-2.4 3,-5 0.7,-0.9 0.2,-0.9 0.3,-2.6 -0.1,-1.2 -2.2,-4.4 0.1,-0.9 3.2,-1.6 1.9,-0 1.5,0.5 0.4,0.9 0.3,0.2 2.1,-0.4 1.4,-0.5 1.3,0.4 1.7,1 -0.1,0.7 0.2,0.3 0.8,0.3 3,-0.1 1.5,-0.6 1.7,-0.1 0.8,-1.2 1.5,-1.3 2.7,-0.3 0.8,-0.4 0.8,-1 2.2,0 0.6,0.6 0.3,0.1 1.9,-1.8 -0.1,-2.4 2,-0.4 0.8,0.2 1.1,-0.7 1.5,-2.3 0.5,-1.1 0,0 0.9,0.4 1.2,-0.3 2.2,0.3 2.8,1.4 0.4,0.5 -0.1,2.7 0.7,1.9 2.2,0.9 0.3,2 -0.9,1.7 1.8,0.6 1,-0.2 0.8,-0.9 2.9,-0.9 0.8,-3.6 0.5,-0.9 0.8,-0.2 0.8,0.5 0.6,0.1 2.4,-1 1.1,-1.2 0.2,-0.6 -0.3,-1.4 0.3,-0.3 2.2,-0.5 0.8,-2 1.6,-0.4 2.5,-1.5 0.6,-0.1 1.5,0.6 0.8,1.4 1.4,0.8 2.4,0.8 3,0.4 1.6,1.1 0.5,1.6 0.4,0.3 0.4,-0.1 0.3,-1.8 0.4,-0.4 1,-0 0.5,0.3 0,0.6 -0.6,0.9 0.5,0.8 0.5,0.4 2.1,0.9 0,0.9 1.2,3 0,0 0.5,1.4 1,0.3 0.5,-0.1 1.4,0.8 0.2,0.7 0,0 -0.7,1.2 0.2,2.1 1.3,2.5 2,1.9 0.8,1.1 -0.1,3.1 -0.7,1.6 -0.1,0.9 0.8,2.8 -0.3,0.6 -0.7,0.6 -2.5,1 -1.1,-0.8 -1.7,-0 -0.3,0.3 -0.6,1.6 0,0.8 0.9,1.6 1.1,0.7 0.5,1.5 1.4,1.5 0.1,0.4 -0.1,1.4 -0.3,0.4 0.1,0.4 0.6,0.5 1.9,0.9 0.5,0.7 0.5,0.3 1.6,0.6 2.9,-0.9 0,0 0.6,-0 0.4,0.4 -4.1,8.8 -3.8,5.2 -1,2.3 -5,5.7 -2.5,1.3 -0.9,-0 0.3,-1.4 0.4,-0.1 0.1,-1.1 -0.5,-1.9 -1.9,-0.3 -0.4,-1.3 -0.7,-0.8 -0.4,0.6 -0.5,2.3 -0.5,0.9 -0.6,0.4 -0.6,-0.3 -0.5,-1.7 0.1,-0.3 0.3,-0.1 -0,-0.4 -0.9,1.3 0.9,1.7 0.5,0.2 0.4,-0.1 1.1,0.3 -0.5,1.8 -1.2,1.1 -0.3,1.8 -1.3,1 -0.3,0.7 -0.2,0.8 0.2,0.8 -1.4,-0.4 -0.2,0.4 -0.4,2.5 0.4,-0.7 0.8,0.2 0.2,0.5 -0.2,0.4 0.1,0.6 0.3,0.3 0.3,1 -1,2.5 0.6,3.4 -0.6,0.5 -0.6,-0.2 -0.1,1.1 0.6,0.5 1.2,-1.7 -0.5,-2.2 0.8,-0.6 0.3,0.5 -0.1,1.8 -1,2.6 -0.7,5.4 -0.5,1.8 0.2,2.5 0.8,2.9 0.2,4.5 0.9,6.4 1,3.4 -2.2,6.7 -1.4,6.7 -0.5,1 -0.2,2.9 -1.1,3.7 -0.1,2.3 0.4,4.4 0.9,1.7 -2.2,3 -1.8,0.7 -0.9,0.6 -2.7,3.9 -0.6,2 0,0 -8.1,-5.1 -0.3,-0.5 z m 22.3,-78 -0.2,-1.2 0.7,-0.4 1.1,-1 0.2,-0.6 -0.4,-0.7 0.8,0.1 0.8,1.1 -0.1,0.5 -2.9,2.3 z m -2.5,6.8 -0.6,-0 0,-0.7 0.3,-0.4 -0.8,-0.2 -0.4,-0.4 0.1,-1.1 1.9,-0.1 0.2,0.2 0.1,1.1 -0.7,1.6 z","ce":"m 574.1,157.1 -4.9,1.6 -2.6,2 -3.3,6.7 -0.8,1.1 -0.9,0.6 -0.7,1.7 0.1,0.7 -1.4,2.4 -1.5,1.5 -0.6,1.1 -1,0.3 -0.8,-0.5 -0.5,0.1 -0.8,0.9 -1.4,2.3 -0.3,2 0.6,0.2 0.7,-0.4 0,0 -0.1,0.5 -0.8,1.1 -1,3 0.5,1.3 -0.7,1.3 -1.1,0.6 -0.2,0.4 -0.1,0.9 0.2,0.4 0.6,0.3 0.3,0.7 -0,1.7 1.2,0.9 0.7,0.1 0.3,1.2 -1.6,3.5 -1.2,1.1 0.2,0.3 0,0 -1.6,0.5 -1.1,0.8 -1.5,2.3 -1.6,0.1 -0.6,-1.6 -0.8,-0.6 -1.4,-0.5 -1,-1.1 -0.5,-1 -1.8,-0.8 -2.9,-1.9 -3.1,-0.4 -1.3,0.1 -2.1,0.8 -1.6,0.2 -0.9,-0.2 -4.9,-0.2 0,0 0.1,-1.3 -0.7,-0.7 -0.1,-1 1.1,-3.1 1.5,-2.3 0,-0.7 -0.8,-1.2 -2.6,-0.5 -1.3,-0.7 -1,-2.7 -1.1,-5.2 -0.8,-2.6 0.2,-0.5 -0.9,-8.2 -0.1,-0.4 -0.9,-0.7 0.8,-0.6 0.6,-1.6 -0.6,-3 -1,-2 0.5,-1.6 -0.8,-3.9 0.7,-1.4 0,-0.8 -1.4,-1.6 -0.4,-1.7 -3.1,-6.4 -1.8,-4.7 -0.3,-1.3 0.2,-1.5 1.6,-2 1.1,-1.9 0.1,-0.8 0,0 0.2,-0.1 -0,-0.6 -0.4,-0.7 0.7,-0.8 6.7,-0.2 2.9,-0.4 2.1,-0.7 7.4,0.8 2.1,1.1 1.9,1.5 4.1,2.2 1.5,0.5 4.8,3 1.2,0.2 2.2,2.3 3,2.1 2.6,0.7 2.4,2.9 1.2,0.6 3,3.8 4.2,3.1 1.5,2 1,1 1.5,0.8 1.1,0 2.4,0.9 0.8,0.7 z","df":"m 417,334.1 -14.7,-0 -0.5,-3.3 0.9,-1.8 0.4,-3.7 11.9,0 1.8,2 0.1,2.2 -0.6,1.2 -0.2,2.4 z","es":"m 501.9,411.6 -0.3,-0.1 0.4,-2.3 0.6,-1.3 -0.6,-3.1 0.2,-0.4 1.7,-2.1 5.2,0 0.6,-0.3 1,-3.2 1.1,-1.3 0.9,-2.3 0.2,-1.7 0.3,-0.4 1.2,-0.9 1.7,-2.1 0.5,-3 -0.3,-2.4 -1.3,-2.8 -1.1,-1.3 -0.5,-0.1 -0.5,0.3 -0.8,-0.3 -0.5,-0.7 0.4,-0.6 1.5,-0.1 0.8,0.3 1,0 0.9,-0.2 0.3,-0.4 -0.2,-1.7 -1.3,-0.3 -0.2,-0.4 0.3,-1.5 0,-1.9 -0.5,-0.7 -1.3,-0.7 -0.3,-0.7 1.2,-1.9 2.2,-1.3 0.3,-0 1.1,0.7 1.1,0.1 0,-0.8 -1.7,-2.3 1.3,0.1 2.2,-0.3 0.8,-0.6 1.1,-0.3 1.6,-0.1 2.5,0.8 0.9,0.6 0,0 0,0 0,0 0.3,0.5 8.1,5.1 0,0 -0.9,3.4 -0.3,2.9 0.1,3.6 0.7,6.2 -0.3,2.5 -1.5,3.2 -2.8,1.4 -0.6,0.6 -1.7,3.3 -1,3.8 -0.8,1.5 -0.8,-0.7 -0.9,-0.1 -0.3,1.3 1.4,0.5 -1.9,4.2 -3.5,3.8 -0.2,-0.3 -1.9,0.7 -0.8,1.2 -0.1,1.4 -0.4,1.3 -1.6,2 -0.3,1.1 0,0 -1.6,-1.1 -3,0.4 -4.3,-1 -2.5,-1.1 -0.7,-4.7 z","go":"m 417,334.1 -0.9,-1 0.2,-2.4 0.6,-1.2 -0.1,-2.2 -1.8,-2 -11.9,-0 -0.4,3.7 -0.9,1.8 0.5,3.3 14.7,0 0,0 0,0 0,0 -0.5,1.5 0.3,1.6 -0.7,1.6 -1,1.3 -0.4,1.5 0.8,1.2 0.8,0.3 1.4,1 1.6,4.6 0,0.6 -2.3,2.7 -3.2,3 -0.4,2.1 1.1,1.1 0.9,-0.5 1.6,0.6 0.5,0.6 0.2,1 -0.2,0.7 -0.7,0.9 -0.5,1.9 1.2,3.5 -3.1,2.1 -1.2,0.2 -0.9,0.9 -0.5,1.1 -4.9,2.7 -0.7,-0.8 -4.3,-1.9 -0.6,0.5 -0.6,0.1 -1.8,0 -1.5,-0.3 -3.9,0.2 -2,-0.9 -4.1,2.6 -2.9,2.9 -0.3,0 -1.3,-1.4 -1.5,-0.3 -3.2,1.6 -3.7,-0.6 -2.5,1 -2.2,0.5 -1.4,2.1 -1.2,2.5 0.1,1 -0.8,1.3 -0.8,0.3 -0.8,-0.2 -0.5,0.1 -0.9,0.7 -1.6,2.1 -0.6,1.9 0.6,0.6 -0,0.3 -0.4,0.2 -0.9,-0.5 0,0 -0.2,-0.5 -2.7,-2.2 -3.1,-0.6 -1.6,-1.6 -1.9,-0.4 -1.5,-0 -3.4,-1.3 -0.7,-0.8 -3.1,-1.6 -0.7,-0.6 -1.4,-0.7 -1.1,-0.2 -2.7,-1.7 -2.8,0.2 -3.8,-0.7 -0.1,-0.3 0.3,-0.8 0.6,-1.2 1.3,-1.8 -0.1,-0.4 -2.3,-0.9 -1.1,0.7 -0.7,-0.2 -0.3,-0.4 -0.2,-1.1 0.3,-2.6 -0.2,-1.8 0,0 -0.9,-2.2 -0.2,-3.4 -1.4,-2.2 -0.2,-0.7 0.4,-3.4 2.5,-3.9 0.4,-2.9 0.7,-0.8 2,-0.8 1.9,-1.8 1.3,-2 0.3,-1.9 0.5,-1 1.3,-1 0.8,-1.4 0.1,-1.5 1.8,-1 1.4,-2.6 2.6,-0.1 2.7,-0.9 0.3,-0.3 2,-4.2 0.7,-1 0.6,-4.1 0.4,-0.7 1.9,-1.9 1.6,-1 1.1,-0.3 1.2,0.7 1.2,-0.7 1.4,-1.4 0.8,-2.9 1.2,-2.9 -0,-0.8 -0.5,-1.1 0.6,-2.7 1.6,-3.1 -0.1,-5.2 1.2,-0.8 1,-2.6 2,-3.2 0.4,-1.1 -0.2,-2.7 0.3,-0.9 1,-0.9 0.3,-1.1 -0.1,-0.6 0,0 0.3,-0.5 0.2,-1.9 0.7,-1.2 1.8,-2.1 0.6,-0.3 -0,1.7 -1.2,1.9 -0.5,2.3 2.4,0.4 2.2,1 3.9,0.4 3.1,1.7 4.1,1.4 0.6,-0.2 1.6,-5.9 1.5,-2.4 1.2,-1 1.1,1.3 1,1.9 1.1,3.7 0.6,3.1 1.1,0.1 0.8,-0.8 0.3,-1 0.6,-0.5 2.8,0.3 4.5,-0.5 0.2,0.7 -0.6,1.6 3.1,1.5 3.4,0.7 0.7,-0.1 0.5,-3.3 0.6,0 1.5,2.6 0.5,0.2 1.8,-0.9 2.5,-2.1 4.5,-1 1.6,0 2.6,-1.1 1.7,-1.3 5.4,-1.4 0,0 2.7,2.5 0,0.4 -1.4,1.1 -0.5,2.5 0.1,0.3 1.6,0.8 -0.1,0.9 -0.2,0.4 -1.6,1 -1.2,3.8 -0.1,1.6 0.6,3.5 1.7,3.5 3.2,2.6 0.1,0.5 -0.7,1.4 -0.1,0.7 0.7,1.7 0.2,1.3 -0.3,0.8 -1.5,2 0,0 -1,1 -3.2,-0.3 -0.9,-1.8 -2.4,-1.5 -1.2,1.5 0.6,3.8 -0.6,0.5 -0.4,0.1 -2.8,-1.1 -1.2,0.2 -0.4,0.3 -0.7,3.2 0.7,0.1 0.5,1.2 -0.6,0.9 -0.7,0.7 0,1.9 0.4,0.6 0.5,0.2 0.7,4.3 -0.5,0.5 -3.4,0.9 -2.3,1.5 z","ma":"m 458.8,129.2 -0,0.3 -2,2.1 -0.4,0.2 -0,1.4 2,-1.7 0.7,-1.2 2.1,-1.6 0.9,-1.1 1,-6.3 1.1,-0.7 1.1,-0.1 1.7,-0.9 0.7,-0.1 0.5,0.1 0.1,1.6 -0.2,0.5 -1.4,1.9 -3.2,1.8 -0,0.7 0.7,0.1 0.5,-0.8 1.1,-0.3 0.2,0.8 -0.6,0.5 0.3,0.3 4.2,-5 0.9,0.3 2.6,-0.9 4,0.4 -0.5,-2.4 0.6,-0.2 2.4,0.1 1.8,0.4 2.6,1.1 1,0.1 2.1,1.4 1.4,0 1.3,1.3 1.9,1.3 2.5,0.6 1.2,-0.2 0.6,0.8 0.3,0.1 1.6,-0.1 2.5,0.7 0.3,-0.9 -0.7,-0.5 1.7,-0.4 0.6,0.1 -0.1,0.4 0,0 -0.5,1.4 0.2,0.7 0.6,0.5 -0.4,1.5 -1.8,2.3 -4.1,4 -3.3,0.5 -0.8,-0.2 -2.9,3.4 0,1.8 -0.9,1.8 -1.9,1.9 -0.8,2 -0.6,0.2 -0.8,1.1 0.4,1.9 1.2,0.8 0.4,1.3 -0.3,1.5 -1.1,2.9 1.6,2.8 0.6,3 -0.1,2.4 -0.2,0.6 -4.1,4.4 -0.2,2.5 0.1,2.1 0.5,2.3 1.8,2 1.6,0.9 0.2,0.5 0.1,0.8 -0.4,2.2 -0.3,0.4 -0.1,1.2 -0.5,1.5 -1.2,1.3 -2.3,0.3 -0.7,-0.3 -0.8,0 -2.4,0.9 -1.5,0.1 -2.5,-1.8 -1,-0.2 -1.5,0.2 -1,0.6 -1.1,0.3 -0.2,-0.3 -0.8,0.2 -0.5,0.2 -1.9,1.9 0,0.5 -0.6,0.9 -2,2 -2.3,0.9 -2.9,2.6 -1.3,0.5 -1.1,0 -1.7,1.5 -1.1,0.4 -2.6,0.3 -2.7,0.8 -2.1,1.9 -1,3 -0.4,3 -0.6,2.3 -1.4,2.7 -0.3,0.2 -0.3,0.8 -0.1,1.5 -1.2,2.5 -1.7,1.4 -0.7,2 0.7,1.9 0.5,3.2 1.7,3.1 -0,0.5 -0.8,1.4 -0.1,6.4 -1.1,2.5 -0.3,1.1 -0.1,1.9 0,0 -1.3,-0.7 -0.6,-0.8 -0.8,-0.5 -1,-0.3 -1.8,0.2 -0.7,-0.2 -1.4,-2 -1,-2.9 -2.1,-1.6 -0.1,-1.6 1.6,-1.8 -0.1,-0.5 -3.9,-1.9 -0.6,-1.1 -0.1,-1.7 -0.8,-1.6 -0.9,-0.7 -2.1,-0.3 -0.2,-0.4 0.3,-0.7 2.6,-2.5 -0.4,-1.3 0.7,-2.7 0.7,-1.4 0.6,-0.6 1.3,-0.5 3.4,-0.3 -0.4,-1.4 0.6,-3.3 -0.1,-1.8 -1.8,-1.2 -4.3,0.9 -2.1,1.3 -2.3,-3 -0.9,-0.8 -3,-4.2 -0.9,0.1 -0.8,-1.4 0.6,-1.2 -0.1,-0.9 -0.3,-0.3 -1.4,-0.2 -0.4,0.3 -1.9,-1.3 0.2,-0.7 1.8,-0.7 1.8,-2 0.3,-1.6 -0.3,-1 0.3,-2.4 1.8,-6.2 0,-0.4 -0.7,-1.1 -0.2,-1.1 0.2,-3.7 -0.6,-1.5 -0.5,-3.5 -0.8,-1 -3.4,-1.4 -1.2,-0 -0.3,-0.3 -0.1,-1 -0.6,-0.7 -1.7,-0.3 -1,0.5 -1.4,-0.1 -2.8,-1.5 -0.9,-0.1 -2,0.5 -2.6,1.9 -0.5,0.6 0,0 -0.5,-0.1 14.7,-11.8 2.4,0.2 1.2,-0.9 1.6,-2.2 0.4,-1.1 1.6,-1.2 0.6,-2.9 1.1,-0.5 2.4,-2.3 0.5,-1.2 0.3,-1.9 1.6,-4.7 2,-1.5 1.5,-1.8 0.8,-1.4 0.5,-1.3 -0.2,-1.8 0.8,-0.8 -1,-1.6 3.7,-3.1 -0.1,-1.6 0.5,-2.4 1.7,-1.6 0.4,-0.7 0.9,-3 0.1,-1.6 -0.4,-0.5 -1,0.2 -0.3,-0.5 0.1,-0.6 1.1,-0.1 0.6,-0.7 0.7,-4.4 -0.2,-1.4 0.5,-1 0.8,-0.5 0,0 0.6,0 0.2,-0.2 -0.1,-0.5 0.3,-0.7 0.6,-0.5 1.3,1 0.5,1.8 1.2,0.1 0.8,-1.4 0.6,2.9 1,0 0.3,-0.5 0.1,-0.9 0.8,-0 1.7,0.5 0.5,0.7 -1.4,1.7 0.7,0.7 0,0.6 1.2,-2 0.5,-1.5 0.5,0 0.4,1 0,0.6 -0.9,0.9 -0.3,1 0.1,2.7 0.3,0.3 0.5,0.1 0.6,-0.1 1,-0.9 -0.5,-1 0.1,-0.6 1.3,-1.4 1.1,-0.3 2.1,0.6 1.5,-1.1 0.1,0.9 -0.4,0.2 -1.1,1.5 0.6,0.6 0.1,-0.4 1.3,-0.6 0.6,0.8 -0.1,1.2 1.6,1.8 0.9,-0.4 1.6,0.7 0.8,2.4 -0.1,0.9 -2.2,2.7 -0.4,0.9 0.1,0.7 0.6,-1 1.8,-1.7 0.8,-0 0.9,0.8 0.5,1.9 -0.3,1.2 -1,0.2 -1,0.9 -1.2,1.5 0.1,0.8 -1.2,2.4 -0.6,3.5 0.2,0.3 0.9,0.2 z m 0.5,0.5 -0.1,-0.8 0.5,-1.5 -0.4,-1.1 0.1,-0.7 0.9,-1.2 0.6,-0.2 0.1,2.4 -0.2,1.3 -0.8,0.6 -0.7,1.2 z m -6.3,-25.8 -0.4,-0.5 -0.1,-0.6 0.8,-1.1 0.8,-0 0.7,0.4 0.1,0.3 -0.2,0.4 -1.7,1.1 z m 3.5,4.2 -0.3,-0.3 0.1,-0.5 1.1,-0.9 0.5,0.1 0.5,0.8 -0.1,0.6 -0.4,-0.2 -1.3,0.4 z m -14.2,-4.8 -0.2,-0.1 0.9,-3.6 0.3,0.1 0,0.2 -0.4,3.1 -0.7,0.3 z","mt":"m 207.2,296.3 1.5,-1.4 4.1,-2.6 0.5,-2.5 1.4,-3.8 0.9,-1.1 1.6,-0.5 0.4,-0.4 0.6,-0.8 0.5,-2.3 1.7,-2 0.6,-2.2 0.1,-1.7 -0.6,-1.5 0,-2 -1.5,-3.3 -0.9,0 -0.6,-0.5 -0.4,-3.3 0.1,-1.3 1.4,-1.1 1.4,-1.8 0.2,-0.8 -1.4,-3.6 -1.1,-0.4 -1.1,-0.1 -3.5,0.1 -1.2,-1.1 0.2,-0.6 -17.2,-0.1 0.9,-9 -1.5,-2.8 -0.3,-1.8 0,-0.8 1,-3.5 -0.4,-1.9 0.9,-1.7 -0.8,-2.3 -0.1,-1.4 -0.3,-0.6 -0.8,-0.5 -0.1,-0.3 1.3,-5 0.8,-1.4 -0.6,-1.2 -1.4,-1 0,0 47.9,-0.3 1.2,-0.7 1.2,-5.2 1.4,-4.2 -0.5,-1.9 -0.7,-1.4 -0.1,-0.8 0.4,-0.8 0.9,-0.6 1.2,-1.8 0.3,-1 -0.3,-0.8 0.1,-0.8 0.2,-0.6 1.2,-1.2 0,0 1.2,1.1 2.5,4.1 0.4,1.8 1.4,4 1.3,1.9 0.8,1.6 -0.2,2.4 0.5,2.4 0.7,2.2 1.5,1.1 3,2.8 3.4,1.7 0.2,0.9 -0,1.1 0.2,0.5 0.9,0.4 0.8,-0.2 1.6,0.5 0.5,0.7 0.2,1.1 0.3,0.3 1.4,-0.5 3.7,1.5 34,2.4 63,3.5 0,0 -0.7,1 -0.6,1.9 -1.1,1.3 -0.4,3.1 -0.4,0.8 -0.4,0.3 -1.9,5.3 -0.5,3 -0,3 -1.9,6 0.1,0.9 1.4,1.3 -0.2,0.9 -0.8,0.9 -0.1,0.5 1.1,2.3 -0.5,3.3 0,1.6 0.5,0.6 0.4,3 -0.7,2.8 1,3.3 1,0.5 0.8,0 0,0 0.1,0.6 -0.3,1.1 -1,0.9 -0.3,0.9 0.2,2.7 -0.4,1.1 -2,3.2 -1,2.6 -1.2,0.8 0.1,5.2 -1.6,3.1 -0.6,2.7 0.5,1.1 0,0.8 -1.2,2.9 -0.8,2.9 -1.4,1.4 -1.2,0.7 -1.2,-0.7 -1.1,0.3 -1.6,1 -1.9,1.9 -0.4,0.7 -0.6,4.1 -0.7,1 -2,4.2 -0.3,0.3 -2.7,0.9 -2.6,0.1 -1.4,2.6 -1.8,1 -0.1,1.5 -0.8,1.4 -1.3,1 -0.5,1 -0.3,1.9 -1.3,2 -1.9,1.8 -2,0.8 -0.7,0.8 -0.4,2.9 -2.5,3.9 -0.4,3.4 0.2,0.7 1.4,2.2 0.2,3.4 0.9,2.2 0,0 -1.6,0.3 -1.2,-0.6 -0.9,-0.1 -2.7,0.1 -0.6,0.6 -4.6,-0.3 -1.7,-1.3 -1.3,-0.1 -0.1,-0.5 0.2,-0.5 1.7,-2.8 1.8,-0.7 1.2,-6.6 -1.3,0.1 -5.6,6 -1,-0.1 -2.1,0.9 -1,-0 -0.2,-0.3 -0.3,-1.4 -1.6,-1 -2.4,-0.1 -1.4,0.6 -0.5,0.8 -1.3,0.8 -4.5,0.6 -1.2,-0.6 -1.3,-1.1 -3,-1.2 -0.8,-1 -0.3,-0.9 -0.7,-0.3 -2.6,-0.5 -2.8,-1.3 -0.8,-1.1 -1.3,-0.2 -2,0.5 -1.4,1.3 -1.7,0.5 -0.8,-0.3 -1.6,0.2 -2.6,-0 -1.4,1.4 -0.1,1.2 -2,3 -2,2 -5.6,2 -2.1,-1.5 -1,-1.1 -0.7,-0.2 0,0 -0.7,-0.7 -0.3,-0.8 0.5,-0.7 -2.4,-2.1 -1.3,0.6 -0.5,-0.1 -1.2,-0.7 -0.5,-0.7 -2,-1.4 -1.9,-0.8 -0.3,-0.3 -0.3,-1.1 -0.2,-2.9 -0.6,-1.8 -0.2,-3.7 0.9,-1.6 1.1,-1.1 0.3,-1.8 -0.1,-1.9 -1,0.1 -0.4,0.6 -0.4,0.2 -26.9,-1.1 -1.1,-12.7 -5.4,-6.1 4.9,-0.1 -0.3,-7.5 -2.6,-5.3 -0.5,-2 0.3,-1.1 0.6,-0.6 0.7,-1.3 -1.4,-2.9 -3.1,-1 z","ms":"m 359.2,400.1 -0.4,2.5 -0.3,0.4 -1.5,0.8 -1.3,0 -0.5,0.2 -1.2,1 -2,2.7 -0.7,0.7 -1,0.3 -0.6,1.7 -0.2,2.9 -2.6,3.6 -1,0.5 -0.2,0.4 0.3,1.9 -0.1,0.9 -1.2,2.3 -2,2.3 0.3,0.8 -0.3,1.2 -1.4,1 -0.4,1.2 -1.7,1.7 -1.3,2.4 -1.9,1.9 -7.6,4.5 -1.3,1.1 -0.7,1.5 -0.8,1.1 0,0 -5.4,2.3 -1.1,0.8 -0.9,2.3 0,1.1 -1.4,3.6 -0.7,0.7 -1.7,1 -1.1,0.3 -0.3,0.3 -1.6,7.9 -0.4,0.8 -2.4,1.6 0,0 -2.5,-2.3 -3.4,-1.9 -4,2 -0.7,0.8 -1.7,0.5 -2.6,0.4 -2.4,-0.5 -1,-0.7 -0.5,-4.3 -0.3,-0.7 -0.9,-0.9 -0.2,-2.5 0.5,-1.3 -0.6,-0.8 -0.1,-0.4 0,-2.9 -0.9,-2 -0.6,-2.7 -0.1,-0.7 0.6,-1.4 0,-1.6 -1.6,-1.1 -0.4,-0.8 -0.2,-2.2 -1.6,-1.8 -2.2,-0.3 -1.5,0.3 -1.8,-0.3 -2.5,-2 -0.6,-1.5 -1.5,0.3 -2.2,2.7 -1,-0.6 -1.7,0.8 -1.1,0.2 -1.7,-0.7 -2.6,-0.5 -3.5,0.2 -3.7,-0.7 -0.5,-0.9 -2,-0.1 -0.9,0.5 -2.5,-0.9 0.9,-7.3 -0.4,-2.4 0.6,-1.4 1,-1.5 0.6,-6 -0.7,-2.3 -0.1,-1.7 -0.8,-1 -0.4,-0.1 -0.5,0.7 -0.6,-3.3 -0.8,-1.9 -1.2,-2 -0.3,-1.8 4,-2.3 0.8,-0.9 -4.2,-3.9 5.4,-11.4 1.1,-0.1 -0.3,-2.1 -0.7,-0.1 3.2,-10.3 0.7,-1.2 -3.1,-5.8 0,-1.9 0,0 0.7,0.2 1,1.1 2.1,1.5 5.6,-2 2,-2 2,-3 0.1,-1.2 1.4,-1.4 2.6,0 1.6,-0.2 0.8,0.3 1.7,-0.5 1.4,-1.3 2,-0.5 1.3,0.2 0.8,1.1 2.8,1.3 2.6,0.5 0.7,0.3 0.3,0.9 0.8,1 3,1.2 1.3,1.1 1.2,0.6 4.5,-0.6 1.3,-0.8 0.5,-0.8 1.4,-0.6 2.4,0.1 1.6,1 0.3,1.4 0.2,0.3 1,0 2.1,-0.9 1,0.1 5.6,-6 1.3,-0.1 -1.2,6.6 -1.8,0.7 -1.7,2.8 -0.2,0.5 0.1,0.5 1.3,0.1 1.7,1.3 4.6,0.3 0.6,-0.6 2.7,-0.1 0.9,0.1 1.2,0.6 1.6,-0.3 0,0 0.2,1.8 -0.3,2.6 0.2,1.1 0.3,0.4 0.7,0.2 1.1,-0.7 2.3,0.9 0.1,0.4 -1.3,1.8 -0.6,1.2 -0.3,0.8 0.1,0.3 3.8,0.7 2.8,-0.2 2.7,1.7 1.1,0.2 1.4,0.7 0.7,0.6 3.1,1.6 0.7,0.8 3.4,1.3 1.5,0 1.9,0.4 1.6,1.6 3.1,0.6 2.7,2.2 0.2,0.5 0,0 -0.6,0.3 -1,4.2 0.6,3.2 z","mg":"m 527.8,365.6 -0.9,-0.6 -2.5,-0.8 -1.6,0.1 -1.1,0.3 -0.8,0.6 -2.2,0.3 -1.3,-0.1 1.7,2.3 -0,0.8 -1.1,-0.1 -1.1,-0.7 -0.3,0 -2.2,1.3 -1.2,1.9 0.3,0.7 1.3,0.7 0.5,0.7 -0,1.9 -0.3,1.5 0.2,0.4 1.3,0.3 0.2,1.7 -0.3,0.4 -0.9,0.2 -1,-0 -0.8,-0.3 -1.5,0.1 -0.4,0.6 0.5,0.7 0.8,0.3 0.5,-0.3 0.5,0.1 1.1,1.3 1.3,2.8 0.3,2.4 -0.5,3 -1.7,2.1 -1.2,0.9 -0.3,0.4 -0.2,1.7 -0.9,2.3 -1.1,1.3 -1,3.2 -0.6,0.3 -5.2,-0 -1.7,2.1 -0.2,0.4 0.6,3.1 -0.6,1.3 -0.4,2.3 0.3,0.1 0,0 -2.5,2.4 -1.2,0.3 -0.6,0.5 0.7,0.7 -2.4,6 -1.9,3.7 -0.1,0.8 1.4,0.1 0.3,0.6 -0.2,0.5 -2.5,1 -9.5,4.5 -1.4,0.2 0,-0.5 -0.5,-0.2 -2.5,-0.3 -0.6,0.1 -1.6,0.9 -1.3,0.2 -3.2,0.1 -0.4,-0.3 -0.5,0.1 -4.1,1.8 -1.1,0.8 -1.7,0.8 -0.5,-0.3 -2.6,0.2 -2.9,1.3 -2.4,0.7 -0.7,0.5 0,0 -1.3,0.7 -2.2,0.2 -1.9,1 -1.2,1.2 -1.8,0.7 -2.4,0.3 -2.3,-0.1 -0,-0.5 0.3,-0.5 -0.1,-0.3 -1.2,0.3 -0.2,2.3 0.2,0.2 -0.1,0.8 -0.8,1 -1.3,0.3 -0.6,-0.4 -3.6,1 -0.2,-0.5 -2,0.2 -1.1,-0.3 -2,-3.3 1.2,-0.7 -0.5,-1.7 -1.8,-0.8 -1.8,-1.2 -0.7,-1.6 0.5,-1.6 0.2,-3.5 -0.3,-2.9 1.9,-2.7 0.7,-2.2 0.1,-1.3 -0.2,-0.4 -3.7,-1.3 -1,0.1 -0.3,0.4 -0.8,0.3 -1.6,0.1 0,-0.8 -0.8,-2 -1.3,-1.8 -0.4,-2.2 -0.3,-0.6 -0.8,-0.7 0.2,-1.9 1.5,-2 0.1,-0.6 -0.4,-1.6 -1.9,-1.2 -0.6,-0.6 0.3,-2.4 0.6,-1 -0.2,-1 -3.3,-3.4 -1.3,0.3 -0.8,0.6 -1.6,-0.8 -2.4,0.1 -0.3,0.6 0.2,0.5 -0.4,1 -2.8,0.7 -1.1,-0.4 -1.5,-1.4 -1,1.3 -8.2,0.7 -0.5,0.5 -0.5,1.2 0.3,2.5 -0.4,0.4 -1.2,-0.5 -0,-2.8 -0.3,-1 -0.4,-0.4 -0.6,-0.1 -0.3,0.2 -0.4,1.1 -0.7,0.9 -0.5,0.3 -0.6,-0 -1.2,-2.1 -0.3,-1.4 0.1,-0.9 -1.7,-0.8 -2.2,-1.4 -2,0.6 -1.6,-0.2 -1.7,0.3 -4.3,-1 -2.5,-0.1 -1.7,-1.6 -0.8,-0.1 -1.5,0.6 -1.4,1.7 -1.9,0.4 -2.1,1.1 -1.2,1.1 0,0 0.3,-2.6 -0.6,-3.2 1,-4.2 0.6,-0.3 0,0 0.9,0.5 0.4,-0.2 0,-0.3 -0.6,-0.6 0.6,-1.9 1.6,-2.1 0.9,-0.7 0.5,-0.1 0.8,0.2 0.8,-0.3 0.8,-1.3 -0.1,-1 1.2,-2.5 1.4,-2.1 2.2,-0.5 2.5,-1 3.7,0.6 3.2,-1.6 1.5,0.3 1.3,1.4 0.3,0 2.9,-2.9 4.1,-2.6 2,0.9 3.9,-0.2 1.5,0.3 1.8,-0 0.6,-0.1 0.6,-0.5 4.3,1.9 0.7,0.8 4.9,-2.7 0.5,-1.1 0.9,-0.9 1.2,-0.2 3.1,-2.1 -1.2,-3.5 0.5,-1.9 0.7,-0.9 0.2,-0.7 -0.2,-1 -0.5,-0.6 -1.6,-0.6 -0.9,0.5 -1.1,-1.1 0.4,-2.1 3.2,-3 2.3,-2.7 0,-0.6 -1.6,-4.6 -1.4,-1 -0.8,-0.3 -0.8,-1.2 0.4,-1.5 1,-1.3 0.7,-1.6 -0.3,-1.6 0.5,-1.5 1.3,-0.1 2.3,-1.5 3.4,-0.9 0.5,-0.5 -0.7,-4.3 -0.5,-0.2 -0.4,-0.6 -0,-1.9 0.7,-0.7 0.6,-0.9 -0.5,-1.2 -0.7,-0.1 0.7,-3.2 0.4,-0.3 1.2,-0.2 2.8,1.1 0.4,-0.1 0.6,-0.5 -0.6,-3.8 1.2,-1.5 2.4,1.5 0.9,1.8 3.2,0.3 1,-1 0,0 0.5,2.4 -1.4,3.4 0.4,0.2 1.3,-0.9 0.7,-1 0.7,-0.1 2.1,0.4 1,-0.8 1.9,-2.6 1,0.1 1.4,-0.5 1.8,-1.6 0.9,-1.2 2,-0.4 3.4,-1.9 0.6,-1.1 4.3,-3 3.8,-1.6 1.8,0.1 1.2,0.5 2.2,0 2.3,0.5 0.8,0.5 -1.3,2.7 -0.1,0.9 0.3,1.5 0.6,0.5 5.3,1.5 0.6,-0.2 0.8,-1.1 1.9,-0.9 1.8,-0.3 2.7,0.8 1.1,0.5 4.3,3.6 1,-0.2 2.2,1.6 2.5,1.2 0.9,0.2 0.5,-0.2 1.5,1.2 4.4,-1.2 0.4,0.2 6.5,6.2 0.4,4 0.6,-0.2 2.6,0.5 1.5,-0.5 1.3,-1 2,0.1 2.7,0.6 2.3,1.1 2.2,0.6 2.1,-0 2.8,2.5 0.7,0.4 0.9,0.1 0.8,1 0.4,1.2 -1.5,3.1 -5,4.2 -0.1,2.6 0.6,1 0,0.4 -1,0.7 -2.5,-0.2 -0.8,0.9 -0.8,3.3 -0.5,4.4 0.2,0.3 0.3,-0.2 0.2,-0.5 0.6,-0.2 0.6,1.2 -0.2,1.5 0.1,0.5 4.1,3.1 0.5,1 0,0.5 -0.7,1.4 z","pa":"m 371.3,235.5 -63,-3.5 -34,-2.4 -3.7,-1.5 -1.4,0.5 -0.3,-0.3 -0.2,-1.1 -0.6,-0.7 -1.6,-0.5 -0.8,0.2 -0.9,-0.4 -0.2,-0.5 0,-1.1 -0.2,-0.9 -3.4,-1.7 -3,-2.8 -1.5,-1.1 -0.7,-2.2 -0.5,-2.4 0.2,-2.4 -0.8,-1.6 -1.3,-1.9 -1.4,-4 -0.4,-1.8 -2.5,-4.1 -1.2,-1.1 0,0 -0.6,-0.6 -0.1,-2 -0.6,-1.3 -1.6,-1.6 -1.1,-0.6 -0.4,-0.6 -0.8,-2.3 0,-1.1 0.6,-1 1.4,-1.1 0.8,-1.3 29.9,-64.2 -1.8,-1.7 0.1,-0.8 -0.2,-0.5 -1.4,0.3 -0.8,0.6 -1.9,-0.8 -1.1,-2.2 -2.7,-1.4 -1.3,-1.3 -0.1,-0.6 -1.3,-0.8 -1.4,-0.1 -2.3,-0.7 -2.4,-1.3 -1.9,-0.7 -1.4,-1.1 -0.6,-0.9 -4.6,-2.5 -4.6,-3.8 -0.3,-0.4 -0,-0.9 -0.6,-1.8 -1.8,-1.2 -0.7,0.2 -0.4,-0.2 -1.8,-2 0.1,-2.1 0.3,-0.7 -0.2,-0.4 -1.7,-0.8 -0.2,-0.7 -0.2,-2.3 0.4,-1.4 -0.4,-4.9 0,0 -1.6,-17 0,0 0.8,0.3 0.4,0.6 -0,0.5 0.5,0.4 0.9,0.3 1.4,-0.7 0.5,-0.8 2.7,0.2 0.8,-1.1 -0.5,-1.8 1.8,-0.4 1.4,-1.6 2.6,1 1.9,0 0.5,-1.5 3.3,-1.6 2,0.4 1.2,-0.1 0.5,-0.3 1.2,-1.5 0.4,-1.4 1.5,-1.1 0.9,-0.1 0.7,0.5 2.1,-1.1 0.4,0.1 0.4,1 0.7,0.5 2,0.5 1.6,0.3 0.6,-0.6 1.7,-0.4 0.8,0.3 0.8,-0 0.9,-0.3 2.2,0.3 4.7,1.4 1,-0.1 1,-0.9 -0,-2.3 -2.1,-2.5 -1.2,-0.6 0.5,-1.7 1.3,-1.4 0.3,-1.1 0.3,-0.2 0.7,0.2 0.8,0.8 2.4,1.1 11.6,-2.3 1.6,1.7 1,0.1 0.4,-0.3 0,0 0.6,0.6 0.4,2.3 -0.6,1.3 -0.3,4.5 0.2,1.4 0.3,0.5 1.2,0 1.1,-0.3 3.4,0.4 1.3,0.5 1.9,1.1 0.7,0.8 0.5,1.3 1.2,0.1 1.1,0.8 0.8,1 0.8,0.3 1.3,-0.1 0.4,-0.4 0.9,-0.1 2.8,2.7 0.7,-0 0.5,1.2 -0.7,0.2 -0.2,0.7 0.8,2.8 2,2.3 2.6,0.7 0.2,0.3 -0.4,3.1 0.2,2.1 0.7,1.5 0.6,0.6 0.6,1.8 -0.1,1.6 1.5,3.5 0.8,0.2 0.8,-0.4 2.9,3.3 -0.1,2.4 0.4,0.9 0.9,0.2 0.3,0.5 0.3,1.6 -0.2,0.7 0.1,1.3 1.9,1.4 0.4,1.5 1.4,1 2.8,0.7 1.3,-0.1 0.8,-0.3 0.9,0.1 0,0 -0.5,0.7 0.3,1.6 -0.2,0.5 -1.3,1.1 -1.4,0.2 -0.5,-0.2 -0.8,-0.8 -0.7,-0.1 -3.4,1.6 -0.4,0.5 -1.6,0.7 -0.6,-0 -1.6,0.6 0,0.6 6.5,-1.1 0.9,0.7 0.1,0.5 0,0.7 -0.6,0.5 0.3,0.4 0.6,-0.2 0.9,-1 1,-0 0.5,-0.3 0.6,0.1 1.1,-0.4 1.1,-0.6 3.3,-2.3 1.5,-0.3 1.8,-0.8 3.2,-1.8 0.5,-1 0.7,-0.5 2.1,-1 0.7,-0.7 -0.3,-0.7 0.2,-0.4 1.1,-0.3 1.1,0.1 0.4,0.2 0.4,3.8 -0.5,2.6 0.3,1.6 0.8,1.6 1.3,1.4 0.3,1.6 -0.1,0.5 -1.8,1.8 -0.5,0.1 -0.9,-0.5 -1.8,-0.5 -1.3,-0.3 -0.9,0.1 -2.1,-1 -0.3,-1.1 -0.9,-0.5 -2.3,3.8 -0.6,2.4 0.7,3 0.5,0.6 0.9,0.6 -1,-1.1 -0.4,-2.7 0.1,-0.5 2.6,-4.2 2.3,1.2 0.1,0.5 2.5,2.5 -0.3,2 -0.7,0.6 0.4,2.3 0.5,1.1 1.1,0.8 0.7,0.1 0.5,0.5 -0.3,-0.6 -0.8,-0.2 -1.2,-1 -0.2,-0.7 0.3,-4.2 0.8,-1.2 1.4,0.7 0.8,1.2 -0.1,0.8 1.2,0.9 0.3,-0.3 -1,-1.3 -0.9,-2.1 0,-0.4 2.3,-2.3 1.6,0.1 1.9,0.6 0.3,0.6 -0.6,0.6 0.3,0.3 0.5,0 1,-0.2 1.3,-0.9 4.1,-1 0.8,0.2 1.7,1.1 3.2,-0.4 1.1,-0.4 1,-1 1,-0.6 1.7,-0.5 0.8,0.1 0.1,0.8 -2,4 -0.2,1.5 -0.5,1.1 -0.8,1 -0,0.9 0.6,1.4 -0.3,2.5 0.9,-1.2 0,-1.4 1.5,-3 1.1,-3.2 1.1,-1.6 0.3,-0.3 0.8,-0.1 0.6,-0.3 1.8,-0.2 0.9,-1.4 1.5,-1.7 1.4,-2.3 0.5,-0.5 0.8,0.5 0.6,-0.5 1.6,2.3 1.2,0.6 -0.1,-0.7 -0.3,-0.8 0.6,-1 3.5,-0.5 -1,-0.3 -3.5,0.5 -0.3,-0.2 0.3,-2.4 0.5,-0.3 0.7,0.4 1,0.1 1.1,-3.1 -0.7,-1.4 0,-0.7 1.2,-1.8 2.8,-2.5 0.4,-0.1 1.1,1.1 2.9,-2.1 0.5,-0.1 0.4,0.5 0.1,0.6 -0.3,0.7 1.1,-0.2 0.8,-0.6 0.4,-0.8 0.6,-0.2 0.3,0.1 0.7,1.4 1.3,1.2 0.2,-0.6 -0.1,-0.4 -1,-0.5 -0.1,-0.3 -0.1,-1.2 0.2,-0.4 0.4,-0.2 2.3,0.3 1.2,0.7 0.6,1 1.6,0.7 1.6,-0.8 0.5,2.1 -0.5,0.3 -0,0.6 0.9,-0.5 1.2,-2.4 0.4,0.2 -0.2,1.3 0.4,0.4 2.5,-0.3 0.5,0.7 0.5,1.7 -0.6,0.9 0.8,-0.5 0.3,0.4 1.9,0.1 3.5,-1.2 -0.3,1.6 -0.8,1.8 1.5,-0.5 0.6,-0.6 0.6,1.6 0,0 -0.8,0.5 -0.5,1 0.2,1.4 -0.7,4.4 -0.6,0.7 -1.1,0.1 -0.1,0.6 0.3,0.5 1,-0.2 0.4,0.5 -0.1,1.6 -0.9,3 -0.4,0.7 -1.7,1.6 -0.5,2.4 0.1,1.6 -3.7,3.1 1,1.6 -0.8,0.8 0.2,1.8 -0.5,1.3 -0.8,1.4 -1.5,1.8 -2,1.5 -1.6,4.7 -0.3,1.9 -0.5,1.2 -2.4,2.3 -1.1,0.5 -0.6,2.9 -1.6,1.2 -0.4,1.1 -1.6,2.2 -1.2,0.9 -2.4,-0.2 -14.7,11.8 0.5,0.1 0,0 2.3,0.8 1.9,-0.2 1.3,0.1 1,1.7 0.4,0.3 0.9,0.1 1.3,1.2 -0,0.6 -0.4,0.7 -0.7,0.4 -1,0.1 -0.3,0.3 0.1,1.4 1,1.3 -0.9,2.8 -0.6,0.5 -1.5,0.5 -0.3,0.5 0.3,1.2 -0.2,1.3 -1.3,0.1 -1.5,1.3 -0.8,1.3 0.1,1.5 -0.2,0.5 -2.5,1.2 -3.4,1.1 -2.5,1.8 -0.2,0.3 0.4,2.2 0.1,2.7 -1.3,2.1 -1.4,1.7 -0.1,0.6 0.2,0.9 0.6,1 1.7,1.7 0.8,0.3 0.1,0.3 -0.7,4 -1.8,5.2 -1.1,0.8 -1.7,3.2 -0.2,1 -0.9,1.5 -0.7,0.8 -1.1,0.2 -1.4,0.9 -1,1.9 -1.2,1.7 -1.2,1.1 -1.1,1.6 -1.1,4.5 -1.6,3.7 z m 21.2,-130.3 -4.5,2 -3.4,0.5 -2,-0.3 -0.7,1.1 -1.8,1.2 -0.7,-0.6 -0.6,-1.5 -0.2,0.3 0.4,1.2 -0.3,0.8 -0.7,0.4 -3.8,-1.6 -0.8,0.7 -4.2,1.3 -3.2,-0.6 -0.8,-0.6 -0.2,-1.9 -0.2,-0.4 -1.1,-1 -1.1,-1.6 -0.2,-1.8 0.5,-2.8 0.6,-0.4 1.8,0.4 0.9,-0.7 0.1,-0.6 -1.3,0.4 -1.2,-0.1 -0.9,-0.7 -0.2,-1.1 0.3,-5.1 0.7,-0.8 0.3,0.8 1.8,0.6 0.6,-0.1 -0.5,-0.4 -1.3,-0.2 -0.9,-2.2 0.4,-1.7 0.9,-2 1.3,-1.3 1,-0.6 1.3,-0.5 1.3,-0.1 3.5,0.5 7.2,1.8 3.7,-0.5 0.1,-0.3 1.1,-0.6 2.2,-0.4 2.9,0.3 2.8,0.8 6.5,0.8 0.6,0.5 -0.1,1.2 -0.7,0.7 -0.7,1.5 -0.4,2.6 -0.9,3.3 -1.3,0.7 -0.3,0.7 0.2,1.2 -2,2.6 -1.4,3.5 -0.5,0.5 z m -47.2,-0.2 -0.8,-0.5 1.1,-2.3 -0.1,-1.8 0.3,-0.2 2.3,-0.5 0.9,-0.9 0.1,-0.5 -0.2,-2.3 0.9,-2.6 1.3,-1.5 2.3,-1.5 2.9,-0.2 0.7,2.4 -1.1,2.2 -0.8,3 -1.1,0.7 -1.3,2 -0.8,0.7 -4.9,3.3 -1.6,0.4 z m 28.5,-22.9 -1,-0.3 -2.5,0.1 -0.8,-0.2 -0.3,-0.3 -0.4,-1.1 0,-1.2 1.5,-0.4 1.9,0 2.2,-1.3 4.8,-0.6 0.8,0.3 0.7,0.7 -0.2,1 -2.6,1.4 -1.8,2.5 -1.1,0.5 -1.3,-1.1 z m 4.8,0 1.9,-1.2 2,0 1.6,0.6 0.5,1 0.1,0.6 -0.9,0.8 -2.9,0.3 -1.2,0.3 -2.3,-0.9 -0.2,-0.5 1.3,-1 z m -17,4.4 -0.5,-0.3 -0.6,0 -1.5,-0.7 0.2,-1.2 0.6,-0.9 1.9,-0.4 2.4,-0.9 1.3,0.1 0.8,0.7 0.1,0.1 -1.9,1.6 -1.1,0.3 -1.7,1.4 z m 9.4,-9.7 -0.8,-0.3 -0.2,-1.7 0.1,-0.6 1.2,-1.3 2.5,-0.9 0.3,0.1 0.5,0.7 0,0.9 -1.9,2 -1.6,1.1 z m -13.8,20.2 -0.1,-0.4 0.2,-0.9 1,-2.8 2.6,-1.7 0.7,-0.3 0.7,0.1 -0.2,1.8 -1.6,0.4 -1.6,2.2 -1.8,1.6 z m 10.9,-17.6 -1.2,-0.3 -0.3,-0.5 0.9,-1 0.7,-4 0.9,-1.2 0.3,0.1 0.1,0.3 -0,2.5 0.6,1.9 -0.3,0.9 -1,0.4 -0.6,0.8 z m -14.8,10.2 -0.3,-0.2 0.1,-0.6 0.6,-0.4 1.2,-1.7 0.8,-1.5 0.7,-0.7 1.4,-0.5 -0.2,1.5 -0.4,1 -1.7,1.7 -2.2,1.5 z m 13.9,-7 -0.6,-0.1 -0.8,-0.7 -1,-1.6 -0.1,-0.4 0.2,-0.3 0.8,-0.6 1.9,0.8 0.3,0.4 0.2,2.1 -1,0.4 z m -5.4,30.6 -0.7,-0.1 -0.9,-0.5 -0.7,0.5 -0.8,-0.3 -1.7,-1.7 0,-0.6 1.3,-0 3.1,1.3 0.3,1.5 z m -21.1,-5.5 0,-1 -0.2,-0.3 0.6,-1 2.4,-0.9 0.8,0.4 0.9,0.9 -0.3,0.3 -1,0.5 -2.5,0.4 -0.6,0.7 z m 12.7,-6.7 -0.2,-0 0,-0.3 0.5,-0.9 1.8,-1.6 0.4,-1.2 0.1,-1.3 0.2,-0.3 0.3,0.4 0,1.5 -0.9,2.7 -0.6,0.6 -1.7,0.5 z m 6.3,-9.9 1.6,-3 0.9,-0.2 0.7,0.2 0.3,0.9 -0.6,0.7 -2.9,1.4 z m 31.4,19 -0.8,-0.3 -0.3,-1.1 1,-1.7 1.1,-0.3 0.2,0.1 -0,0.7 -0.7,2.2 -0.4,0.4 z m -33.5,-19.5 -0.5,-0.2 0.3,-2 1.3,-1.8 0.2,0 1.3,0.9 -0,0.3 -1.6,0.6 -1.1,2.2 z m 2.2,5 0.7,0 -0.4,0.5 -0.9,0.3 -0.1,1.1 -0.8,0.7 -1.7,0.8 -0.2,-0.2 0.3,-0.8 0.5,-0.6 1.7,-1.7 0.9,-0.1 z m -22.6,10.2 -0.6,-0.2 -0.1,-0.3 0.4,-0.4 3.6,-1.6 0.5,0.7 -0,0.2 -1.4,0.7 -2.5,0.9 z m 63.5,-4.8 -1,-0.2 -0.8,-0.8 0.9,-1.2 1.3,-0 0.2,1.2 -0.1,0.6 -0.5,0.5 z m -37.3,-18.9 -2.4,0.7 -0.6,0 -0.2,-0.2 1,-1 1,-0.5 1,0.2 0.4,0.3 0.1,0.2 -0.1,0.2 -0.4,0.1 z m -5.3,8.6 -0.1,-0.8 0.3,-0.5 2.5,-1.5 -0.9,2 -0.8,0.6 -0.9,0.1 z m 2.1,4.5 -0.5,-0.1 -0.1,-0.2 0.8,-1.5 1.2,0 -0.1,1.4 -1.3,0.5 z m 28,15.8 -0.3,-0.2 0.9,-1.6 0.7,-0.4 0.2,0.8 0.5,0.4 -0.3,0.5 -0.4,0.3 -0.6,-0.2 -0.7,0.4 z m -26.7,-23.3 -0.9,-0.1 0,-0.2 2.4,-1.8 0,1 -0.2,0.6 -0.3,0.3 -1.1,0.2 z m 67.5,10.2 -0.4,-0.5 0.2,-0.8 1,-0.9 0.3,0.1 0.2,1.8 -1.3,0.3 z","pb":"m 610.7,199.4 -2.5,-2.1 -0.8,-0.3 -2.6,-0.2 -2.3,1.1 -1.5,1.3 -0.5,1.8 -1.9,1 -2,0.5 -1.1,-0 0,0.6 -0.8,0.5 -2.2,0.3 -3.9,-0.3 -1.6,0.9 -0.6,0.6 -1.8,0.1 -0.9,0.7 -0.5,0.8 0.4,0.7 0,0.5 -0.4,0.5 -1.8,1.5 -1.3,0.2 -1.6,0.8 -1.6,-0.8 -0.9,-0.9 -0.3,-2.2 0.2,-0.5 -0.2,-0.3 -1.1,-0.3 -0.4,0.3 -1.5,0.3 0,-0.5 2.5,-2.6 0.2,-0.4 -0.7,-1.9 -0,-0.5 0.4,-0.8 3,-1.1 0.1,-0.3 -0.5,-1.4 -3.5,-1.9 -1.5,0.4 -2.2,1.3 -0.9,1.5 -1.5,0.9 -1.1,0.3 -2.7,1.9 -1.5,1.6 -1.6,0.2 -2.6,1 -0.8,-0.3 0.1,-0.7 -0.6,-1.2 -0.4,-0.1 -0.9,0.7 -1.5,0.3 -1,-0.3 -1.4,-1.9 -0.4,-0.1 0,0 -0.2,-0.3 1.2,-1.1 1.6,-3.5 -0.3,-1.2 -0.7,-0.1 -1.2,-0.9 0,-1.7 -0.3,-0.7 -0.6,-0.3 -0.2,-0.4 0.1,-0.9 0.2,-0.4 1.1,-0.6 0.7,-1.3 -0.5,-1.3 1,-3 0.8,-1.1 0.1,-0.5 0,0 0.6,-0.5 1.9,1.6 0.9,0.4 2.9,0.6 1.2,-1.1 3.2,-1.7 0.8,-0.7 0.1,-1 0.4,-0.9 3.2,-1.2 1.4,-0.1 3.3,-1 0.6,0.1 0.5,0.4 0,1.2 -3,3.2 -0.4,1 -0.4,1.7 -0.4,0.4 -0.8,0.3 -0.2,0.3 -0.1,1.7 3.5,0.5 0.3,0.2 0.3,1.4 0.3,0.2 3.1,-1.3 1.8,-0.1 1.9,0.3 0.9,1.2 -0.5,1.5 0.8,0.7 2.4,-0.9 0.5,-0.7 0.6,-1.2 -0.5,-0.9 -0.2,-1.4 0.5,-0.6 1,0.3 -0.5,-1.5 -0.7,-0.8 0.3,-1.5 1.8,-1.4 1.4,-0.1 0.4,0.4 -0.1,1 0.6,0.5 3.4,0.4 0.5,0.3 5.8,-0.4 2.2,0.3 2.5,1.1 1,-0.4 3.5,0.2 0.9,-0.2 0,0 0.1,2.4 1.4,4.4 0.1,0.6 -0.2,0.9 -0.4,0.5 -0,0.9 0.6,-0.7 0.5,-1.5 0,2 0.6,1 -0.3,5.2 -0.4,0.6 z","pr":"m 397,499.7 -5.2,-0 -0.3,0.4 -1.7,0.2 -0.8,-0.1 -0.1,-0.4 -1.6,0.6 -1.4,1.4 -3.4,2.1 -1.4,-0.2 -1.2,-0.6 -3.1,-2.6 -1,-0.4 -0.8,-0 -2.8,0.7 -2.3,0.2 -0.8,-0 -1.4,-0.8 -1.1,0.1 -1.5,0.7 -0.6,1.5 -0.7,0.9 -1.9,1 -3.6,-0.4 -2,1.1 -0.7,0.8 -0.7,1.6 0.8,3 -0.9,0.9 -0.9,0 -0.8,0.4 -0.2,0.5 -1.3,-1.9 -4.3,0.1 -3.8,-0.4 -1.6,-1.2 -0.2,-0.4 -1,-0.6 -4.3,-0.4 -5.3,-1.7 -2.3,0.6 -2.7,-0 -2,-1.4 -0.3,-0.5 -1.1,-0.2 -0.5,-0 -0.7,0.4 -3.6,-0 0,0 -0.2,-1.2 -2.5,-4.2 0,-2.6 -1,-2.9 -3.4,-2.4 -1.1,1.1 -2.1,-0.1 -1.1,0.4 -1.1,0.9 -1.5,-1.1 -0.8,0.1 -0.3,-2.2 0.7,-1.6 1.1,-1.3 1.2,-2.2 0.1,-0.3 -0.5,-0.8 0,-1.2 0.9,-3.6 1.3,-3 -0.3,-2.3 1.3,-2.4 -0.2,-1 -0.8,-0.9 -0.3,-1.6 0.7,-1.1 0.8,-0.5 0,0 2.4,-1.6 0.4,-0.8 1.6,-7.9 0.3,-0.3 1.1,-0.3 1.7,-1 0.7,-0.7 1.4,-3.6 -0,-1.1 0.9,-2.3 1.1,-0.8 5.4,-2.3 0,0 3.3,-2.3 3.8,0.7 4,-0.1 3.3,0.3 1.2,-0.6 0.3,-0.6 0.7,-0.4 1.2,0.3 1.5,0.8 2.5,0.5 2.6,1.1 1.3,0.1 1.1,-0.5 2.6,-0 0.8,1 1.8,0.8 3.5,0.8 0.6,0.5 0.7,1.3 1.7,0.1 0.4,-0.3 1.6,0.1 0.7,0.5 5.3,0.1 3,-0.8 1.1,1.6 3.6,2.8 0.9,1.8 0,2.7 -0.4,0.6 -0.2,0.8 0.4,1.8 1.3,1.5 -0.1,1.8 -0.4,0.6 1.5,3 1.2,1.1 0.7,0.3 0.5,0.7 -0.1,0.9 0.9,2 0.6,0.3 0.3,0.4 -0.3,1.1 -1.3,2.1 0.3,2 0.6,0.4 1,0.2 2.4,-0.1 3.4,-0.5 0.5,0.4 1.6,-0.2 1.6,0.1 1.6,1.3 -0.1,0.4 -0.9,0.7 -0.7,3.3 0.3,0.8 1.1,0.5 0.7,-0.8 1.1,-2.8 0.8,-0.2 2.1,0.6 -0.4,1.9 0.7,3.3 1.4,0.6 0.2,1.3 0,0 -1.4,1 -0.6,1.5 -0.6,-0.1 0.3,-1.9 1.4,-0.9 -1.4,0.3 -0.9,0.5 -0.9,-0 -0.3,-0.4 -0.6,-0.2 -0.5,0.4 -0.3,0.9 0.5,0.8 -0.7,1 -0.3,0.1 -2.5,-0.5 -0.8,-0.5 -0.5,0.1 -0.2,0.9 0.3,0.4 1.6,0.6 1.4,-0.3 2.1,0.6 0.3,0.5 -1,0.7 -1.5,2.8 -1.2,0.8 -2.4,0.6 -0.2,0.5 3,-0.2 0.1,1.2 z","pe":"m 558.5,227.5 -1.2,-3 -0,-0.9 -2.1,-0.9 -0.5,-0.4 -0.5,-0.8 0.6,-0.9 -0,-0.6 -0.5,-0.3 -1,0 -0.4,0.4 -0.3,1.7 -0.4,0.1 -0.4,-0.3 -0.5,-1.6 -1.6,-1.1 -3,-0.4 -2.4,-0.8 -1.4,-0.8 -0.8,-1.4 -1.5,-0.6 -0.6,0.1 -2.5,1.5 -1.6,0.4 -0.8,2 -2.2,0.5 -0.3,0.3 0.3,1.4 -0.2,0.6 -1.1,1.2 -2.4,1 -0.6,-0.1 -0.8,-0.5 -0.8,0.2 -0.5,0.9 -0.8,3.6 -2.9,0.9 -0.8,0.9 -1,0.2 -1.8,-0.6 0.9,-1.7 -0.3,-2 -2.2,-0.9 -0.7,-1.9 0.1,-2.7 -0.4,-0.5 -2.8,-1.4 -2.2,-0.3 -1.2,0.3 -0.9,-0.4 0,0 2.6,-1.3 2,-1.7 0.5,-0.9 2.3,-1.3 1,-0.3 3.9,-3.9 0.7,-1.8 0.1,-2.3 -0.3,-0.5 -1.6,-1.6 0.1,-2.2 -0.6,-1.1 -0.1,-0.9 0.1,-0.5 0.5,-0.3 1.8,-0.2 0,0 4.9,0.2 0.9,0.2 1.6,-0.2 2.1,-0.8 1.3,-0.1 3.1,0.4 2.9,1.9 1.8,0.8 0.5,1 1,1.1 1.4,0.5 0.8,0.6 0.6,1.6 1.6,-0.1 1.5,-2.3 1.1,-0.8 1.6,-0.5 0,0 0.4,0.1 1.4,1.9 1,0.3 1.5,-0.3 0.9,-0.7 0.4,0.1 0.6,1.2 -0.1,0.7 0.8,0.3 2.6,-1 1.6,-0.2 1.5,-1.6 2.7,-1.9 1.1,-0.3 1.5,-0.9 0.9,-1.5 2.2,-1.3 1.5,-0.4 3.5,1.9 0.5,1.4 -0.1,0.3 -3,1.1 -0.4,0.8 0,0.5 0.7,1.9 -0.2,0.4 -2.5,2.6 -0,0.5 1.5,-0.3 0.4,-0.3 1.1,0.3 0.2,0.3 -0.2,0.5 0.3,2.2 0.9,0.9 1.6,0.8 1.6,-0.8 1.3,-0.2 1.8,-1.5 0.4,-0.5 -0,-0.5 -0.4,-0.7 0.5,-0.8 0.9,-0.7 1.8,-0.1 0.6,-0.6 1.6,-0.9 3.9,0.3 2.2,-0.3 0.8,-0.5 0,-0.6 1.1,0 2,-0.5 1.9,-1 0.5,-1.8 1.5,-1.3 2.3,-1.1 2.6,0.2 0.8,0.3 2.5,2.1 0,0 0.9,0.2 0.6,1.2 -1.3,1.7 -0.1,0.6 0,0.5 0.7,0.4 0.3,0.5 0.2,1.1 -2,6.4 -3.3,8.9 0,0 -0.3,-0.2 -2.9,-0.3 -1.9,-0.8 -1.5,0.2 -2.6,1.3 -2.2,-0.8 -2,0.2 -1.6,1.2 -0.1,0.5 -2.2,2.3 -1.8,1.1 -1.2,-0.1 -1.9,1.1 -1.2,0.1 -3.1,-0.3 -2.5,0.7 -1.9,-0.5 -1.8,-1.1 -1.9,-2.1 -2.5,-2 -1.1,0.1 -1.7,-0.3 -1,-1.2 -0.8,0.6 -0.1,0.7 -2.4,3.3 -2.2,0.8 -0.6,1.1 z","pi":"m 506,127.2 1.3,0.1 0.7,-0.2 2.2,0.5 1,0.8 0.3,0.6 0,0 -0.1,0.8 -1.1,1.9 -1.6,2 -0.2,1.5 0.3,1.3 1.8,4.7 3.1,6.4 0.4,1.7 1.4,1.6 -0,0.8 -0.7,1.4 0.8,3.9 -0.5,1.6 1,2 0.6,3 -0.6,1.6 -0.8,0.6 0.9,0.7 0.1,0.4 0.9,8.2 -0.2,0.5 0.8,2.6 1.1,5.2 1,2.7 1.3,0.7 2.6,0.5 0.8,1.2 -0,0.7 -1.5,2.3 -1.1,3.1 0.1,1 0.7,0.7 -0.1,1.3 0,0 -1.8,0.2 -0.5,0.3 -0.1,0.5 0.1,0.9 0.6,1.1 -0.1,2.2 1.6,1.6 0.3,0.5 -0.1,2.3 -0.7,1.8 -3.9,3.9 -1,0.3 -2.3,1.3 -0.5,0.9 -2,1.7 -2.6,1.3 0,0 -0.5,1.2 -1.5,2.3 -1.1,0.7 -0.8,-0.2 -2,0.4 0.1,2.4 -1.9,1.8 -0.3,-0.1 -0.6,-0.6 -2.2,-0 -0.8,1 -0.8,0.4 -2.7,0.3 -1.5,1.3 -0.8,1.2 -1.7,0.1 -1.5,0.6 -3,0.1 -0.8,-0.3 -0.2,-0.3 0.1,-0.7 -1.7,-1 -1.3,-0.4 -1.4,0.6 -2.1,0.4 -0.3,-0.2 -0.4,-0.9 -1.5,-0.5 -1.9,0 -3.2,1.6 -0.1,0.9 2.2,4.4 0.1,1.1 -0.3,2.6 -0.3,0.9 -0.7,0.9 -3,5 -3,2.4 -1.4,0.4 -1.5,-0.5 -1.3,-0.2 -2.2,0.8 -1.2,0.9 -0.7,0.9 -1.1,0.4 -0.8,1.4 -0.3,0.2 -2.1,-0.2 -1.8,0.5 -4.2,-1.9 -1.8,-2.5 -0.5,-2.2 -0.7,-1 -1.4,-1.3 -2.3,0 0,0 -2.9,-0.2 0,0 0.1,-1.9 0.3,-1.1 1.1,-2.5 0.1,-6.4 0.8,-1.4 0,-0.5 -1.7,-3.1 -0.5,-3.2 -0.7,-1.9 0.7,-2 1.7,-1.4 1.2,-2.5 0.1,-1.5 0.3,-0.8 0.3,-0.2 1.4,-2.7 0.6,-2.3 0.4,-3 1,-3 2.1,-1.9 2.7,-0.8 2.6,-0.3 1.1,-0.4 1.7,-1.5 1.1,-0 1.3,-0.5 2.9,-2.6 2.3,-0.9 2,-2 0.6,-0.9 0,-0.5 1.9,-1.9 0.5,-0.2 0.8,-0.2 0.2,0.3 1.1,-0.3 1,-0.6 1.5,-0.2 1,0.2 2.5,1.8 1.5,-0.1 2.4,-0.9 0.8,-0 0.7,0.3 2.3,-0.3 1.2,-1.3 0.5,-1.5 0.1,-1.2 0.3,-0.4 0.4,-2.2 -0.1,-0.8 -0.2,-0.5 -1.6,-0.9 -1.8,-2 -0.5,-2.3 -0.1,-2.1 0.2,-2.5 4.1,-4.4 0.2,-0.6 0.1,-2.4 -0.6,-3 -1.6,-2.8 1.1,-2.9 0.3,-1.5 -0.4,-1.3 -1.2,-0.8 -0.3,-1.9 0.8,-1.1 0.6,-0.2 0.8,-2 1.9,-1.9 0.9,-1.8 -0,-1.8 2.9,-3.4 0.8,0.2 3.3,-0.5 4.1,-4 1.8,-2.3 0.4,-1.5 -0.6,-0.5 -0.2,-0.7 0.5,-1.4 0,0 0.7,0.1 1.5,0.9 0.5,0.5 -0.1,0.3 z","rj":"m 468.6,450.5 -0.1,-0.8 0.4,-0.3 3.2,0.2 2.6,-0.6 -2.5,-1.6 -1.4,-0.5 -2.8,0.7 -1.4,1.6 -1,0.3 -0.7,-0.1 -1.4,-2.1 -0.5,0 -0.9,0.4 -1,1.1 -3.1,0.8 -0.3,0.9 -0.2,1.9 2.2,0.1 1.1,1 -1.1,1.1 -0.9,-0.2 -1.4,0.2 0,0 -0.5,-0.3 -1.6,-1.7 -0.1,-0.4 1.1,-3.5 1.1,-1.1 2.4,-1 0.5,0.1 2.8,-0.4 1.5,-0.7 1.6,-2.1 -0.8,-1.6 -1.7,-0 -3.1,0.5 -1.8,-0.4 -1.2,-1.6 -0.6,-1.2 -1.3,-0.5 0,0 0.7,-0.5 2.4,-0.7 2.9,-1.3 2.6,-0.2 0.5,0.3 1.7,-0.8 1.1,-0.8 4.1,-1.8 0.5,-0.1 0.4,0.3 3.2,-0.1 1.3,-0.2 1.6,-0.9 0.6,-0.1 2.5,0.3 0.5,0.2 -0,0.5 1.4,-0.2 9.5,-4.5 2.5,-1 0.2,-0.5 -0.3,-0.6 -1.4,-0.1 0.1,-0.8 1.9,-3.7 2.4,-6 -0.7,-0.7 0.6,-0.5 1.2,-0.3 2.5,-2.4 0,0 1.9,0.8 0.7,4.7 2.5,1.1 4.3,1 3,-0.4 1.6,1.1 0,0 -0.1,1.3 -0.9,1.6 -0.2,2.1 1.1,6.8 -0.5,0.7 -3.1,1.8 -6,1.9 -2.8,1.7 -3.5,3.7 -0.1,1.7 0.3,1.2 -0.2,1.6 -0.7,1.5 -1.8,0.5 -6.5,-0.2 -5.8,0.7 -2.4,-0.5 -0.5,-0.4 -0.1,-0.7 1,-1.5 0.7,-1.4 -0.1,-0.6 -0.8,-0.2 -2.8,1.1 -0.3,0.7 0.3,0.8 1.4,1.2 0.3,1 -0.6,0.5 -1.6,0.5 -1.6,-0 -8,1.1 -1.5,0.5 z m -5.1,2 -0.7,-1 2.1,-1.6 1.9,0.9 0.4,0.7 -2.5,0.5 -0.4,-0.3 -0.5,0 -0.4,0.7 z","rn":"m 609.6,183.2 -0.9,0.2 -3.5,-0.2 -1,0.4 -2.5,-1.1 -2.2,-0.3 -5.8,0.4 -0.5,-0.3 -3.4,-0.4 -0.6,-0.5 0.1,-1 -0.4,-0.4 -1.4,0.1 -1.8,1.4 -0.3,1.5 0.7,0.8 0.5,1.5 -1,-0.3 -0.5,0.6 0.2,1.4 0.5,0.9 -0.6,1.2 -0.5,0.7 -2.4,0.9 -0.8,-0.7 0.5,-1.5 -0.9,-1.2 -1.9,-0.3 -1.8,0.1 -3.1,1.3 -0.3,-0.2 -0.3,-1.4 -0.3,-0.2 -3.5,-0.5 0.1,-1.7 0.2,-0.3 0.8,-0.3 0.4,-0.4 0.4,-1.7 0.4,-1 3,-3.2 -0,-1.2 -0.5,-0.4 -0.6,-0.1 -3.3,1 -1.4,0.1 -3.2,1.2 -0.4,0.9 -0.1,1 -0.8,0.7 -3.2,1.7 -1.2,1.1 -2.9,-0.6 -0.9,-0.4 -1.9,-1.6 -0.6,0.5 0,0 -0.7,0.4 -0.6,-0.2 0.3,-2 1.4,-2.3 0.8,-0.9 0.5,-0.1 0.8,0.5 1,-0.3 0.6,-1.1 1.5,-1.5 1.4,-2.4 -0.1,-0.7 0.7,-1.7 0.9,-0.6 0.8,-1.1 3.3,-6.7 2.6,-2 4.9,-1.6 0,0 0.5,0.8 0.9,0.8 3.1,-0 1.2,0.4 1.7,1.8 1.3,0.5 3.3,-0.3 2.9,0.5 2.5,-0.2 2.3,-0.7 4.5,0.9 1.3,0 1.9,0.9 1,0.8 0.6,0.9 2.3,4.7 0.5,1.8 -0,0.8 1.5,5.4 0.2,1.7 0.7,0.5 1,2.7 z","rs":"m 322.3,638.8 -0.4,0 -1.9,-1.1 -0.2,-0.5 0.5,-4.3 -0.5,-4.3 0.1,-1.1 0.6,-1.2 2.8,-2.4 0.8,-1.6 2.3,-2.6 -1.5,-1.6 -1.1,-0.6 -2.3,-0.6 -2.3,-2.3 -1.2,-1.6 -0.1,-1.6 -0.4,-1.2 -1.2,-2 -2.1,-2.2 -0.7,-0.6 -2.4,-1.2 -1.4,0.2 -1.9,-1.5 -1.5,-1.6 -1.3,-0.8 -0.1,-1.7 -1.9,-2.2 -3.3,-0.5 -0.9,-0.5 -1.7,-1.7 -1.8,0.1 -2.2,-1.4 -1.9,-3.7 -1.1,-1.5 -2.5,-2.1 -0.7,0.1 -0.7,1.8 -2.6,2.2 -2.7,0.1 0.1,-2.9 0.4,-1.3 -0.4,-1 -3.6,-4.3 -2.4,-1.8 -2.2,-2.1 -1.8,-2.1 -2.7,-2.2 -1.9,-0.1 -2.1,0.2 -1.1,1.4 -0.1,1 -1,1 -1.1,0 -0.6,-0.5 -3.2,0.1 -0.7,-0.5 -0.2,-0.9 -0.5,-0.2 0.8,-0.2 1,-0.7 2.5,-2.8 0.1,-1.8 0.6,-1.3 0.8,-0.5 1.3,-0.1 0.6,-0.3 0.9,-1 5.5,-6.5 0.6,-1.4 0.2,-1.1 0.8,-1.1 1.2,-0.8 1.4,-0.4 2,-4.2 0.1,-0.6 0.3,-0.4 1.6,-0.9 1.6,-1.8 0.8,-1.1 0.5,-1.3 1.3,-2.1 0.9,-0.3 1.6,0.2 0.6,0.8 0.5,-1.3 -0.2,-0.6 -1.4,-0.8 -0.1,-0.4 0.3,-0.3 1.1,-0.4 0.8,-1 2.8,-0.9 1.1,-1.1 0.1,-0.9 0.8,-0.9 2.2,-1.1 2.5,-0.4 1.8,-1.8 0.1,-1.1 1.3,-2.4 0.3,-0 0.1,0.4 0.3,0.2 1.3,-0.2 2.4,-1.1 2.7,-0.6 1.2,-0.6 2.1,-2.4 0.5,0 0.7,-0.4 1,-1.4 2.3,-0.7 0.3,0.4 0,0 3.5,0.4 3.3,-1.1 0.6,-0.8 1.4,0.6 -0.1,0.9 3.1,-0 1.6,1 2.6,-0.4 1.9,1.1 2.6,-0.4 1.5,0.2 2.8,-0.2 2.3,0.9 2.5,1.4 1,2.4 1.6,0.2 0.1,-0.5 1.8,-0.3 5.6,3.5 1.4,1.6 0.7,-0 1.6,1 3,3.5 1.6,2.2 0.5,1.5 2.2,2.7 1.2,0.6 6.7,1.1 2.1,-0.4 3.4,0.3 0.9,2.3 -2.1,1.6 -1.3,0.4 -0.7,1.9 0.2,2.2 -0.4,1.6 -0.5,1.3 -1.2,0.2 -1.3,1.7 -0,1.4 1.8,1.2 0.3,-0.2 -0.3,-1 0,-1 1.5,-0.8 1.6,0.6 0.7,0.9 1.2,0.8 0.5,-0 0,0 -1.4,1.7 -3.9,7 -4.2,11.6 -6.3,10.5 -5.4,6.7 -6.5,6 -6.1,3.7 -3.1,4.3 -0.2,-0.4 0.7,-1.6 0.3,-2.2 -1.2,-1.7 0.1,-0.4 0.9,-0.2 1,0.4 0.6,0.6 1,0 2.6,-1.4 0.8,-0.7 2.9,-3.7 0.8,-0.7 0.5,0.2 1,-0.2 1.1,-0.8 0.9,-1.3 0.4,-1.5 0.2,-0.9 -0.2,-2.1 0.2,-1.4 1.6,-0.1 0.7,0.3 0.3,0.8 0.3,-0.3 -0.3,-1.4 0.5,-2.1 0.5,-0.6 2.7,-1.6 0.7,-1.1 0.5,-2.8 -0.2,-2.3 0.6,-0.7 0.5,0.8 0.4,0 0.4,-0.4 0.5,-3.1 -0.1,-0.4 -0.9,-1.2 -0.7,-0 -0.3,0.7 0.2,0.4 -0.1,0.6 -0.3,0.2 -1.5,-0 -2,0.4 -0.3,1.6 -0.5,0.1 -0.8,-0.4 0.1,-1.7 -0.8,-0.9 -1,0.3 -0.6,-0.5 -0.7,-1.3 -0.4,-1.4 0.1,-0.6 -0.6,-0.7 -0.6,2.7 0.4,2.3 1.3,2.1 -0.6,0.8 -0.7,2.5 0.4,3 -0.2,0.8 -0.5,-0.4 0.3,-0.2 -0,-0.7 -0.5,-1.3 -0.5,-0.4 -0.5,0.7 -0,1.4 -1.4,3.3 -0.1,1.9 0.2,0.5 -0.7,0.7 -1.6,0.6 -0.6,1.6 -4.1,1.6 -0.7,0.5 -0.5,1.6 -0.1,2.3 -1,2.3 -2.4,1.3 -0.1,1.8 0.5,0.8 0.3,1 -0.9,0.6 -0.3,1.5 0.4,0.6 0.7,-0.1 1.3,0.6 0.1,0.9 -2.1,1.6 -2.3,4.5 -1.9,6.9 -2,4.5 -1.7,2.5 -7.8,7.5 z","ro":"m 187.6,291.2 -1.3,-1.4 -0.4,-1.9 -1.6,-0.5 -0.9,0.3 -1.8,0.1 -4.1,-1.8 -0,-0.4 -0.7,-0.6 -1.3,0.6 -2,-1.7 -1.5,-1 -0.9,-1.5 -0.3,-1.4 -1,-0.4 -1.8,1.1 -1.2,-0 -1.4,-0.8 -0.9,-1.3 -3.1,-1.6 -2,-0.2 -1.1,0.5 -0.9,0.8 -1.4,-0.2 -0.3,-0.3 -2.1,-0.5 -3.1,-0.3 -0.8,-0.4 -1.2,-1.2 -0.3,-2 -1.6,-0.5 -1.9,-1 -0.8,-1.7 -0.3,-0.2 -2.7,-0.3 -0.4,-0.3 -0.8,-3.7 -0.9,-0.9 -0.5,1.2 -0.7,-0.3 -0.3,-0.6 0.6,-1.5 -0.8,-1.5 -1.4,-0.4 -1.3,-3.5 -0.2,-1.7 1.6,-2.9 -0.2,-1.7 -1.2,-2 -0.8,-2.2 -0.1,-2.3 0.6,-0.5 0.4,-1.4 1,-1.1 0.4,-1.5 -0.2,-1.5 -0.4,-0.9 -0.1,-1.5 0.5,-1.6 -1.2,-2.2 -1,-0.4 -1.1,1 -0.1,0.5 -0.8,1 -0.6,0 -2.2,-1 -5.2,0.1 -5.6,1.8 -1.7,-0 -1.5,0.5 0,0 -3,-1.3 0,0 3.3,-2.6 1.9,-0.6 1.6,-1.8 0.1,-0.6 -0.2,-1.3 4,0.3 2.9,-0.3 0.7,0.4 2.3,2.3 0.4,-0 1.2,-0.8 0.1,-0.7 0.4,-0.5 1.1,-0.5 0.8,0.1 1.4,-0.4 1.3,-1.2 1.8,-1 0.4,0.1 0.6,2.3 0.7,0.5 0.7,-0.1 2.5,-3.2 -0.3,-1.8 0.5,-0.8 1.8,-1.3 0.5,0 0.8,0.6 1.8,0.1 1.2,-1.1 2.1,-0.4 3.9,0.5 -0.2,-1.5 0.1,-1.8 2.1,-1.2 0.8,-1.1 0.4,-1 -0.2,-0.5 -0.9,-0.7 0.1,-0.7 1.2,-1.6 2.5,-0.5 0.3,-0.2 -0.1,-1.2 1.7,-0.5 1.4,-2.6 10.8,-0.1 2.1,1.1 0.5,0.5 0.8,1.9 1.3,1.3 2.5,1 1.3,3.3 0.5,0.2 1,-0.1 0.6,0.2 0.7,2.9 3.2,1.5 0.7,-0.2 0.5,-1.7 1.9,-1.1 1.4,0.3 0.4,0.4 -0,0.7 0,0 1.4,1 0.6,1.2 -0.8,1.4 -1.3,5 0.1,0.3 0.8,0.5 0.3,0.6 0.1,1.4 0.8,2.3 -0.9,1.7 0.4,1.9 -1,3.5 -0,0.8 0.3,1.8 1.5,2.8 -0.9,9 17.2,0.1 -0.2,0.6 1.2,1.1 3.5,-0.1 1.1,0.1 1.1,0.4 1.4,3.6 -0.2,0.8 -1.4,1.8 -1.4,1.1 -0.1,1.3 0.4,3.3 0.6,0.5 0.9,-0 1.5,3.3 -0,2 0.6,1.5 -0.1,1.7 -0.6,2.2 -1.7,2 -0.5,2.3 -0.6,0.8 -0.4,0.4 -1.6,0.5 -0.9,1.1 -1.4,3.8 -0.5,2.5 -4.1,2.6 -1.5,1.4 0,0 -0.7,-0 -2.6,-1.6 -1.3,-1.4 -7.1,1 -1.3,-0.4 -0.3,-0.3 -3.4,0.7 -0.5,-0.2 -0.5,-1.4 z","rr":"m 234.9,61.7 1.6,17 0,0 -18.5,-0.1 0,0.7 -2.3,3.3 -1.7,3 -0.1,1.1 -1.1,2.6 -0.1,0.7 0.2,0.7 1.1,1.4 -0,0.5 -0.4,0.4 -2,0.6 -1.4,1.4 -1.3,0.5 -1.8,-0.2 -0.9,-2.5 -1.9,-2 -2.8,-0.9 -1.6,0.1 -0.6,0.9 -2.1,0.7 -1.3,0.7 -1,1.3 -0.8,3 0.4,1.8 -0.3,1.7 -0.8,2.3 0.4,2.1 -2.4,-1 -1.3,0.4 -0.5,-0.1 -1,-2 -1.5,-1.6 -2,-1.3 -0.5,-0 -5,-4.4 0.1,-1.1 1.8,0.3 1.1,-1.3 0.1,-0.6 -1.1,-4.3 -0.6,-0.9 -1.2,-0.8 -0.9,-2.2 -0.3,-5 0.6,-1 0.8,-3 -0.7,-1.6 -0.4,-1.6 1.6,-1.5 -0.1,-0.5 -0.9,-1.1 -0.2,-2.3 -1.7,-4.8 -2.7,-3.7 0.7,-1.5 0.9,-3.3 -0.5,-0.7 -1.9,-0.9 -1.4,-0.1 -0.9,0.2 -1,-0.4 -1.2,-1.2 -0.1,-1 -0.6,-0.1 -1.1,0.4 -0.6,-0 -0.8,-0.3 -0.7,-0.8 0,0 0.3,-0.5 0.2,-2.3 -0.3,-0.2 -3.4,-0.2 -3.8,0.1 -3.3,-0.7 -0.2,-0.6 0.8,-1.8 0.1,-1.5 -0.7,-1.8 -1.9,-3.5 -0.7,-2.1 -0.5,-3.7 0.8,-1.5 -0.1,-1 -1.8,-2 -2.2,-1.1 -2.8,-2.8 -1.1,-1.8 -0.3,-1 -1.1,-0.7 -0.3,-0.4 0,-0.8 0.3,-0.3 0.9,0.1 1.1,0.7 0.9,1.7 0.6,0.1 3.4,-0.5 1.4,0.1 1.9,0.6 0.6,1.2 0.6,1.9 0.5,0.3 1,-0.1 0.7,-0.7 0.9,-0.4 3.2,0.2 0.5,0.1 1.3,1.2 0.6,0.1 0.5,-0.1 0.6,-1.6 1.3,0.1 1.4,0.9 3.9,4.6 1.1,0.6 0.7,0.1 1.5,-0.7 0.7,-1.1 0.1,-0.8 -0.8,-2.8 0.4,-1.7 0.5,-0.3 1.9,-0.1 1,-1.1 1.6,-1.1 0.8,0.1 3.9,1.3 0.6,-0.2 0.8,-0.7 1,-0.3 1.1,0.3 1,-0.2 1.3,-1.3 1,-0.3 1.1,0.2 1.1,-0.1 0.7,-0.8 0.1,-1.4 3,-1.8 2.3,0.2 2.8,-0.4 0.9,-1.1 0.1,-0.7 0.6,-1.1 0.8,-0.1 1.9,-0.9 1.1,-1 1.1,-1.7 -1.2,-3.6 -1.2,-0.4 0.6,-0.2 1.4,0.1 0.8,0.3 3.6,-0.1 1.1,-0.9 0.7,-0.2 1.4,0.4 0.5,1.3 1,0.8 0.5,1.4 -0.7,4.9 -0.7,1.4 -1.3,0.7 0.1,0.8 1.6,0.4 1.6,-0.2 2.4,0.8 1.8,1.1 -0.9,1.4 -0,1.1 2.3,3.4 0.2,1.6 -1.5,2.9 -1.9,1.4 -0.7,1.5 0.3,0.4 0.1,2.2 -1.5,2.4 -0.9,2.8 -0.3,2.6 -0.1,2.7 1,1.9 0.5,1.8 -0,1.4 1.6,1 0.9,0.2 0.1,0.7 -0.5,5.2 0.1,0.7 1.8,0.3 -0.7,1.2 0.5,0.5 2.1,0.7 1.5,1.9 2.7,2.7 z","sc":"m 379.6,558.3 -0.5,0 -1.2,-0.8 -0.7,-0.9 -1.6,-0.6 -1.5,0.8 -0,1 0.3,1 -0.3,0.2 -1.8,-1.2 0,-1.4 1.3,-1.7 1.2,-0.2 0.5,-1.3 0.4,-1.6 -0.2,-2.2 0.7,-1.9 1.3,-0.4 2.1,-1.6 -0.9,-2.3 -3.4,-0.3 -2.1,0.4 -6.7,-1.1 -1.2,-0.5 -2.2,-2.7 -0.5,-1.5 -1.6,-2.2 -3,-3.5 -1.6,-1 -0.7,0 -1.4,-1.6 -5.6,-3.5 -1.8,0.3 -0.1,0.5 -1.6,-0.2 -1,-2.4 -2.5,-1.4 -2.3,-0.9 -2.8,0.2 -1.5,-0.2 -2.6,0.4 -1.9,-1.1 -2.6,0.4 -1.6,-1 -3.1,0 0.1,-0.9 -1.4,-0.6 -0.6,0.8 -3.3,1.2 -3.5,-0.4 0,0 1.4,-2.9 0.7,-2.1 -0.6,-3.3 0.4,-3.2 -0,-2.5 1,-1.8 0,0 3.6,0 0.7,-0.4 0.5,0 1.1,0.2 0.3,0.5 2,1.4 2.7,0 2.3,-0.6 5.3,1.7 4.3,0.4 1,0.6 0.2,0.4 1.6,1.2 3.8,0.4 4.3,-0.1 1.3,1.9 0.2,-0.5 0.7,-0.4 0.9,-0 0.9,-0.9 -0.8,-3 0.7,-1.6 0.7,-0.8 2,-1.1 3.6,0.4 1.9,-1 0.7,-0.9 0.6,-1.5 1.5,-0.7 1.1,-0.1 1.4,0.8 0.8,0 2.3,-0.2 2.8,-0.7 0.8,0 1,0.4 3.1,2.6 1.2,0.6 1.4,0.2 3.4,-2.1 1.4,-1.4 1.6,-0.6 0.1,0.4 0.8,0.1 1.7,-0.2 0.3,-0.4 5.2,0 0,0 -0.4,1.3 0.5,1.6 -0.1,0.4 -1.5,1.1 -1,-0.5 -0.8,-2.5 -0,1.1 0.6,2.7 1.7,1.7 0.6,0.9 -1,2.3 -0.2,2.3 0.1,0.4 0.8,0.7 0.3,5.9 0.3,0.6 0.4,0.2 0.8,-0.5 0.3,0.7 0.1,0.9 -0.5,0.1 -0.4,-0.3 -1.2,0.6 -0.3,3.8 0.6,2.6 -0.6,0.8 0.3,1.9 0.9,1.9 -0.9,2.3 -0.5,4 -1.7,4.7 -0.3,-0.1 -0.4,-0.8 0.2,-1 -0.9,-1.2 -0.3,0.3 0.2,2.4 1.2,0.8 -0.9,1.7 -1.6,0.7 -4.1,3 -2.8,2.6 -3.8,4.4 -1,1.9 z m 17.9,-26.6 -0.1,-0.5 0.3,-1.8 0.8,-2.4 -0.4,-1.2 0.2,-1 1.4,-0.8 0.2,0.1 0.7,0.9 -0.5,2.6 -0.8,0.9 -0.6,1.2 0.2,1.2 -1.1,0.8 z m -0.5,-24.4 -1.9,-2 2.5,-2.4 0.3,0 0.7,1.1 -0.9,1.3 -0.7,2 z","sp":"m 404.8,488.2 -0.2,-1.3 -1.4,-0.6 -0.7,-3.3 0.4,-1.9 -2.1,-0.6 -0.8,0.2 -1.1,2.8 -0.7,0.8 -1.1,-0.5 -0.3,-0.8 0.7,-3.3 0.9,-0.7 0.1,-0.4 -1.6,-1.3 -1.6,-0.1 -1.6,0.2 -0.5,-0.4 -3.4,0.5 -2.4,0.1 -1,-0.2 -0.6,-0.4 -0.3,-2 1.3,-2.1 0.3,-1.1 -0.3,-0.4 -0.6,-0.3 -0.9,-2 0.1,-0.9 -0.5,-0.7 -0.7,-0.3 -1.2,-1.1 -1.5,-3 0.4,-0.6 0.1,-1.8 -1.3,-1.5 -0.4,-1.8 0.2,-0.8 0.4,-0.6 -0,-2.7 -0.9,-1.8 -3.6,-2.8 -1.1,-1.6 -3,0.9 -5.3,-0.1 -0.7,-0.5 -1.6,-0.1 -0.4,0.3 -1.7,-0.1 -0.7,-1.3 -0.6,-0.5 -3.5,-0.8 -1.8,-0.8 -0.8,-1 -2.6,0 -1.1,0.5 -1.3,-0.1 -2.6,-1.1 -2.5,-0.5 -1.5,-0.8 -1.2,-0.3 -0.7,0.4 -0.3,0.6 -1.2,0.6 -3.3,-0.3 -4,0.1 -3.8,-0.7 -3.3,2.3 0,0 0.8,-1.1 0.7,-1.5 1.3,-1.1 7.6,-4.5 1.9,-1.9 1.3,-2.4 1.7,-1.7 0.4,-1.2 1.4,-1 0.3,-1.2 -0.3,-0.8 2,-2.3 1.2,-2.3 0.1,-0.9 -0.3,-1.9 0.2,-0.4 1,-0.5 2.6,-3.6 0.2,-2.9 0.6,-1.7 1,-0.3 0.7,-0.6 2,-2.7 1.2,-1 0.5,-0.2 1.3,-0 1.5,-0.8 0.3,-0.4 0.4,-2.5 0,0 1.2,-1.1 2.1,-1.1 1.9,-0.4 1.4,-1.7 1.5,-0.6 0.8,0.1 1.7,1.6 2.5,0.1 4.3,1 1.7,-0.4 1.6,0.2 2,-0.6 2.2,1.4 1.7,0.8 -0.1,0.9 0.3,1.4 1.2,2.1 0.6,0 0.5,-0.3 0.7,-0.9 0.4,-1.1 0.3,-0.2 0.6,0.1 0.4,0.4 0.3,1 0,2.8 1.2,0.5 0.4,-0.5 -0.3,-2.5 0.5,-1.2 0.5,-0.5 8.2,-0.7 1,-1.3 1.5,1.5 1.1,0.4 2.8,-0.7 0.4,-1 -0.2,-0.5 0.3,-0.6 2.4,-0.1 1.7,0.8 0.8,-0.6 1.3,-0.3 3.3,3.4 0.2,1 -0.6,1 -0.3,2.4 0.6,0.6 1.9,1.2 0.4,1.6 -0.1,0.6 -1.5,2 -0.2,1.9 0.8,0.7 0.3,0.6 0.4,2.2 1.3,1.8 0.8,2 -0,0.8 1.6,-0.1 0.8,-0.3 0.3,-0.4 1,-0.1 3.7,1.3 0.2,0.4 -0.1,1.3 -0.7,2.2 -1.9,2.7 0.3,2.9 -0.2,3.5 -0.5,1.6 0.7,1.6 1.8,1.2 1.8,0.8 0.5,1.7 -1.2,0.7 2,3.3 1.1,0.3 2,-0.2 0.2,0.5 3.6,-1 0.6,0.4 1.3,-0.3 0.8,-1 0.1,-0.8 -0.2,-0.2 0.2,-2.3 1.2,-0.3 0.1,0.3 -0.3,0.5 0,0.5 2.3,0.1 2.4,-0.3 1.8,-0.7 1.2,-1.2 1.9,-1 2.2,-0.2 1.2,-0.7 0,0 1.3,0.5 0.6,1.2 1.2,1.6 1.8,0.4 3.1,-0.5 1.7,0 0.8,1.6 -1.6,2.1 -1.5,0.7 -2.8,0.4 -0.5,-0.1 -2.4,1 -1.1,1.1 -1.1,3.5 0.1,0.4 1.6,1.7 0.5,0.3 0,0 -0.1,0.2 -1.7,0.4 -1.1,-0.8 -1.5,1.1 -0.4,0.7 0.3,0.2 -0.8,0.6 -3.2,1.6 -2.3,0.7 -0.3,0.4 0,1 0.5,1.6 -0.3,0.4 -1.4,0.3 -0.7,-0.6 -1.3,-0.3 -3.1,-0.5 -0.9,0.1 -1.3,0.3 -1.7,0.8 -0.5,0.5 -1.2,2.1 -1.3,0.6 -0.5,-0.1 0.6,-0.5 -0.5,-1.2 -1.2,-0.8 -0.8,1.2 0.3,0.8 -0.3,0.6 -7.6,4.2 -0.9,0.8 -0.3,1.2 -3.3,3 -3.3,1.9 -1.9,0.5 -4.5,3.2 -2.3,2 -0.7,0.1 -0.4,0.6 0.9,0.4 0.7,0.1 0.9,-0.4 0,0.8 -0.6,1.3 -1.3,0.8 -1.1,1.5 z m 44.3,-23 -1.5,-0.7 -1.2,0.2 -0.5,-0.4 0.1,-0.8 0.9,-0.7 1.1,-1.9 0.7,0.3 0.7,0.7 0.1,2.9 -0.5,0.3 z","se":"m 570.2,262 -2.9,0.9 -1.6,-0.6 -0.5,-0.3 -0.5,-0.7 -1.9,-0.9 -0.6,-0.5 -0.1,-0.4 0.3,-0.4 0.1,-1.4 -0.1,-0.4 -1.4,-1.5 -0.5,-1.5 -1.1,-0.7 -1,-1.6 -0,-0.8 0.6,-1.6 0.3,-0.3 1.7,0 1.1,0.8 2.5,-1 0.7,-0.6 0.3,-0.6 -0.8,-2.8 0.1,-0.9 0.7,-1.6 0.1,-3.1 -0.8,-1.1 -2,-1.9 -1.3,-2.5 -0.2,-2.1 0.7,-1.1 0,0 6.5,3 3.7,0.9 5.4,3.1 1.3,2.5 1.8,1.4 1.7,0.8 0.5,0 3.6,2.2 0.6,1.3 0,0 -2.4,0.8 -4.6,2.9 -1,0.9 -1.6,2.2 -0.3,-0 0.1,-1.1 -1.1,-1.8 -1,0.2 0.3,1.2 1.2,0 0.2,0.2 -0.5,2 -1.3,2.1 -0.5,-0.3 -0.4,-0.7 -1,-0.2 0.2,0.7 1.1,0.6 -0.3,1.8 -0.9,1.1 -0.9,2 -0.8,0.1 -0.3,-0.5 0.5,-1.4 0.4,-0.1 0.3,-0.4 0.4,-1 -0.8,-0.4 0.1,0.7 -0.5,1.1 -0.5,0.5 -0.3,1.1 0.3,0.7 -0.3,0.5 z","to":"m 433.6,282.1 -5.4,1.4 -1.7,1.3 -2.6,1.1 -1.6,0 -4.5,1 -2.5,2.1 -1.8,0.9 -0.5,-0.2 -1.5,-2.6 -0.6,-0 -0.5,3.3 -0.7,0.1 -3.4,-0.7 -3.1,-1.5 0.6,-1.6 -0.2,-0.7 -4.5,0.5 -2.8,-0.3 -0.6,0.5 -0.3,1 -0.8,0.8 -1.1,-0.1 -0.6,-3.1 -1.1,-3.7 -1,-1.9 -1.1,-1.3 -1.2,1 -1.5,2.4 -1.6,5.9 -0.6,0.2 -4.1,-1.4 -3.1,-1.7 -3.9,-0.4 -2.2,-1 -2.4,-0.4 0.5,-2.3 1.2,-1.9 0,-1.7 -0.6,0.3 -1.8,2.1 -0.7,1.2 -0.2,1.9 -0.3,0.5 0,0 -0.8,-0 -1,-0.5 -1,-3.3 0.7,-2.8 -0.4,-3 -0.5,-0.6 -0,-1.6 0.5,-3.3 -1.1,-2.3 0.1,-0.5 0.8,-0.9 0.2,-0.9 -1.4,-1.3 -0.1,-0.9 1.9,-6 0,-3 0.5,-3 1.9,-5.3 0.4,-0.3 0.4,-0.8 0.4,-3.1 1.1,-1.3 0.6,-1.9 0.7,-1 0,0 1.6,-3.7 1.1,-4.5 1.1,-1.6 1.2,-1.1 1.2,-1.7 1,-1.9 1.4,-0.9 1.1,-0.2 0.7,-0.8 0.9,-1.5 0.2,-1 1.7,-3.2 1.1,-0.8 1.8,-5.2 0.7,-4 -0.1,-0.3 -0.7,-0.3 -1.7,-1.7 -0.6,-0.9 -0.2,-0.9 0.1,-0.6 1.4,-1.7 1.3,-2.1 -0.1,-2.7 -0.4,-2.2 0.2,-0.3 2.5,-1.8 3.4,-1.1 2.5,-1.2 0.2,-0.5 -0.1,-1.5 0.9,-1.3 1.5,-1.3 1.3,-0.1 0.2,-1.3 -0.3,-1.2 0.3,-0.5 1.5,-0.5 0.6,-0.5 0.9,-2.8 -1,-1.3 -0.1,-1.4 0.3,-0.3 1,-0.1 0.7,-0.4 0.4,-0.7 0,-0.6 -1.3,-1.2 -0.9,-0.1 -0.4,-0.3 -1,-1.7 -1.3,-0.1 -1.9,0.3 -2.3,-0.8 0,0 0.5,-0.6 2.6,-1.9 2,-0.5 0.9,0.1 2.8,1.5 1.4,0.1 0.9,-0.5 1.7,0.3 0.6,0.7 0.1,1 0.3,0.3 1.2,0 3.4,1.4 0.8,1 0.5,3.5 0.6,1.5 -0.2,3.7 0.2,1.1 0.7,1.1 -0,0.4 -1.8,6.2 -0.3,2.4 0.3,1 -0.3,1.6 -1.8,2 -1.8,0.7 -0.2,0.7 1.9,1.3 0.4,-0.3 1.4,0.2 0.3,0.3 0.1,0.9 -0.6,1.2 0.8,1.4 0.9,-0.1 3,4.2 0.9,0.8 2.3,3 2.1,-1.3 4.3,-0.9 1.8,1.2 0.1,1.8 -0.6,3.3 0.4,1.4 -3.4,0.3 -1.3,0.5 -0.6,0.6 -0.7,1.4 -0.7,2.7 0.4,1.3 -2.6,2.5 -0.3,0.7 0.2,0.4 2.1,0.3 0.9,0.7 0.7,1.6 0.1,1.7 0.6,1 3.9,1.9 0.1,0.5 -1.6,1.8 0.1,1.6 2.1,1.6 1,2.9 1.3,2 0.7,0.2 1.8,-0.2 1,0.3 0.8,0.4 0.6,0.8 1.3,0.7 0,0 2.9,0.2 0,0 -0.7,0.7 -0.2,1 -0.6,0.5 -3.8,2 -3.2,2.6 -0.2,0.4 1.3,1.8 -0.4,0.4 -1,0.3 -0.9,0.6 -1.5,3.5 -1,0.7 -0.5,1.2 0.2,0.9 1.9,1.9 3.6,0.7 1.9,1 0.1,0.8 -0.6,0.5 -2,0.8 -0.4,1 0.1,0.5 0.3,0.3 1,-0.2 0.9,0.3 0.6,0.5 0.3,0.6 -1,0.7 -1.1,0.4 -1.9,1.7 -0.2,0.8 -0.1,2.9 0.3,1.3 0.9,0.7 1.1,0.2 0.4,0.3 0.2,0.4 0.1,1.1 -1.4,2.4 z"};
+/* ===== motor do jogo: batalha + mapa do Brasil (sem dependências) ===== */
+const CABECAS = {
+  "13": `<g transform="translate(3,-142)">
+    <ellipse cx="-17" cy="2" rx="4" ry="6" fill="#d9a072"/><ellipse cx="17" cy="2" rx="4" ry="6" fill="#d9a072"/>
+    <ellipse cx="0" cy="0" rx="17" ry="19" fill="#e6b48a"/>
+    <path d="M-17,-1 Q-19,-15 -9,-19.5 Q0,-22 9,-19.5 Q19,-15 17,-1 Q16,-9 12,-12.5 Q6,-15.5 0,-15.5 Q-6,-15.5 -12,-12.5 Q-16,-9 -17,-1 Z" fill="#ececec"/>
+    <path d="M-17,-1 Q-18,-12 -12,-15 L-12,-4 Z M17,-1 Q18,-12 12,-15 L12,-4 Z" fill="#dcdcdc"/>
+    <path d="M-16.5,2 Q-17,18 -8,22 Q0,26 8,22 Q17,18 16.5,2 Q14,10 9,9 Q4,6 0,7 Q-4,6 -9,9 Q-14,10 -16.5,2 Z" fill="#cfcfcf"/>
+    <path d="M-8,8.5 Q0,4.5 8,8.5 Q4,10.5 0,9.5 Q-4,10.5 -8,8.5 Z" fill="#b9b9b9"/>
+    <path d="M-5,13 Q0,15.5 5,13" stroke="#8a4b3a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M-13,-7 Q-8,-11 -3,-7.5 M3,-7.5 Q8,-11 13,-7" stroke="#bdbdbd" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+    <path d="M-10,-3 Q-7.5,-4.5 -5,-3 M5,-3 Q7.5,-4.5 10,-3" stroke="#2a1d16" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M-1,-3 Q-4,5 -3,6 Q0,7.5 3,6 Q4,5 1,-3" stroke="#b9805a" stroke-width="1.4" fill="#dca57c"/>
+  </g>`,
+  "22": `<g transform="translate(3,-142)">
+    <ellipse cx="-16" cy="1" rx="3.6" ry="6" fill="#dba67c"/><ellipse cx="16" cy="1" rx="3.6" ry="6" fill="#dba67c"/>
+    <path d="M-16,-4 Q-16,18 0,21 Q16,18 16,-4 Q16,-19 0,-19 Q-16,-19 -16,-4 Z" fill="#ebbd94"/>
+    <path d="M-16.5,-2 Q-19,-22 -2,-24 Q16,-25 18,-10 Q17.5,-5 16,-2 Q15,-11 10,-14 Q2,-12 -6,-16 Q-12,-11 -14,-3 Z" fill="#3b2a20"/>
+    <path d="M-13,-6 Q-8,-8.5 -3,-6.5 M3,-6.5 Q8,-8.5 13,-6" stroke="#2f2119" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+    <ellipse cx="-7.5" cy="-1.5" rx="1.9" ry="2.1" fill="#2a1d16"/><ellipse cx="7.5" cy="-1.5" rx="1.9" ry="2.1" fill="#2a1d16"/>
+    <path d="M-0.5,-2 L-2.5,6 Q0,7.5 2.5,6" stroke="#c48a63" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <path d="M-6,11 Q0,15 6,11" stroke="#8a4b3a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M-13,10 Q-8,19 0,20 Q8,19 13,10" stroke="#c99a76" stroke-width="1" fill="none" opacity=".7"/>
+  </g>`,
+};
+// Para usar imagens próprias (ex.: caricaturas licenciadas), informe o caminho do arquivo aqui; vazio = desenho padrão.
+const CARICATURA_IMG = { "13": "", "22": "" };
+const cabeca = (n, cor) => CARICATURA_IMG[n] ? `<image href="${CARICATURA_IMG[n]}" x="-22" y="-167" width="50" height="50" preserveAspectRatio="xMidYMid meet"/>` : (CABECAS[n] || cabecaGenerica(cor));
+const cabecaGenerica = cor => `<circle cx="3" cy="-142" r="19" fill="#e8b98a"/><rect x="-16" y="-160" width="38" height="9" rx="4" style="fill:${cor}"/><circle cx="-4" cy="-142" r="2.2" fill="#222"/><circle cx="10" cy="-142" r="2.2" fill="#222"/><path d="M-3,-133 Q3,-128 9,-133" stroke="#7a4a3a" stroke-width="2" fill="none"/>`;
+const fmtCurto = n => { const a = Math.abs(n); return a >= 1e6 ? (n / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mi" : a >= 1e3 ? Math.round(n / 1e3).toLocaleString("pt-BR") + " mil" : String(Math.round(n)); };
+
+/* Batalha estilo "live battle": placar no topo, dois lados, contador subindo, efeitos quando entram votos */
+function criarBatalha(el) {
+  const lado = k => `<div class="bt-side ${k}"><div class="bt-glow"></div><div class="bt-crown">👑</div>
+      <div class="bt-face"><svg viewBox="-23 -167 52 52" aria-hidden="true"><g class="bt-h"></g></svg><img class="bt-foto" alt="" hidden referrerpolicy="no-referrer"><span class="bt-badge"></span></div>
+      <div class="bt-nm"></div><div class="bt-pc"></div><div class="bt-top"></div><div class="bt-fx"></div></div>`;
+  el.innerHTML = `<div class="bt"><div class="bt-bar"><div class="bt-fa"><b class="bt-va"></b></div><div class="bt-fb"><b class="bt-vb"></b></div><div class="bt-spark">VS</div></div>
+    <div class="bt-arena">${lado("a")}<div class="bt-mid">⚡</div>${lado("b")}</div>
+    <div class="bt-time"><i></i><span></span></div><div class="bt-banner"></div></div>`;
+  const q = s => el.querySelector(s), A = q(".bt-side.a"), B = q(".bt-side.b");
+  const rm = matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const S = { va: 0, vb: 0, sa: 0, sb: 0, numA: null, numB: null, primeira: true };
+  function contar() {   // contador animado dos votos
+    const k = rm ? 1 : .12;
+    S.sa += (S.va - S.sa) * k; S.sb += (S.vb - S.sb) * k;
+    if (Math.abs(S.va - S.sa) < 1) S.sa = S.va; if (Math.abs(S.vb - S.sb) < 1) S.sb = S.vb;
+    q(".bt-va").textContent = Math.round(S.sa).toLocaleString("pt-BR"); q(".bt-vb").textContent = Math.round(S.sb).toLocaleString("pt-BR");
+    if (S.sa !== S.va || S.sb !== S.vb) requestAnimationFrame(contar); else S.anim = false;
+  }
+  function presente(side, delta) {   // "presentes" subindo quando entram votos
+    if (rm || delta <= 0) return;
+    const fx = side.querySelector(".bt-fx"), n = Math.min(innerWidth < 500 ? 5 : 10, 2 + Math.round(Math.log10(delta + 1) * 1.6));
+    const p = document.createElement("div"); p.className = "bt-plus"; p.textContent = "+" + fmtCurto(delta); p.style.left = 35 + Math.random() * 30 + "%"; fx.appendChild(p); setTimeout(() => p.remove(), 1900);
+    const em = ["🔥", "❤️", "⭐", "🗳️", "💥", "✨"];
+    for (let i = 0; i < n; i++) { const e = document.createElement("span"); e.className = "bt-em"; e.textContent = em[i % em.length];
+      e.style.left = 15 + Math.random() * 70 + "%"; e.style.animationDelay = Math.random() * .6 + "s"; e.style.setProperty("--dx", (Math.random() * 60 - 30) + "px");
+      fx.appendChild(e); setTimeout(() => e.remove(), 2600); }
+  }
+  return {
+    set({ va, vb, numA, numB, nomeA, nomeB, corA = "var(--a)", corB = "var(--b)", win = -1, apurado = 0, rotApurado = "", topA = "", topB = "", fotoA = "", fotoB = "", pctA = null, pctB = null }) {
+      [[A, fotoA], [B, fotoB]].forEach(([sd, u]) => { const im = sd.querySelector(".bt-foto"); if (im.dataset.u === u) return; im.dataset.u = u; im.hidden = !u; im.onerror = () => { im.hidden = true; }; im.onload = () => { im.hidden = false; }; if (u) im.src = u; else im.removeAttribute("src"); im.alt = sd === A ? (nomeA || "") : (nomeB || ""); });
+      const t = va + vb, pa = t ? va / t * 100 : 50;
+      if (!S.primeira) { presente(A, va - S.va); presente(B, vb - S.vb); }
+      S.primeira = false; S.va = va; S.vb = vb; if (!S.anim) { S.anim = true; requestAnimationFrame(contar); }
+      if (numA !== S.numA) { S.numA = numA; A.querySelector(".bt-h").innerHTML = cabeca(numA, corA); }
+      if (numB !== S.numB) { S.numB = numB; B.querySelector(".bt-h").innerHTML = cabeca(numB, corB); }
+      q(".bt-fa").style.width = pa + "%"; q(".bt-fb").style.width = (100 - pa) + "%"; q(".bt-spark").style.left = pa + "%";
+      const lid = !t || va === vb ? -1 : (va > vb ? 0 : 1);
+      [[A, numA, nomeA, pctA ?? pa, topA, 0], [B, numB, nomeB, pctB ?? 100 - pa, topB, 1]].forEach(([s, n, nm, p, top, i]) => {
+        s.querySelector(".bt-badge").textContent = n || ""; s.querySelector(".bt-nm").textContent = nm || "";
+        s.querySelector(".bt-pc").textContent = t ? p.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%" : "—";
+        s.querySelector(".bt-top").innerHTML = top;
+        s.classList.toggle("lider", lid === i); s.classList.toggle("perde", win >= 0 && win !== i); s.classList.toggle("venceu", win === i);
+      });
+      q(".bt-time i").style.width = Math.min(100, apurado) + "%"; q(".bt-time span").innerHTML = rotApurado;
+      const bn = q(".bt-banner");
+      if (win >= 0) { bn.textContent = "🏆 VITÓRIA: " + (win ? nomeB : nomeA); bn.className = "bt-banner fixo " + (win ? "b" : "a"); }
+      else if (bn.classList.contains("fixo")) bn.className = "bt-banner";
+    },
+    efeito(txt, lado) {
+      const bn = q(".bt-banner"); if (bn.classList.contains("fixo")) return;
+      bn.textContent = txt; bn.className = "bt-banner " + (lado === 1 ? "b" : "a"); void bn.offsetWidth; bn.classList.add("on");
+      const w = q(".bt"); w.classList.remove("shake"); void w.offsetWidth; w.classList.add("shake");
+    },
+  };
+}
+
+function criarMapa(el, aoClicar) {
+  const PEQ = new Set(["df", "se", "al", "pb", "rn", "es", "rj", "pe"]);
+  el.innerHTML = `<svg class="bm" viewBox="0 0 613 660" role="img" aria-label="Mapa do Brasil por estado">
+    ${Object.entries(BR_PATHS).map(([u, d]) => `<path data-uf="${u}" d="${d}"><title></title></path>`).join("")}
+    <g class="ext" data-uf="zz"><circle cx="560" cy="620" r="24" data-uf="zz"><title></title></circle></g><g class="lb"></g></svg>`;
+  const svg = el.querySelector("svg"), lb = el.querySelector(".lb");
+  const centros = {};
+  const AJ = { rn: [6, -2], pb: [10, 1], pe: [0, 2], al: [6, 2], se: [5, 4], es: [8, 2], rj: [4, 4], df: [0, 1], sc: [2, 1], go: [-6, 8] };
+  svg.querySelectorAll("path").forEach(p => { const b = p.getBBox(), aj = AJ[p.dataset.uf] || [0, 0]; centros[p.dataset.uf] = [b.x + b.width / 2 + aj[0], b.y + b.height / 2 + 5 + aj[1]]; });
+  centros.zz = [560, 625];
+  svg.addEventListener("click", e => { const u = e.target.closest("[data-uf]")?.dataset.uf; if (u && aoClicar) aoClicar(u); });
+  return {
+    // dados: { uf: { cor:"var(--a)", forca:0..1, rotulo:"52%", gar:bool, titulo:"..." } }
+    set(dados, sel) {
+      svg.querySelectorAll("path, .ext circle").forEach(p => {
+        const x = dados[p.dataset.uf];
+        p.style.fill = x && x.cor ? `color-mix(in srgb, ${x.cor} ${Math.round((x.forca ?? 1) * 100)}%, var(--jg-ground))` : "";
+        p.classList.toggle("sel", sel === p.dataset.uf);
+        p.querySelector("title").textContent = x?.titulo || "";
+      });
+      lb.innerHTML = Object.entries(centros).map(([u, [x, y]]) => {
+        const d = dados[u] || {}, peq = PEQ.has(u);
+        const txt = (u === "zz" ? "EXT" : u.toUpperCase()) + (d.gar ? "✓" : "");
+        return `<text x="${x}" y="${y}" class="${d.cor ? "" : "vz"} ${peq ? "p" : ""}">${txt}</text>`;
+      }).join("");
+    },
+    piscar(u) { const p = svg.querySelector(`[data-uf="${u}"]`); if (!p) return; p.classList.remove("fl"); void p.getBBox(); p.classList.add("fl"); },
+  };
+}
+
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n || 0).toLocaleString("pt-BR");
+const pct = (a, b) => b > 0 ? 100 * a / b : 0;
+const pf = x => x.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const NOMEUF = {ac:"Acre",al:"Alagoas",am:"Amazonas",ap:"Amapá",ba:"Bahia",ce:"Ceará",df:"Distrito Federal",es:"Espírito Santo",go:"Goiás",ma:"Maranhão",mg:"Minas Gerais",ms:"Mato Grosso do Sul",mt:"Mato Grosso",pa:"Pará",pb:"Paraíba",pe:"Pernambuco",pi:"Piauí",pr:"Paraná",rj:"Rio de Janeiro",rn:"Rio Grande do Norte",ro:"Rondônia",rr:"Roraima",rs:"Rio Grande do Sul",sc:"Santa Catarina",se:"Sergipe",sp:"São Paulo",to:"Tocantins",zz:"Exterior"};
+const POS = {rr:[2,0],ap:[4,0],am:[1,1],pa:[3,1],ma:[4,1],pi:[5,1],ce:[6,1],rn:[7,1],ac:[0,2],ro:[1,2],mt:[2,2],to:[3,2],ba:[5,2],pe:[6,2],pb:[7,2],ms:[2,3],go:[3,3],df:[4,3],mg:[5,3],al:[6,3],se:[7,3],pr:[3,4],sp:[4,4],rj:[5,4],es:[6,4],sc:[3,5],rs:[3,6],zz:[6,6]};
+const LS = { g(k) { try { return localStorage.getItem(k); } catch { return null; } }, s(k, v) { try { localStorage.setItem(k, v); } catch { /* ok */ } } };
+let snap = null, tseBr = null, ultOk = 0, falha = false, som = LS.g("som") === "1", primeira = true;
+const vistos = new Set(), decididos = new Set(), eventosLocais = [];
+
+/* ---------- lógica ---------- */
+function ordenado(nom) { return Object.entries(nom || {}).sort((a, b) => b[1] - a[1]); }
+function duelo(nomes, nom) {            // devolve [numA, numB]: o menor número é sempre "A" (cor vermelha)
+  let ns = Object.keys(nomes || {});
+  if (ns.length !== 2) ns = ordenado(nom).slice(0, 2).map(x => x[0]);
+  if (ns.length < 2 && nomes && !Object.keys(nomes).length) ns = Object.keys(FALLBACK_PRES);
+  return ns.sort((x, y) => Number(x) - Number(y)).slice(0, 2);
+}
+function placar(bloco, par) {
+  const a = bloco.nom[par[0]] || 0, b = bloco.nom[par[1]] || 0, t = a + b;
+  const dif = a - b, lid = dif === 0 ? -1 : (dif > 0 ? 0 : 1);
+  const gar = lid >= 0 && bloco.rest != null && Math.abs(dif) > bloco.rest;
+  return { a, b, t, pa: pct(a, t), pb: pct(b, t), lid, gar, margem: Math.abs(pct(a, t) - pct(b, t)), fim: bloco.rest === 0 && bloco.st != null && bloco.st === bloco.ts };
+}
+const nome = (nomes, n) => ((nomes || {})[n] || FALLBACK_PRES[n] || {}).nm || ("Candidato " + n);
+const cor = i => i === 0 ? "var(--a)" : i === 1 ? "var(--b)" : "var(--cx)";
+
+/* ---------- presidente ---------- */
+let cabo = null, mapa = null, pmapa = null, selUf = null, dadosMapa = {};
+function renderArena() {
+  const P = snap.pres, par = duelo(P.nomes, P.br.nom), s = placar(P.br, par), nm = P.nomes;
+  // % sobre todos os votos válidos (igual ao TSE); vitória só com maioria garantida
+  const vval = Object.values(P.br.nom || {}).reduce((x, y) => x + y, 0) + (P.br.legenda || 0);
+  const garBr = s.lid >= 0 && P.br.rest != null && 2 * Math.max(s.a, s.b) > vval + P.br.rest;
+  const A = nome(nm, par[0]), B = nome(nm, par[1]);
+  $("lgA").textContent = A; $("lgB").textContent = B; $("plA").textContent = A; $("plB").textContent = B;
+  if (!cabo) cabo = criarBatalha($("bat"));
+  const lead = s.lid < 0 ? (s.t ? "Empate técnico" : "Aguardando as primeiras urnas") : `${esc(s.lid === 0 ? A : B)} ${garBr ? "vence a batalha por" : "à frente por"} ${Math.abs(pct(s.a, vval) - pct(s.b, vval)).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p. (${fmt(Math.abs(s.a - s.b))} votos)`;
+  const saldo = Object.entries(P.ufs).filter(([u]) => u !== "zz").map(([u, x]) => ({ u, d: (x.nom[par[0]] || 0) - (x.nom[par[1]] || 0) }));
+  const top = sg => saldo.filter(x => x.d * sg > 0).sort((x, y) => (y.d - x.d) * sg).slice(0, 3).map(x => `${x.u.toUpperCase()} +${fmtCurto(Math.abs(x.d))}`).join(" · ");
+  const ta = top(1), tb = top(-1), br = P.br;
+  const foto = n => { const sq = ((nm || {})[n] || {}).sq || (FALLBACK_PRES[n] || {}).sq; return sq ? `https://resultados.tse.jus.br/oficial/ele2026/${DEMO ? "6257" : TSE_ELE}/fotos/br/${sq}.jpeg` : ""; };
+  cabo.set({ fotoA: foto(par[0]), fotoB: foto(par[1]), pctA: pct(s.a, vval), pctB: pct(s.b, vval), va: s.a, vb: s.b, numA: par[0], numB: par[1], nomeA: A, nomeB: B, win: garBr ? s.lid : -1, apurado: pct(br.lidas, br.ts),
+    rotApurado: `⏱ ${pf(pct(br.lidas, br.ts))} lido · ${fmt(br.lidas)} de ${fmt(br.ts)} urnas<span class="sx"> (seções)</span>`, topA: ta ? "🔥 Top estados<br>" + esc(ta) : "", topB: tb ? "🔥 Top estados<br>" + esc(tb) : "" });
+  $("arenaLead").innerHTML = `<div class="lead"><span>${lead}</span>${garBr ? `<span class="seal ${s.fim ? "" : "go"}">${s.fim ? "VENCEDOR" : "RESULTADO GARANTIDO"}</span>` : ""}</div>`;
+  return { par, s };
+}
+function renderHud(par, s) {
+  const b = snap.pres.br, pU = pct(b.lidas, b.ts), st = tseBr ? tseBr.st : b.st, pT = pct(st || 0, b.ts), dif = b.lidas - (st || 0);
+  let ga = 0, gb = 0, la = 0, lb = 0;
+  for (const [u, x] of Object.entries(snap.pres.ufs)) { if (u === "zz") continue; const r = placar(x, par); if (r.lid === 0) { la++; if (r.gar) ga++; } else if (r.lid === 1) { lb++; if (r.gar) gb++; } }
+  const ult = Object.values(snap.pres.ufs).map(x => x.ult).filter(Boolean).sort().pop();
+  $("hud").innerHTML = `
+   <div class="stat"><div class="k">Urnas lidas</div><div class="v">${pf(pU)}</div><div class="s">${fmt(b.lidas)} de ${fmt(b.ts)}</div><div class="meter"><i class="t" style="width:${pT}%"></i><i class="u" style="width:${pU}%"></i></div></div>
+   <div class="stat"><div class="k">Oficial (TSE)</div><div class="v">${pf(pT)}</div><div class="s">${fmt(st)} urnas apuradas</div></div>
+   <div class="stat"><div class="k">À frente do TSE</div><div class="v" style="color:${dif >= 0 ? "var(--ok)" : "var(--warn)"}">${dif >= 0 ? "+" : "−"}${fmt(Math.abs(dif))}</div><div class="s">urnas${ult ? " · última: " + esc(ult.slice(-8)) : ""}</div></div>
+   <div class="stat"><div class="k">Estados</div><div class="v"><span style="color:var(--a)">${la}</span> × <span style="color:var(--b)">${lb}</span></div><div class="s">garantidos: ${ga} × ${gb}</div></div>`;
+}
+function renderMap(par) {
+  if (!mapa) mapa = criarMapa($("map"), u => { selUf = selUf === u ? null : u; const p = duelo(snap.pres.nomes, snap.pres.br.nom); if (selUf) detalhe(selUf, p); else $("detail").hidden = true; mapa.set(dadosMapa, selUf); });
+  const nm = snap.pres.nomes; dadosMapa = {};
+  for (const u of Object.keys(NOMEUF)) {
+    const x = snap.pres.ufs[u]; if (!x) continue; const r = placar(x, par);
+    dadosMapa[u] = { cor: r.lid < 0 ? "" : cor(r.lid), forca: Math.min(1, .45 + r.margem / 25), gar: r.gar, titulo: r.t ? `${NOMEUF[u]}: ${nome(nm, par[0])} ${pf(r.pa)} × ${nome(nm, par[1])} ${pf(r.pb)}` : NOMEUF[u] };
+  }
+  mapa.set(dadosMapa, selUf);
+  if (selUf) detalhe(selUf, par);
+}
+function detalhe(u, par) {
+  const x = snap.pres.ufs[u]; if (!x) return; const s = placar(x, par), nm = snap.pres.nomes;
+  $("detail").hidden = false;
+  $("detail").innerHTML = `<b>${esc(NOMEUF[u])}</b> ${s.gar ? '<span class="seal">GARANTIDO</span>' : ""}<br>
+   <span style="color:var(--a)">${esc(nome(nm, par[0]))}: <b>${pf(s.pa)}</b> (${fmt(s.a)})</span> · <span style="color:var(--b)">${esc(nome(nm, par[1]))}: <b>${pf(s.pb)}</b> (${fmt(s.b)})</span><br>
+   <span style="color:var(--mut)">Urnas lidas: ${fmt(x.lidas)}${x.ts ? " de " + fmt(x.ts) + " (" + pf(pct(x.lidas, x.ts)) + ")" : ""}</span>`;
+}
+function renderFeed(par) {
+  const nm = snap.pres.nomes;
+  const todos = [...(snap.eventos || []).map(e => ({ t: e.t, txt: `${esc(e.nome)} virou em <b>${esc(e.rotulo)}</b>`, c: e.para === par[0] ? 0 : 1 })), ...eventosLocais].sort((a, b) => b.t.localeCompare(a.t)).slice(0, 25);
+  $("feedN").textContent = todos.length; $("feedU").innerHTML = todos.length ? "Última: " + todos[0].txt : "Nenhuma ainda · toque para ver";
+  $("feed").innerHTML = todos.length ? todos.map(e => `<div class="ev" style="border-left-color:${cor(e.c)}"><time>${new Date(e.t).toLocaleTimeString("pt-BR")}</time><span>${e.txt}</span></div>`).join("") : '<div class="ev"><span style="color:var(--mut)">As viradas e conquistas aparecem aqui assim que acontecerem.</span></div>';
+}
+
+/* ---------- governadores ---------- */
+function renderGov() {
+  const us = Object.entries(snap.gov?.ufs || {}).sort((a, b) => NOMEUF[a[0]].localeCompare(NOMEUF[b[0]]));
+  if (!us.length) { $("govgrid").innerHTML = '<div class="card">Nenhum estado com 2º turno de governador foi encontrado ainda. Esta aba se preenche sozinha quando o TSE publicar.</div>'; return; }
+  $("govgrid").innerHTML = us.map(([u, x]) => {
+    const par = duelo(x.nomes, x.nom), s = placar(x, par);
+    return `<div class="gc"><h3><span>${esc(NOMEUF[u])}</span>${s.gar ? '<span class="seal">GARANTIDO</span>' : ""}</h3>
+     <div class="row" style="color:var(--a)"><b>${esc(nome(x.nomes, par[0]))}</b><b>${pf(s.pa)}</b></div>
+     <div class="bar"><i style="width:${s.pa}%;background:var(--a)"></i><i style="width:${s.pb}%;background:var(--b)"></i></div>
+     <div class="row" style="color:var(--b)"><b>${esc(nome(x.nomes, par[1]))}</b><b>${pf(s.pb)}</b></div>
+     <div class="sm">Urnas lidas: ${x.ts ? pf(pct(x.lidas, x.ts)) : fmt(x.lidas)} · ${s.lid < 0 ? "empate" : "lidera: " + esc(nome(x.nomes, par[s.lid]))}</div></div>`;
+  }).join("");
+}
+
+/* ---------- palpites ---------- */
+let pal = (() => { try { return JSON.parse(LS.g("pal") || ""); } catch { return null; } })() || { id: (crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === "x" ? r : (r & 3 | 8)).toString(16); })), apelido: "", br: null, ufs: {}, govs: {}, enviado: false };
+const salvarLocal = () => LS.s("pal", JSON.stringify(pal));
+const travado = () => Date.now() >= new Date(LOCK_AT).getTime();
+let ranking = [];
+function pontos(p, res) {
+  let t = 0, ac = 0;
+  if (res.br && p.br === res.br) { t += 10; ac++; }
+  for (const [u, v] of Object.entries(p.ufs || {})) if (res.ufs[u] && res.ufs[u] === v) { t++; ac++; }
+  for (const [u, v] of Object.entries(p.govs || {})) if (res.govs[u] && res.govs[u] === v) { t += 3; ac++; }
+  return { t, ac };
+}
+function resultados() {
+  const P = snap.pres, par = duelo(P.nomes, P.br.nom), r = { br: null, ufs: {}, govs: {}, par };
+  const sb = placar(P.br, par); if (sb.lid >= 0) r.br = par[sb.lid];
+  for (const [u, x] of Object.entries(P.ufs)) { const s = placar(x, par); if (s.lid >= 0) r.ufs[u] = par[s.lid]; }
+  for (const [u, x] of Object.entries(snap.gov?.ufs || {})) { const pg = duelo(x.nomes, x.nom), s = placar(x, pg); if (s.lid >= 0) r.govs[u] = pg[s.lid]; }
+  return r;
+}
+function renderPal() {
+  const P = snap.pres, par = duelo(P.nomes, P.br.nom), nm = P.nomes, trav = travado();
+  $("palintro").innerHTML = `<h3>Palpite da galera</h3><div class="msg" style="margin:0">Aposte antes da apuração: Brasil (10 pts), cada estado (1 pt) e cada governador do 2º turno (3 pts). ${trav ? "<b>Palpites encerrados.</b>" : "Vale até " + new Date(LOCK_AT).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) + ". Você pode mudar o palpite até lá."}</div>`;
+  $("apel").value = pal.apelido; $("apel").disabled = trav;
+  $("pkBr").innerHTML = par.map((n, i) => `<button class="pick ${i ? "b" : "a"}" data-n="${n}" aria-pressed="${pal.br === n}" ${trav ? "disabled" : ""}><span>${esc(nome(nm, n))}</span></button>`).join("");
+  $("pkBr").querySelectorAll(".pick").forEach(b => b.onclick = () => { pal.br = b.dataset.n; salvarLocal(); renderPal(); });
+  if (!pmapa) pmapa = criarMapa($("pmap"), u => {
+    if (travado()) return; const pp = duelo(snap.pres.nomes, snap.pres.br.nom), c = pal.ufs[u];
+    if (!c) pal.ufs[u] = pp[0]; else if (c === pp[0]) pal.ufs[u] = pp[1]; else delete pal.ufs[u];
+    salvarLocal(); renderPal();
+  });
+  const dp = {}; for (const u of Object.keys(NOMEUF)) if (pal.ufs[u]) dp[u] = { cor: pal.ufs[u] === par[0] ? "var(--a)" : "var(--b)", forca: 1, titulo: NOMEUF[u] + ": " + nome(nm, pal.ufs[u]) };
+  pmapa.set(dp, null);
+  const gu = Object.entries(snap.gov?.ufs || {}).sort((a, b) => NOMEUF[a[0]].localeCompare(NOMEUF[b[0]]));
+  $("govpal").hidden = !gu.length;
+  $("gp").innerHTML = gu.map(([u, x]) => { const pg = duelo(x.nomes, x.nom); return `<div class="g"><b>${u.toUpperCase()}</b><div>${pg.map((n, i) => `<button data-u="${u}" data-n="${n}" aria-pressed="${pal.govs[u] === n}" style="color:${cor(i)}" ${trav ? "disabled" : ""}>${esc(nome(x.nomes, n).split(" ").slice(0, 2).join(" "))}</button>`).join("")}</div></div>`; }).join("");
+  $("gp").querySelectorAll("button").forEach(b => b.onclick = () => { pal.govs[b.dataset.u] = b.dataset.n; salvarLocal(); renderPal(); });
+  $("enviar").disabled = trav; $("enviar").textContent = pal.enviado ? "Atualizar palpite" : "Registrar palpite";
+  renderRanking();
+}
+function renderRanking() {
+  const res = resultados(), lista = ranking.map(p => ({ ...p, ...pontos(p, res) })).sort((a, b) => b.t - a.t || a.criado.localeCompare(b.criado));
+  const meuPos = lista.findIndex(p => p.apelido === pal.apelido && pal.enviado);
+  $("rkinfo").textContent = `${fmt(lista.length)} palpites · pontuação parcial, conforme quem lidera agora${meuPos >= 0 ? " · você está em " + (meuPos + 1) + "º" : ""}.`;
+  $("rk").innerHTML = '<tr><th>#</th><th>Apelido</th><th class="n">Acertos</th><th class="n">Pontos</th></tr>' + lista.slice(0, 30).map((p, i) => `<tr class="${p.apelido === pal.apelido && pal.enviado ? "me" : ""}"><td>${i + 1}</td><td>${esc(p.apelido)}</td><td class="n">${p.ac}</td><td class="n">${p.t}</td></tr>`).join("");
+}
+async function enviar() {
+  const ap = $("apel").value.trim(); pal.apelido = ap; salvarLocal();
+  if (ap.length < 2) { $("palmsg").textContent = "Escolha um apelido com pelo menos 2 letras."; return; }
+  if (!pal.br) { $("palmsg").textContent = "Escolha quem vence no Brasil."; return; }
+  if (DEMO) { pal.enviado = true; salvarLocal(); $("palmsg").textContent = "Demonstração: palpite não enviado de verdade."; renderPal(); return; }
+  $("enviar").disabled = true;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/salvar_palpite`, { method: "POST", headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY, "Content-Type": "application/json" }, body: JSON.stringify({ p_id: pal.id, p_apelido: ap, p_br: pal.br, p_ufs: pal.ufs, p_govs: pal.govs }) });
+    if (!r.ok) throw new Error((await r.text()).slice(0, 120));
+    pal.enviado = true; salvarLocal(); $("palmsg").textContent = "Palpite registrado! Boa sorte.";
+    await carregarRanking();
+  } catch (e) { $("palmsg").textContent = "Não consegui registrar agora: " + e.message; }
+  renderPal();
+}
+async function carregarRanking() {
+  if (DEMO) { ranking = [{ apelido: "Ana", br: "13", ufs: { sp: "22", rj: "13" }, govs: {}, criado: "2026-10-24" }, { apelido: "Beto", br: "22", ufs: { sp: "22" }, govs: {}, criado: "2026-10-24" }]; return; }
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/ranking?select=apelido,br,ufs,govs,criado&order=criado.asc&limit=5000`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY }, cache: "no-store" });
+    if (r.ok) ranking = await r.json();
+  } catch { /* mantém */ }
+}
+
+/* ---------- efeitos ---------- */
+function toast(txt) { const t = $("toast"); t.textContent = txt; t.classList.add("on"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("on"), 4500); }
+function bip(f = 660, d = .15) { if (!som) return; try { const c = bip.c || (bip.c = new (window.AudioContext || window.webkitAudioContext)()), o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; g.gain.value = .08; o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime + d); } catch { /* ok */ } }
+function confete() { if (matchMedia("(prefers-reduced-motion:reduce)").matches) return; for (let i = 0; i < 70; i++) { const s = document.createElement("span"); s.className = "cf"; s.style.left = Math.random() * 100 + "vw"; s.style.background = ["#ff4d63", "#4d8dff", "#2ee59d", "#ffc83d", "#fff"][i % 5]; s.style.animationDelay = Math.random() * .8 + "s"; document.body.appendChild(s); setTimeout(() => s.remove(), 4500); } }
+function detectar(par) {
+  const nm = snap.pres.nomes, ev = snap.eventos || [];
+  for (const e of ev) { const id = e.t + e.escopo; if (!vistos.has(id)) { vistos.add(id); if (!primeira) { toast(`🔄 ${e.nome} virou em ${e.rotulo}`); bip(520); const uf = e.escopo.split(":")[1]; if (uf === "br") cabo && cabo.efeito("VIRADA!", e.para === par[0] ? 0 : 1); else if (e.escopo.startsWith("pres:")) mapa && mapa.piscar(uf); } } }
+  const alvos = [["br", "o Brasil", snap.pres.br], ...Object.entries(snap.pres.ufs).map(([u, x]) => [u, NOMEUF[u], x])];
+  for (const [k, rot, x] of alvos) { const s = placar(x, par), vx = Object.values(x.nom || {}).reduce((a, b) => a + b, 0) + (x.legenda || 0), g = k === "br" ? (s.lid >= 0 && x.rest != null && 2 * Math.max(s.a, s.b) > vx + x.rest) : s.gar; if (g && !decididos.has(k)) { decididos.add(k); if (!primeira) { const who = nome(nm, par[s.lid]); eventosLocais.push({ t: new Date().toISOString(), txt: `🏁 ${esc(who)} garantiu <b>${esc(rot)}</b>`, c: s.lid }); toast(`🏁 ${who} garantiu ${rot}!`); bip(k === "br" ? 880 : 740, .3); if (k === "br") { confete(); cabo && cabo.efeito("VITÓRIA!", s.lid); } else mapa && mapa.piscar(k); } } }
+  primeira = false;
+}
+
+/* ---------- ciclo ---------- */
+function demo() {
+  const ufs = {}, br = { nom: { 13: 0, 22: 0 }, lidas: 0, ts: 0, st: 0, rest: 2e6, branco: 0, nulo: 0 }, tt = Date.now() / 20000;
+  Object.keys(NOMEUF).forEach((u, i) => { const t = 2000 + i * 900, l = Math.round(t * Math.min(1, .3 + (tt % 1) * .7)), a = 40 + 22 * Math.sin(i * 1.7), v = l * 230, n13 = Math.round(v * a / 100), n22 = Math.round(v - n13);
+    ufs[u] = { nom: { 13: n13, 22: n22 }, lidas: l, ts: t, st: Math.round(l * .8), rest: Math.max(0, Math.round((t - l) * 230)), ult: "18/10/2026 20:" + String(10 + i).padStart(2, "0") + ":00" };
+    br.nom[13] += n13; br.nom[22] += n22; br.lidas += l; br.ts += t; br.st += Math.round(l * .8); });
+  return { gerado: new Date().toISOString(), pres: { nomes: FALLBACK_PRES, br, ufs }, gov: { ufs: { sp: { nom: { 40: 5200000, 45: 4800000 }, lidas: 3000, ts: 5000, rest: 900000, nomes: { 40: { nm: "Haddad", sg: "PT" }, 45: { nm: "Tarcísio", sg: "REP" } } }, mg: { nom: { 31: 3000000, 22: 3100000 }, lidas: 2500, ts: 4000, rest: 1200000, nomes: { 31: { nm: "Kalil", sg: "PSD" }, 22: { nm: "Zema", sg: "NOVO" } } } } }, eventos: [{ t: new Date().toISOString(), escopo: "pres:sc", rotulo: "SC", para: "22", nome: "Flávio Bolsonaro", de: "13" }] };
+}
+function render() {
+  if (!snap) return;
+  const { par, s } = renderArena(); renderHud(par, s); renderMap(par); renderFeed(par); renderGov(); detectar(par);
+  if (!$("v-pal").hidden) renderPal();
+  $("foot").textContent = "Última atualização do coletor: " + (snap.gerado ? new Date(snap.gerado).toLocaleTimeString("pt-BR") : "—") + ". O Brasil é a soma dos estados. “Garantido” = a vantagem é maior que o total de eleitores de seções ainda não totalizadas pelo TSE.";
+}
+function pill() {
+  const idade = (Date.now() - ultOk) / 1000;
+  $("pill").className = "pill " + (falha || idade > 15 ? "err" : "live");
+  $("pillt").textContent = !ultOk ? "Conectando…" : falha ? "Sem conexão" : idade < 4 ? "Ao vivo" : "há " + Math.round(idade) + " s";
+}
+async function poll() {
+  try {
+    if (DEMO) snap = demo();
+    else { const r = await fetch(`${SUPABASE_URL}/rest/v1/snapshot?id=eq.resumo&select=data`, { headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY }, cache: "no-store" }); if (!r.ok) throw new Error(r.status); const j = await r.json(); if (j[0]) snap = j[0].data; }
+    ultOk = Date.now(); falha = false; render();
+  } catch { falha = true; }
+  pill();
+}
+async function pollTse() {
+  if (DEMO) return;
+  try { const r = await fetch(`https://resultados.tse.jus.br/oficial/ele2026/${TSE_ELE}/dados/br/br-c0001-e${TSE_ELE.padStart(6, "0")}-u.json`, { cache: "no-store" }); const j = await r.json(); tseBr = { st: Number(j.s.st), ts: Number(j.s.ts) }; if (snap) render(); } catch { /* mantém */ }
+}
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#tabs button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  ["pres", "gov", "pal"].forEach(v => $("v-" + v).hidden = v !== b.dataset.v); render();
+  if (b.dataset.v === "pal") carregarRanking().then(() => snap && renderPal());
+});
+$("snd").textContent = som ? "🔊" : "🔇"; $("snd").onclick = () => { som = !som; LS.s("som", som ? "1" : "0"); $("snd").textContent = som ? "🔊" : "🔇"; bip(700); };
+$("thm").onclick = () => { const l = document.documentElement.dataset.theme === "light"; document.documentElement.dataset.theme = l ? "dark" : "light"; LS.s("tema", l ? "dark" : "light"); };
+document.documentElement.dataset.theme = LS.g("tema") || "dark";
+$("apel").oninput = () => { pal.apelido = $("apel").value; salvarLocal(); };
+$("enviar").onclick = enviar;
+$("demoB").hidden = !DEMO;
+poll(); pollTse(); carregarRanking(); setInterval(poll, DEMO ? 3000 : POLL_MS); setInterval(pollTse, TSE_POLL_MS); setInterval(pill, 1000); setInterval(() => { if (!$("v-pal").hidden) carregarRanking().then(() => snap && renderRanking()); }, 15000);
+</script>
+</body>
+</html>
