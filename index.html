@@ -141,7 +141,8 @@ table.rk .n{text-align:right;font-variant-numeric:tabular-nums}table.rk tr.me{ba
 .bt-banner{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.3);opacity:0;font:900 clamp(26px,8vw,48px)/1 system-ui,sans-serif;padding:10px 22px;border-radius:14px;white-space:nowrap;pointer-events:none;z-index:3;text-shadow:0 2px 8px rgba(0,0,0,.4)}
 .bt-banner.a{background:var(--a)}.bt-banner.b{background:var(--b)}
 .bt-banner.on{animation:btbn 1.8s ease-out}
-.bt-banner.fixo{opacity:1;transform:translate(-50%,-50%) scale(1);top:auto;bottom:30px;font-size:clamp(16px,4.5vw,24px);box-shadow:0 0 24px #ffd84d}
+.bt-banner.fixo{opacity:1;transform:translateX(-50%);bottom:auto;top:calc(42px + (100% - 72px) / 8);font-size:clamp(13px,3.6vw,18px);padding:6px 14px;box-shadow:0 0 18px #ffd84d}
+@media (max-width:600px){.bt-banner.fixo{top:40px}}
 @keyframes btbn{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-6deg)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(2deg)}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0}}
 @media (max-width:480px){.bt-arena{min-height:220px}.bt-top{font-size:10.5px}}
 @media (prefers-reduced-motion:reduce){.bt.shake,.bt-mid,.bt-side.lider .bt-glow{animation:none}.bt-banner.on{animation:none;opacity:1;transform:translate(-50%,-50%)}}
@@ -151,9 +152,31 @@ table.rk .n{text-align:right;font-variant-numeric:tabular-nums}table.rk tr.me{ba
 .bm path.sel{stroke:var(--jg-ink);stroke-width:3}
 .bm path.fl{animation:bmfl 1.3s}
 @keyframes bmfl{25%,75%{opacity:.35}50%{opacity:1}}
-.bm text{font:800 13px system-ui,sans-serif;fill:#fff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:2.5}
-.bm text.vz{fill:var(--jg-mut);stroke:none}
+.bm text{font:800 19px system-ui,sans-serif;fill:#0b1118;text-anchor:middle;pointer-events:none;letter-spacing:.02em}
+.bm text.vz{fill:var(--jg-mut)}
 .bm text.p{font-size:9.5px}
+.bm-chips{display:none;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+.bm-chips .chip{border:0;border-radius:99px;padding:4px 10px;font:800 12px system-ui,sans-serif;color:#fff;cursor:pointer;background:var(--jg-ground)}
+.bm-chips .chip.vz{color:var(--jg-mut)}
+.bm-chips .chip.sel{outline:2px solid var(--jg-ink);outline-offset:1px}
+.bm-chips .chip.fl{animation:bmfl 1.3s}
+
+.bm .cl{stroke:var(--jg-ink);stroke-width:1.2;opacity:.55}
+.bm .pt{fill:var(--jg-ink);opacity:.8}
+.bm .selo{fill:rgba(11,17,24,.8)}
+.bm-faixa[hidden]{display:none}
+.bm-faixa{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+.bm-faixa .chip{border:0;border-radius:99px;padding:6px 12px;font:800 14px system-ui,sans-serif;cursor:pointer;background:var(--jg-ground);color:#0b1118}
+.bm-faixa .chip.vz{color:var(--jg-mut)}
+.bm-faixa .chip.sel{outline:2px solid var(--jg-ink);outline-offset:1px}
+.bm-faixa .chip.fl{animation:bmfl 1.3s}
+
+.bm .ext circle{stroke-width:2}
+.bm .bx{cursor:pointer}
+.bm .bx text{font-size:13.5px}
+.bm .bx.sel rect{stroke:var(--jg-ink);stroke-width:2}
+.bm text .pc{font-size:1em}
+
 .bm .ext circle{stroke:var(--jg-bg);stroke-width:1.5;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.tgw.shake,.bm path.fl,.tg .txt.on{animation:none}.tg .txt.on{opacity:1}}
 
@@ -171,6 +194,50 @@ details.fx[open] .fxu{display:none}
 details.fx[open]{padding-bottom:12px}
 details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top:0}
 :root{--fx-bd:var(--bd);--fx-mut:var(--mut);--fx-bg:var(--card)}
+
+/* ===== layout v2: título + frase na mesma linha, batalha ao lado do mapa, primeira tela sem rolar ===== */
+.ahd{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap;margin-bottom:10px}
+.ahd h2{margin:0}
+.ahd .lead{margin-top:0;justify-content:flex-end;font-size:15px}
+.ahd .seal{background:var(--ok);color:#04150d;padding:3px 12px;border-radius:99px;font-size:12.5px;display:inline-block;width:auto}
+.ahd .seal.t2{background:#f2b33d;color:#2a1a00}
+.pgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:0 24px}
+.pc1,.pc2{min-width:0}
+.bt-side{justify-content:center}
+@media (min-width:1180px){
+  .wrap{max-width:1440px}
+  .pgrid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:start}
+  .pc2 .hmap{margin-top:4px}
+  .pc1 .hud{grid-template-columns:repeat(4,1fr);gap:8px}
+  .pc1 .stat{padding:8px 10px}.pc1 .stat .v{font-size:20px}
+  .pc2 .mapwrap{max-width:680px}
+  #v-pres .bt-face{width:140px}
+  #v-pres .bt-pc{font-size:50px}
+  #v-pres .bt-nm{font-size:22px}
+  #v-pres .bt-arena{min-height:220px}
+  .ahd{margin-bottom:8px}.ahd .lead{font-size:14px}
+  .pc1 .hud{margin:10px 0 0}
+  .pc1 .stat .s{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #v-pres .bt-face{width:132px}
+  #v-pres .bt-crown{height:28px;font-size:26px}
+  #v-pres .bt-side{padding:10px 8px 10px}
+  #v-pres .bt-top{font-size:12px;margin-top:5px}
+  #v-pres .bt-top{font-size:13px}
+  #v-pres .bt-bar{height:42px}
+}
+@media (max-width:600px){
+  .wrap{padding:10px 10px 40px}
+  .logo{font-size:16px}.logo small{font-size:11px}
+  nav{margin:10px 0}nav button{padding:8px 10px;font-size:14px;min-width:0}
+  .warn{font-size:12px;padding:7px 10px;margin-bottom:10px}
+  .arena{padding:12px}
+  #v-pres .bt-arena{min-height:0}
+  #v-pres .bt-side{padding:8px 6px 10px}
+  #v-pres .bt-face{width:84px}
+  #v-pres .bt-crown{height:26px;font-size:24px}
+  #v-pres .bt-top{font-size:10px;margin-top:4px}
+  .ahd h2{font-size:14px}.ahd .lead{font-size:14px}
+}
 </style>
 </head>
 <body>
@@ -188,12 +255,15 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 <div class="warn">Soma dos boletins de urna divulgados pelo TSE, <b>antes da totalização oficial</b>. Não substitui o resultado oficial: <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a>.<span id="demoB"> <b>Modo demonstração: números fictícios.</b></span></div>
 
 <section class="view" id="v-pres">
-  <div class="arena" id="arena"><div id="bat"></div><div id="arenaLead"></div></div>
+  <div class="pgrid"><div class="pc1">
+  <div class="arena" id="arena"><div class="ahd"><h2>Batalha ao vivo</h2><div id="arenaLead"></div></div><div id="bat"></div></div>
   <div class="hud" id="hud"></div>
-  <h2>Mapa de territórios</h2>
+  </div><div class="pc2">
+  <h2 class="hmap">Mapa de territórios</h2>
   <div class="mapwrap" id="map"></div>
-  <div class="legend"><span><i style="background:var(--a)"></i><b id="lgA">A</b></span><span><i style="background:var(--b)"></i><b id="lgB">B</b></span><span><i style="background:var(--cx)"></i>sem dados / empate</span><span>✓ resultado garantido · toque no estado</span></div>
+  <div class="legend"><span><i style="background:var(--a)"></i><b id="lgA">A</b></span><span><i style="background:var(--b)"></i><b id="lgB">B</b></span><span><i style="background:var(--cx)"></i>sem dados / empate</span><span>toque no estado para ver o detalhe</span></div>
   <div class="detail" id="detail" hidden></div>
+  </div></div>
   <details class="fx" id="feedBox"><summary>🔄 Viradas e conquistas <span class="fxn" id="feedN">0</span><span class="fxu" id="feedU">Toque para ver</span></summary>
   <div class="feed" id="feed"></div></details>
 </section>
@@ -217,7 +287,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 <div class="toast" id="toast"></div>
 <script>
 // ===== CONFIGURE AQUI =====
-const SUPABASE_URL = "https://hvabmapxzgdadjnruycj.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://hvabmapxzgdadjnruycj.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2YWJtYXB4emdkYWRqbnJ1eWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1NDMxMzcsImV4cCI6MjEwODExOTEzN30.ax3AWhs7hX4Esfgs6NbfMJCFaV99ITcJvMq97PNljfc";
 const TSE_ELE = "6257";                       // 1º turno 6257 · 2º turno 6258
 const LOCK_AT = "2026-10-25T08:00:00-03:00";  // fim dos palpites (igual ao SQL)
@@ -313,33 +383,118 @@ function criarBatalha(el) {
   };
 }
 
+// centro visual de cada estado (ponto mais distante das bordas) e raio do maior círculo que cabe dentro dele
+const CENTRO_UF = {"ac":[70.3,235.7,17.1],"al":[585.9,234.5,8.1],"ap":[346.6,62.5,21.7],"am":[134,144.8,68.3],"ba":[504.7,272.8,44.3],"ce":[539.4,158.8,23.3],"df":[409.4,329.7,4.4],"es":[525.5,382.2,9.4],"go":[373,344.8,30.9],"ma":[446.5,163.7,32.1],"mt":[292.1,292.4,61.3],"ms":[295.1,399.4,38.9],"mg":[465.9,361.5,48.2],"pa":[319.4,170.6,61.8],"pb":[594.7,191.9,9.5],"pr":[342.6,475.3,32.5],"pe":[533.2,206.8,10.1],"pi":[488.9,207.9,20.9],"rj":[505.7,427,8.8],"rn":[595.2,171.5,10.4],"rs":[318.4,562.1,37.7],"ro":[165.5,248.1,29.1],"rr":[195.4,39.7,22.9],"sc":[376.1,522.6,19.5],"sp":[397.8,432.3,26.2],"se":[572.6,243.6,7],"to":[399.2,248.1,30.7]};
+// estilo dos rótulos do mapa: "escuro" | "selo" | "tonal" | "branco"
+let MAPA_ESTILO = "tonal";
 function criarMapa(el, aoClicar) {
-  const PEQ = new Set(["df", "se", "al", "pb", "rn", "es", "rj", "pe"]);
-  el.innerHTML = `<svg class="bm" viewBox="0 0 613 660" role="img" aria-label="Mapa do Brasil por estado">
+  // estados pequenos: no computador, chips ao lado do mapa ligados ao estado; no celular, faixa de chips abaixo do mapa
+  const CHIP = { rn: 146, pb: 179, pe: 212, al: 245, se: 278, df: 332, es: 392, rj: 426 }, CX = 618;
+  const EXT = [560, 620, 30];
+  el.innerHTML = `<svg class="bm" viewBox="0 0 712 660" role="img" aria-label="Mapa do Brasil por estado">
     ${Object.entries(BR_PATHS).map(([u, d]) => `<path data-uf="${u}" d="${d}"><title></title></path>`).join("")}
-    <g class="ext" data-uf="zz"><circle cx="560" cy="620" r="24" data-uf="zz"><title></title></circle></g><g class="lb"></g></svg>`;
-  const svg = el.querySelector("svg"), lb = el.querySelector(".lb");
+    <g class="cx"></g>
+    <g class="ext" data-uf="zz"><circle cx="${EXT[0]}" cy="${EXT[1]}" r="${EXT[2]}" data-uf="zz"><title></title></circle></g><g class="lb"></g></svg>
+    <div class="bm-faixa" role="group" aria-label="Estados pequenos"></div>`;
+  const svg = el.querySelector("svg"), lb = el.querySelector(".lb"), cx = el.querySelector(".cx"), faixa = el.querySelector(".bm-faixa");
   const centros = {};
-  const AJ = { rn: [6, -2], pb: [10, 1], pe: [0, 2], al: [6, 2], se: [5, 4], es: [8, 2], rj: [4, 4], df: [0, 1], sc: [2, 1], go: [-6, 8] };
-  svg.querySelectorAll("path").forEach(p => { const b = p.getBBox(), aj = AJ[p.dataset.uf] || [0, 0]; centros[p.dataset.uf] = [b.x + b.width / 2 + aj[0], b.y + b.height / 2 + 5 + aj[1]]; });
-  centros.zz = [560, 625];
-  svg.addEventListener("click", e => { const u = e.target.closest("[data-uf]")?.dataset.uf; if (u && aoClicar) aoClicar(u); });
-  return {
-    // dados: { uf: { cor:"var(--a)", forca:0..1, rotulo:"52%", gar:bool, titulo:"..." } }
-    set(dados, sel) {
-      svg.querySelectorAll("path, .ext circle").forEach(p => {
-        const x = dados[p.dataset.uf];
-        p.style.fill = x && x.cor ? `color-mix(in srgb, ${x.cor} ${Math.round((x.forca ?? 1) * 100)}%, var(--jg-ground))` : "";
-        p.classList.toggle("sel", sel === p.dataset.uf);
-        p.querySelector("title").textContent = x?.titulo || "";
-      });
-      lb.innerHTML = Object.entries(centros).map(([u, [x, y]]) => {
-        const d = dados[u] || {}, peq = PEQ.has(u);
-        const txt = (u === "zz" ? "EXT" : u.toUpperCase()) + (d.gar ? "✓" : "");
-        return `<text x="${x}" y="${y}" class="${d.cor ? "" : "vz"} ${peq ? "p" : ""}">${txt}</text>`;
+  for (const [u, c] of Object.entries(CENTRO_UF)) centros[u] = c;
+  centros.zz = EXT;
+  el.addEventListener("click", e => { const u = e.target.closest("[data-uf]")?.dataset.uf; if (u && aoClicar) aoClicar(u); });
+  const mistura = (x, f) => {
+    if (!x || !x.cor) return "";
+    const p = Math.round((f ?? x.forca ?? 1) * 100);
+    if (MAPA_ESTILO === "branco") return `color-mix(in srgb, color-mix(in srgb, ${x.cor} 72%, #000) ${p}%, var(--jg-ground))`;
+    // no estilo tonal a margem muda a saturação (mistura com um cinza claro), não a claridade: o texto escuro continua legível
+    if (MAPA_ESTILO === "tonal") return `color-mix(in srgb, ${x.cor} ${Math.max(40, p)}%, #b4bcc6)`;
+    return `color-mix(in srgb, ${x.cor} ${p}%, var(--jg-ground))`;
+  };
+  const corTexto = x => !x || !x.cor ? "" : MAPA_ESTILO === "tonal" ? `color-mix(in srgb, ${x.cor} 22%, #000)` : (MAPA_ESTILO === "branco" || MAPA_ESTILO === "selo") ? "#fff" : "#0b1118";
+  const estreito = () => (el.clientWidth || innerWidth) < 560;
+  let ultimo = null, modoFaixa = null;
+  // o texto (com uma folga) precisa caber DENTRO do contorno real do estado
+  function cabe(path, b, dx, dy, m) {
+    const x0 = b.x + dx - m, x1 = b.x + b.width + dx + m, y0 = b.y + dy - m, y1 = b.y + b.height + dy + m, xm = (x0 + x1) / 2, ym = (y0 + y1) / 2;
+    const pts = [[x0, y0], [xm, y0], [x1, y0], [x1, ym], [x1, y1], [xm, y1], [x0, y1], [x0, ym], [(x0 + xm) / 2, y0], [(xm + x1) / 2, y0], [(x0 + xm) / 2, y1], [(xm + x1) / 2, y1]];
+    const P = svg.createSVGPoint();
+    return pts.every(([x, y]) => { P.x = x; P.y = y; return path.isPointInFill(P); });
+  }
+  function encaixar() {
+    const esc = svg.clientWidth ? svg.clientWidth / svg.viewBox.baseVal.width : 0; if (!esc) return;
+    const base = Math.max(19, 13 / esc), minimo = Math.max(12, 9.5 / esc), folga = Math.max(2, 1.5 / esc);
+    lb.querySelectorAll("g.lbl").forEach(g => {
+      const u = g.dataset.uf, [x, y, r] = centros[u], t = g.querySelector("text"), sel = g.querySelector("rect"), pc = t.querySelector(".pc"), sg = t.querySelector(".sg");
+      const linha = on => { if (!pc) return; if (on) { pc.removeAttribute("x"); pc.setAttribute("dx", ".3em"); pc.setAttribute("dy", "0"); } else { pc.setAttribute("x", sg.getAttribute("x")); pc.removeAttribute("dx"); } };
+      t.removeAttribute("transform"); if (pc) { pc.style.display = ""; linha(false); pc.setAttribute("dy", "1em"); } if (sg) sg.style.display = "";
+      if (u === "zz") {                                    // círculo do exterior: o texto inteiro (diagonal) cabe no círculo
+        t.style.fontSize = base + "px"; let b = t.getBBox();
+        const f = Math.min(base, base * (r * 1.75) / Math.hypot(b.width, b.height)); t.style.fontSize = f + "px"; b = t.getBBox();
+        t.setAttribute("transform", `translate(0,${(y - (b.y + b.height / 2)).toFixed(1)})`); return;
+      }
+      const path = svg.querySelector(`path[data-uf="${u}"]`);
+      const desl = [[0, 0]]; for (const k of [.25, .5, .75]) for (const a of [0, 45, 90, 135, 180, 225, 270, 315]) { const rad = a * Math.PI / 180; desl.push([Math.cos(rad) * r * k, Math.sin(rad) * r * k]); }
+      let achou = null;
+      // 1º tenta o maior tamanho; se não couber no centro, procura um lugar próximo; só então diminui (até o mínimo legível)
+      // ordem de preferência: sigla + %, só o %, só a sigla (o % é o mais importante)
+      const modos = pc ? ["ambos", "linha", "pc"] : ["sg"];
+      for (const modo of modos) {
+        if (pc) { pc.style.display = modo === "sg" ? "none" : ""; linha(modo === "linha"); if (modo !== "linha") pc.setAttribute("dy", modo === "pc" ? "0" : "1em"); }
+        if (sg) sg.style.display = modo === "pc" ? "none" : "";
+        for (let f = base; f >= (modo === "pc" ? minimo * .85 : minimo) - .01 && !achou; f *= .93) {
+          t.style.fontSize = f + "px"; const b = t.getBBox(), cy0 = y - (b.y + b.height / 2), cx0 = x - (b.x + b.width / 2);
+          for (const [dx, dy] of desl) if (cabe(path, b, cx0 + dx, cy0 + dy, folga)) { achou = [f, cx0 + dx, cy0 + dy]; break; }
+        }
+        if (achou) break;
+      }
+      if (!achou) { if (pc) { pc.style.display = ""; linha(false); pc.setAttribute("dy", "0"); } if (sg && pc) sg.style.display = "none"; t.style.fontSize = minimo + "px"; const b = t.getBBox(); achou = [minimo, x - (b.x + b.width / 2), y - (b.y + b.height / 2)]; }
+      t.style.fontSize = achou[0] + "px"; t.setAttribute("transform", `translate(${achou[1].toFixed(1)},${achou[2].toFixed(1)})`);
+      if (sel) { const b = t.getBBox(); sel.setAttribute("x", (b.x + achou[1] - 4).toFixed(1)); sel.setAttribute("y", (b.y + achou[2] - 2).toFixed(1)); sel.setAttribute("width", (b.width + 8).toFixed(1)); sel.setAttribute("height", (b.height + 4).toFixed(1)); }
+    });
+    cx.querySelectorAll("g.bx").forEach(g => {
+      const t = g.querySelector("text"), rc = g.querySelector("rect");
+      let f = Math.min(19, Math.max(15, 15 / esc)); t.style.fontSize = f + "px"; let b = t.getBBox();
+      const max = 712 - CX - 2; if (b.width + 14 > max) { f = f * (max - 14) / b.width; t.style.fontSize = f + "px"; b = t.getBBox(); }
+      const w = Math.max(56, b.width + 14), h = Math.min(31, Math.max(24, b.height + 7)), yy = +g.dataset.y;
+      rc.setAttribute("width", w.toFixed(1)); rc.setAttribute("height", h.toFixed(1)); rc.setAttribute("y", (yy - h / 2).toFixed(1)); rc.setAttribute("rx", (h / 2).toFixed(1));
+      t.setAttribute("x", (CX + w / 2).toFixed(1)); t.setAttribute("y", (yy + b.height * .32).toFixed(1));
+    });
+  }
+  function desenhar(dados, sel) {
+    const fx = estreito();
+    if (fx !== modoFaixa) { modoFaixa = fx; svg.setAttribute("viewBox", fx ? "0 0 620 660" : "0 0 712 660"); faixa.hidden = !fx; cx.style.display = fx ? "none" : ""; }
+    svg.querySelectorAll("path, .ext circle").forEach(p => {
+      const x = dados[p.dataset.uf];
+      p.style.fill = mistura(x);
+      p.classList.toggle("sel", sel === p.dataset.uf);
+      p.querySelector("title").textContent = x?.titulo || "";
+    });
+    const txtChip = (u, d) => `${u.toUpperCase()}${d.pct ? " " + d.pct : ""}`;
+    if (fx) {
+      cx.innerHTML = "";
+      faixa.innerHTML = Object.keys(CHIP).map(u => { const d = dados[u] || {};
+        return `<button type="button" class="chip${sel === u ? " sel" : ""}${d.cor ? "" : " vz"}" data-uf="${u}" style="${d.cor ? `background:${mistura(d, 1)};color:${corTexto(d)}` : ""}" title="${(d.titulo || "").replace(/"/g, "&quot;")}">${txtChip(u, d)}</button>`; }).join("");
+    } else {
+      faixa.innerHTML = "";
+      cx.innerHTML = Object.entries(CHIP).map(([u, y]) => {
+        const d = dados[u] || {}, [x0, y0] = centros[u];
+        return `<line x1="${x0}" y1="${y0}" x2="${CX}" y2="${y}" class="cl"/><circle cx="${x0}" cy="${y0}" r="2.2" class="pt"/>
+          <g class="bx${sel === u ? " sel" : ""}" data-uf="${u}" data-y="${y}"><rect x="${CX}" y="${y - 12}" width="80" height="24" rx="12" data-uf="${u}" style="fill:${d.cor ? mistura(d, 1) : "var(--jg-ground)"}"><title>${d.titulo || ""}</title></rect>
+          <text x="${CX + 40}" y="${y + 5}" class="${d.cor ? "" : "vz"}" style="fill:${corTexto(d)}">${txtChip(u, d)}</text></g>`;
       }).join("");
-    },
-    piscar(u) { const p = svg.querySelector(`[data-uf="${u}"]`); if (!p) return; p.classList.remove("fl"); void p.getBBox(); p.classList.add("fl"); },
+    }
+    lb.innerHTML = Object.entries(centros).filter(([u]) => !CHIP[u]).map(([u, [x, y]]) => {
+      const d = dados[u] || {}, sig = u === "zz" ? "EXT" : u.toUpperCase();
+      const selo = MAPA_ESTILO === "selo" && d.cor ? `<rect class="selo" rx="5"/>` : "";
+      return `<g class="lbl" data-uf="${u}">${selo}<text x="${x}" y="${y}" class="${d.cor ? "" : "vz"}" style="fill:${corTexto(d)}">${d.pct ? `<tspan x="${x}" dy="0" class="sg">${sig}</tspan><tspan x="${x}" dy="1em" class="pc">${d.pct}</tspan>` : `<tspan x="${x}" dy="0" class="sg">${sig}</tspan>`}</text></g>`;
+    }).join("");
+    encaixar();
+  }
+  let tRz; addEventListener("resize", () => { clearTimeout(tRz); tRz = setTimeout(() => { if (ultimo) desenhar(...ultimo); }, 200); });
+  return {
+    // dados: { uf: { cor:"var(--a)", forca:0..1, pct:"52%", gar:bool, titulo:"..." } }
+    set(dados, sel) { ultimo = [dados, sel]; desenhar(dados, sel); },
+    piscar(u) { const p = el.querySelector(`path[data-uf="${u}"]`) || el.querySelector(`[data-uf="${u}"]`); if (!p) return; p.classList.remove("fl"); void p.getBoundingClientRect(); p.classList.add("fl"); },
+    reencaixar() { if (ultimo) desenhar(...ultimo); },
   };
 }
 
@@ -407,7 +562,7 @@ function renderMap(par) {
   const nm = snap.pres.nomes; dadosMapa = {};
   for (const u of Object.keys(NOMEUF)) {
     const x = snap.pres.ufs[u]; if (!x) continue; const r = placar(x, par);
-    dadosMapa[u] = { cor: r.lid < 0 ? "" : cor(r.lid), forca: Math.min(1, .45 + r.margem / 25), gar: r.gar, titulo: r.t ? `${NOMEUF[u]}: ${nome(nm, par[0])} ${pf(r.pa)} × ${nome(nm, par[1])} ${pf(r.pb)}` : NOMEUF[u] };
+    dadosMapa[u] = { cor: r.lid < 0 ? "" : cor(r.lid), forca: Math.min(1, .45 + r.margem / 25), gar: r.gar, pct: r.t && r.lid >= 0 ? Math.round(r.lid ? r.pb : r.pa) + "%" : "", titulo: r.t ? `${NOMEUF[u]}: ${nome(nm, par[0])} ${pf(r.pa)} × ${nome(nm, par[1])} ${pf(r.pb)}` : NOMEUF[u] };
   }
   mapa.set(dadosMapa, selUf);
   if (selUf) detalhe(selUf, par);
@@ -562,6 +717,25 @@ $("apel").oninput = () => { pal.apelido = $("apel").value; salvarLocal(); };
 $("enviar").onclick = enviar;
 $("demoB").hidden = !DEMO;
 poll(); pollTse(); carregarRanking(); setInterval(poll, DEMO ? 3000 : POLL_MS); setInterval(pollTse, TSE_POLL_MS); setInterval(pill, 1000); setInterval(() => { if (!$("v-pal").hidden) carregarRanking().then(() => snap && renderRanking()); }, 15000);
+
+/* batalha na altura do mapa, sem passar da primeira tela (só no computador) */
+function ajustarBatalha() {
+  const ar = document.querySelector("#v-pres .bt-arena"), bt = document.querySelector("#v-pres .bt"), mapa = document.getElementById("map"), hud = document.getElementById("hud");
+  if (!ar || !bt || !mapa) return;
+  ar.style.minHeight = "";
+  if (innerWidth < 1180 || !mapa.offsetParent) return;
+  const base = ar.getBoundingClientRect().height, b = bt.getBoundingClientRect(), y0 = b.top + scrollY;
+  const hudH = hud && hud.offsetParent ? hud.getBoundingClientRect().height + 24 : 0;
+  const alvoMapa = mapa.getBoundingClientRect().bottom + scrollY - hudH;
+  const alvoTela = innerHeight - hudH - 10;
+  const extra = Math.min(alvoMapa, alvoTela) - (y0 + b.height);
+  if (extra > 0) ar.style.minHeight = Math.round(base + extra) + "px";
+}
+let _ajB; const ajustarBatalhaLogo = () => { clearTimeout(_ajB); _ajB = setTimeout(ajustarBatalha, 60); };
+addEventListener("resize", ajustarBatalhaLogo);
+addEventListener("load", ajustarBatalhaLogo);
+if (window.ResizeObserver) { const ro = new ResizeObserver(ajustarBatalhaLogo); ["map", "bat", "hud", "arenaLead"].forEach(id => { const e = document.getElementById(id); if (e) ro.observe(e); }); }
+setInterval(ajustarBatalha, 2500);
 </script>
 </body>
 </html>
