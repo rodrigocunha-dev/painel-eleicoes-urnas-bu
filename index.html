@@ -635,7 +635,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="h1b"><h1>Urnas ao Vivo</h1><div class="warn">Soma dos boletins de urna divulgados pelo TSE, <b>antes da totalização oficial</b>. Não substitui o resultado oficial: <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a></div></div>
+    <div class="h1b"><h1>Urnas ao Vivo</h1><div class="warn">Soma dos boletins de urna divulgados pelo TSE, <b>antes da totalização oficial</b>. Não substitui o resultado oficial: acompanhe a totalização do TSE em <a href="https://painel-eleicoes.vercel.app/" target="_blank" rel="noopener">Apuração Eleições 2026</a> ou em <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a></div></div>
     <div class="meta">
       <span class="pill" id="pill"><i></i><span id="pillTxt">Conectando</span></span>
       <span id="upd">—</span>
@@ -2006,22 +2006,21 @@ function ajustarBatalha() {
   const extra = fim - (y0 + b.height);
   if (extra > 0) ar.style.minHeight = Math.round(base + extra) + "px";
 }
-/* modo clássico: colunas mais compactas e mapa menor, só o necessário para caber na primeira tela */
+/* mapa (batalha e clássico) e colunas do clássico: só o necessário para caber na primeira tela */
 function ajustarMapaClassico() {
-  const lay = $("clLayout"), svg = document.querySelector("#clMapSlot #gmMap svg");
-  document.querySelectorAll("#gmMap svg").forEach(e => { if (e !== svg) { e.style.height = ""; e.style.width = ""; } });
+  const lay = $("clLayout"), cl = lay && !lay.hidden, svg = document.querySelector("#gmMap svg");
   if (lay) lay.classList.remove("aperta");
-  if (!lay || lay.hidden || innerWidth < 820) { if (svg) { svg.style.height = ""; svg.style.width = ""; } return; }
+  if (!svg) return;
+  svg.style.height = ""; svg.style.width = ""; svg.style.marginInline = "";
+  if (innerWidth < (cl ? 820 : 1180) || !svg.getBoundingClientRect().height) return;
   const limite = innerHeight - FOLGA_TELA;
-  if (innerWidth >= 1180) {
+  if (cl && innerWidth >= 1180) {
     const fimCol = () => Math.max(...[".cl-l", ".cl-r"].map(q => { const e = lay.querySelector(q); return e ? e.getBoundingClientRect().bottom + scrollY : 0; }));
     if (fimCol() > limite) lay.classList.add("aperta");
   }
-  if (!svg) return;
-  svg.style.height = ""; svg.style.width = "";
-  if (!svg.getBoundingClientRect().height) return;
-  const r = svg.getBoundingClientRect(), leg = $("gmLeg"), legH = leg && leg.offsetParent ? leg.getBoundingClientRect().height + 8 : 0;
-  const disp = limite - (r.top + scrollY) - legH;
+  // abaixo do mapa ainda vêm a faixa de chips (telas estreitas) e a legenda: tudo isso precisa caber
+  const r = svg.getBoundingClientRect(), leg = $("gmLeg"), abaixo = leg && leg.offsetParent ? Math.max(0, leg.getBoundingClientRect().bottom - r.bottom) : 0;
+  const disp = limite - (r.top + scrollY) - abaixo;
   if (r.height > disp) { svg.style.height = Math.max(360, Math.round(disp)) + "px"; svg.style.width = "auto"; svg.style.marginInline = "auto"; }
 }
 let _ajB; const ajustarBatalhaLogo = () => { clearTimeout(_ajB); _ajB = setTimeout(ajustarBatalha, 60); };
