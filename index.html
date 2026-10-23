@@ -601,6 +601,8 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .gm-toast:not(.on){opacity:0;pointer-events:none}.gm-toast{transition:transform .4s,opacity .4s}
 .gm-toast.on{transform:translate(-50%,0)}
 .rz-map .ext{display:none}
+.rz-svg{display:block;width:100%;height:auto;max-width:640px;margin:0 auto}.rz-svg text{text-anchor:middle}.rz-svg text.ini{text-anchor:start}.rz-svg path:hover{stroke:var(--ink);stroke-width:2}.rz-svg .rzm{cursor:default}
+
 .gm-cf{position:fixed;top:-14px;width:9px;height:14px;z-index:49;pointer-events:none;animation:gmfall 3.2s linear forwards}
 @keyframes gmfall{to{transform:translateY(105vh) rotate(720deg)}}
 @media (prefers-reduced-motion:reduce){.gm-cf{display:none}.gm-rope .fa,.gm-rope .fb,.gm-rope .mk{transition:none}}
@@ -2057,6 +2059,40 @@ function hemiciclo(grupos, total, maioria) {
     <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="11" fill="var(--ink2)">cadeiras · maioria ${maioria}</text></svg></div>`;
 }
 const legendaPartidos = grupos => `<div class="rz-leg">${grupos.map(([sg, n]) => `<span><i style="background:${corPartido(sg)}"></i>${esc(sg)}<b>${n}</b></span>`).join("")}</div>`;
+
+/* mapa do Resumo: cor do partido, foto e sigla em cada estado; passar o mouse mostra o detalhe */
+const RZ_CHIP = { rn: 146, pb: 180, pe: 214, al: 248, se: 282, df: 334, es: 394, rj: 428 };
+function rzMapa(id, dados, opts) {
+  // dados[uf] = { cores:[c1,(c2)], fotos:[url..], nomes:[...], sub:"PL", titulo:"...", forte:bool }
+  const P = "rz" + id, defs = [], corpo = [], marcas = [];
+  for (const [u, d] of Object.entries(BR_PATHS)) {
+    const x = dados[u], cs = x ? x.cores.map(c => x.forte ? c : `color-mix(in srgb, ${c} 50%, #dfe3e8)`) : null;
+    let fill = "var(--track)";
+    if (cs && cs.length > 1 && cs[1] !== cs[0]) { defs.push(`<linearGradient id="${P}g${u}" x1="0" y1="0" x2="1" y2="1"><stop offset=".5" style="stop-color:${cs[0]}"/><stop offset=".5" style="stop-color:${cs[1]}"/></linearGradient>`); fill = `url(#${P}g${u})`; }
+    else if (cs) fill = cs[0];
+    corpo.push(`<path d="${d}" style="fill:${fill}" stroke="var(--panel)" stroke-width="1.2"><title>${esc(x ? x.titulo : UF_NAMES[u])}</title></path>`);
+  }
+  const foto = (cx, cy, r, url, k, cor) => { const cid = `${P}c${k}`; defs.push(`<clipPath id="${cid}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath>`);
+    return `<circle cx="${cx}" cy="${cy}" r="${r + 1.6}" fill="${cor || "#fff"}"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="#2a3440"/>${url ? `<image href="${url}" x="${cx - r}" y="${cy - r}" width="${2 * r}" height="${2 * r}" preserveAspectRatio="xMidYMin slice" clip-path="url(#${cid})"/>` : ""}`; };
+  for (const [u, x] of Object.entries(dados)) {
+    if (!BR_PATHS[u]) continue;
+    const n = x.fotos.length, tit = `<title>${esc(x.titulo)}</title>`;
+    if (RZ_CHIP[u] != null) {                       // estados pequenos: chip ao lado, ligado ao estado
+      const [x0, y0] = CENTRO_UF[u], y = RZ_CHIP[u], X = 606, r = 11;
+      let h = `<line x1="${x0}" y1="${y0}" x2="${X}" y2="${y}" stroke="var(--ink2)" stroke-width=".8" opacity=".7"/><circle cx="${x0}" cy="${y0}" r="2" fill="var(--ink2)"/>`;
+      h += `<rect x="${X}" y="${y - 15}" width="${n * 24 + (x.sub ? 66 : 36)}" height="30" rx="15" style="fill:${x.forte ? x.cores[0] : `color-mix(in srgb, ${x.cores[0]} 50%, #dfe3e8)`}"/>`;
+      x.fotos.forEach((f, i) => { h += foto(X + 15 + i * 24, y, r, f, u + i, "#fff"); });
+      h += `<text class="ini" x="${X + 8 + n * 24}" y="${y + 4.5}" font-size="13" font-weight="800" fill="#0b1118" font-family="var(--f-body)">${u.toUpperCase()}${x.sub ? ` <tspan font-weight="600">${esc(x.sub)}</tspan>` : ""}</text>`;
+      marcas.push(`<g class="rzm">${tit}${h}</g>`); continue;
+    }
+    const [cx, cy, rr] = CENTRO_UF[u], r = Math.max(9, Math.min(20, rr * 0.5)), gap = r * 2 + 3, x1 = cx - (n - 1) * gap / 2;
+    let h = `<text x="${cx}" y="${cy - r - 5}" text-anchor="middle" font-size="${Math.max(12, Math.min(15, rr * 0.4))}" font-weight="800" fill="#0b1118" font-family="var(--f-body)">${u.toUpperCase()}</text>`;
+    x.fotos.forEach((f, i) => { h += foto(x1 + i * gap, cy, r, f, u + i, "#fff"); });
+    if (x.sub) h += `<text x="${cx}" y="${cy + r + 13}" text-anchor="middle" font-size="${Math.max(11, Math.min(14, rr * 0.36))}" font-weight="700" fill="#0b1118" font-family="var(--f-body)">${esc(x.sub)}</text>`;
+    marcas.push(`<g class="rzm">${tit}${h}</g>`);
+  }
+  return `<svg class="rz-svg" viewBox="0 0 712 660" role="img" aria-label="${esc(opts.rotulo)}"><defs>${defs.join("")}</defs>${corpo.join("")}${marcas.join("")}</svg>`;
+}
 async function emLote(lista, n, fn) { const out = new Array(lista.length); let i = 0; await Promise.all(Array.from({ length: n }, async () => { while (i < lista.length) { const k = i++; try { out[k] = await fn(lista[k]); } catch (e) { out[k] = null; } } })); return out; }
 const fotoUF = (d, c) => d && d.fotoBase && c && c.sq ? d.fotoBase + c.sq + ".jpeg" : "";
 const imgOuIni = (u, c) => u ? `<img src="${u}" alt="" referrerpolicy="no-referrer" loading="lazy" onerror="this.outerHTML='<span class=&quot;ph&quot;></span>'">` : '<span class="ph"></span>';
@@ -2123,9 +2159,9 @@ function renderResumoGeral() {
     if (vg === "mapa") {
       const dados = {}, cont = {};
       for (const u of gUF) { const d = R.gov[u], c = d.cands[0]; if (!c || !(c.vap > 0)) continue; const ok = situacaoMaj(d.cands, 1, d).kind === "ok";
-        dados[u] = { cor: corPartido(c.sg), forca: ok ? 1 : 0.55, pct: c.sg, titulo: `${UF_NAMES[u]}: ${nomeBonito(c.nm)} (${c.sg}) · ${ok ? "eleito" : "à frente"}` }; cont[c.sg] = (cont[c.sg] || 0) + 1; }
-      const m = criarMapa($("rzGovMap"), null); m.set(dados, null);
-      $("rzGovMap").insertAdjacentHTML("beforeend", legendaPartidos(Object.entries(cont).sort((a, b) => b[1] - a[1])) + '<div class="sub" style="text-align:center;margin-top:4px">Cor forte = eleito; cor clara = à frente, ainda em disputa.</div>');
+        dados[u] = { cores: [corPartido(c.sg)], fotos: [fotoUF(d, c)], sub: c.sg, forte: ok, titulo: `${UF_NAMES[u]}: ${nomeBonito(c.nm)} (${c.sg}) · ${d.vv ? pf(c.vap / d.vv * 100) : ""} · ${ok ? `eleito no ${d.turno}º turno` : "à frente, ainda em disputa"}` }; cont[c.sg] = (cont[c.sg] || 0) + 1; }
+      $("rzGovMap").innerHTML = rzMapa("gov", dados, { rotulo: "Mapa dos governadores por estado" }) + legendaPartidos(Object.entries(cont).sort((a, b) => b[1] - a[1]))
+        + '<div class="sub" style="text-align:center;margin-top:4px">Cor forte = eleito; cor clara = à frente, ainda em disputa. Passe o mouse (ou toque) no estado para ver o detalhe.</div>';
     }
   } else $("rzGov").innerHTML = "";
   // Senado
@@ -2139,7 +2175,9 @@ function renderResumoGeral() {
       return `<div class="rz-tile" style="background:linear-gradient(135deg, ${c1} 50%, ${c2} 50%)" title="${esc(UF_NAMES[u])}: ${cs.map(c => esc(nomeBonito(c.nm) + " (" + c.sg + ")")).join(", ")}">${u.toUpperCase()}</div>`; }).join("");
     $("rzSen").innerHTML = `<div class="rz-h"><h3>Senado <small>${nT} vagas em disputa · ${nG} definidas</small></h3>${rzSwitch("sen", [["blocos", "Blocos"], ["mapa", "Mapa"], ["cadeiras", "Cadeiras"]], vs)}</div>`
       + (vs === "cadeiras" ? hemiciclo(grupos, nT, Math.floor(81 / 2) + 1) + legendaPartidos(grupos) + '<div class="sub" style="text-align:center;margin-top:4px">Só as vagas desta eleição. O Senado tem 81 cadeiras; a maioria (41) considera também os senadores eleitos em 2022.</div>'
-        : vs === "mapa" ? `<div class="rz-tiles">${tiles}</div>` + legendaPartidos(grupos) + '<div class="sub" style="text-align:center;margin-top:4px">Cada estado elege dois senadores: as duas cores são os partidos dos dois mais votados.</div>'
+        : vs === "mapa" ? `<div class="rz-map">${rzMapa("sen", Object.fromEntries(sUF.map(u => { const d = R.sen[u], cs = d.cands.slice(0, d.nv).filter(c => c.vap > 0); if (!cs.length) return null;
+            const ok = cs.every(c => c.fl === "tse" || c.fl === "gar");
+            return [u, { cores: cs.map(c => corPartido(c.sg)), fotos: cs.map(c => fotoUF(d, c)), forte: ok, titulo: `${UF_NAMES[u]}: ` + cs.map(c => `${nomeBonito(c.nm)} (${c.sg}) ${d.vv ? pf(c.vap / d.vv * 100) : ""}${c.fl === "tse" || c.fl === "gar" ? " eleito" : " à frente"}`).join(" · ") }]; }).filter(Boolean)), { rotulo: "Mapa dos senadores por estado" })}</div>` + legendaPartidos(grupos) + '<div class="sub" style="text-align:center;margin-top:4px">Cada estado elege dois senadores: as duas cores são os partidos deles. Passe o mouse (ou toque) no estado para ver nomes e votos.</div>'
         : `<div class="rz-ban">${ban.map(p => `<span>${esc(p.sg)}<b>${p.proj}</b></span>`).join("")}</div><div class="rz-sen">${lista}</div>`);
   } else $("rzSen").innerHTML = "";
   // Deputados
