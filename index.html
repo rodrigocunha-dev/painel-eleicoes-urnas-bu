@@ -1986,6 +1986,20 @@ function montarAbas() {
 const FOLGA_TELA = 22;
 function ajustarBatalha() {
   ajustarMapaClassico();
+  ajustarBatalhaCore();
+  cortarPrimeiraTela();
+}
+/* o bloco seguinte não pode aparecer pela metade no fim da primeira tela: ou aparece inteiro, ou começa logo abaixo dela */
+function cortarPrimeiraTela() {
+  const lay = $("clLayout"), cl = lay && !lay.hidden;
+  ["#clLayout .cl-bx", "#gmFeedBox"].forEach(q => { const e = document.querySelector(q); if (e) e.style.marginTop = ""; });
+  if (innerWidth < 1180 || state.tab !== "presidente") return;
+  const e = document.querySelector(cl ? "#clLayout .cl-bx" : "#gmFeedBox");
+  if (!e || !e.offsetParent) return;
+  const r = e.getBoundingClientRect(), topo = r.top + scrollY, mt = parseFloat(getComputedStyle(e).marginTop) || 0;
+  if (topo < innerHeight && topo + r.height > innerHeight - 4) e.style.marginTop = Math.ceil(mt + innerHeight - topo + 24) + "px";
+}
+function ajustarBatalhaCore() {
   const gm = document.querySelector(".gm"), ar = document.querySelector(".gm .bt-arena"), bt = document.querySelector(".gm .bt"), mapa = $("gmMap"), hud = $("gmHud");
   if (!gm || !ar || !bt || !mapa) return;
   ar.style.minHeight = ""; gm.classList.remove("btf"); gm.style.removeProperty("--btf");
