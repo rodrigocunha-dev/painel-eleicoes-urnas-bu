@@ -6,6 +6,7 @@ const ROTAS = {
   resumo: { q: "snapshot?id=eq.resumo&select=data", cache: 2 },
   exterior: { q: "snapshot?id=eq.exterior&select=data", cache: 30 },
   ranking: { q: "ranking?select=apelido,br,ufs,govs,criado&order=criado.asc&limit=5000", cache: 30 },
+  "hist-bu": { q: "snapshot?id=eq.hist-bu&select=data", cache: 30 },
 };
 module.exports = async (req, res) => {
   const id = String((req.query && req.query.id) || "resumo");
