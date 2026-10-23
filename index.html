@@ -89,6 +89,8 @@ td.mini{width:130px;min-width:110px;padding-inline:6px}
 .lp{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.8rem;font-weight:600}
 .lp.a{background:var(--a-soft);color:var(--a)} .lp.b{background:var(--b-soft);color:var(--b)} .lp.n{background:var(--track);color:var(--ink2)}
 td.ap .bar{width:64px;display:inline-block;vertical-align:middle;margin:0 8px 0 0}
+/* tabela por estado (presidente): colunas dos candidatos, barrinha e líder centralizadas com os títulos; % lido sem barra */
+.tp th:nth-child(n+2):nth-child(-n+5),.tp td:nth-child(n+2):nth-child(-n+5){text-align:center}.tp td.mini .split{margin-inline:auto}.tp td.ap .bar{display:none}
 .foot{color:var(--ink2);font-size:.82rem}
 .foot a{color:inherit}
 [hidden]{display:none!important}
@@ -529,7 +531,8 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .rg2 .tw2 b{text-shadow:none}.rg2 .tw2 b:first-of-type{color:color-mix(in srgb,var(--a) 22%,#000)}.rg2 .tw2 b:last-of-type{color:color-mix(in srgb,var(--b) 22%,#000)}
 .cl-fa,.cl-fa b{color:color-mix(in srgb,var(--a) 22%,#000)}.cl-fb,.cl-fb b{color:color-mix(in srgb,var(--b) 22%,#000)}.cl-fa span,.cl-fb span{opacity:1;font-weight:600}
 .gm-hd{display:flex;justify-content:space-between;align-items:center;gap:6px 12px;flex-wrap:wrap}
-.gm-hd .gm-lead{margin-top:0;justify-content:flex-end;font-size:.95rem}
+.gm-hd .gm-lead{margin-top:0;justify-content:flex-end;font-size:.88rem}.gm-hd .gm-lead .gm-seal{font-size:.72rem}
+@media (min-width:1180px){.gm-hd{flex-wrap:nowrap}.gm-hd h2{white-space:nowrap}.gm-hd .gm-lead{white-space:nowrap;min-width:0}}
 /* clássico: quem perdeu fica apagado */
 .perde{filter:grayscale(1);opacity:.45;transition:filter .5s,opacity .5s}
 /* primeira tela sem rolar */
@@ -1487,7 +1490,7 @@ function jogoPres(r, A, B) {
     : win >= 0 && fim ? `${esc(nomeCurto(win ? B : A))} é eleito presidente com ${pf(win ? r.pb : r.pa)} dos votos válidos`
     : t2 && fim ? `${esc(nomeCurto(ladoBr === 1 ? B : A))} e ${esc(nomeCurto(ladoBr === 1 ? A : B))} vão ao 2º turno`
     : ladoBr < 0 ? "Empate"
-    : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${pp} p.p. (${fmtCurto(Math.abs(r.a - r.b))} de votos)`;
+    : `${esc(nomeCurto(ladoBr ? B : A))} ${win >= 0 ? "vence a batalha por" : "à frente por"} ${pp} p.p. (${nf.format(Math.abs(r.a - r.b))} votos)`;
   $("gmLead").innerHTML = `<span>${lead}</span>${win >= 0 ? `<span class="gm-seal">${fim ? "VENCEDOR" : "RESULTADO GARANTIDO"}</span>` : t2 ? `<span class="gm-seal t2">2º TURNO GARANTIDO</span>` : ""}`;
   // mapa + placar de estados + eventos
   let la = 0, lb = 0, ga = 0, gb = 0; const dados = {};
