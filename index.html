@@ -598,45 +598,25 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .gm-pal{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;border:2px dashed var(--line);border-radius:12px;padding:10px 12px}
 .gm-pal a{font-weight:700;color:var(--b)}
 .gm-toast{position:fixed;left:50%;top:12px;transform:translate(-50%,-140px);background:var(--panel);color:var(--ink);border:2px solid var(--ink);border-radius:12px;padding:10px 16px;font-weight:700;z-index:50;transition:transform .4s;max-width:92vw;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.gm-toast:not(.on){opacity:0;pointer-events:none}.gm-toast{transition:transform .4s,opacity .4s}
 .gm-toast.on{transform:translate(-50%,0)}
+.rz-map .ext{display:none}
 .gm-cf{position:fixed;top:-14px;width:9px;height:14px;z-index:49;pointer-events:none;animation:gmfall 3.2s linear forwards}
 @keyframes gmfall{to{transform:translateY(105vh) rotate(720deg)}}
 @media (prefers-reduced-motion:reduce){.gm-cf{display:none}.gm-rope .fa,.gm-rope .fb,.gm-rope .mk{transition:none}}
 
-/* ===== Resumo: uma tela final com o resultado, para compartilhar ===== */
-#rsLayout{display:grid;gap:14px}#rsLayout[hidden]{display:none}
-.rs-hd{display:flex;justify-content:space-between;align-items:center;gap:8px 14px;flex-wrap:wrap}
-.rs{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
-@media (min-width:1000px){.rs{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:start}}
-.rs-l{display:grid;gap:12px;min-width:0}.rs-r{min-width:0}.rs-r #mapBlock>h2{display:none}
-.rs-c{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:14px 16px;border-radius:16px;border:1px solid color-mix(in srgb,var(--k) 45%,var(--line));background:color-mix(in srgb,var(--k) 12%,var(--panel))}
-.rs-c img,.rs-c .ph{width:104px;height:104px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--track);box-shadow:0 0 0 4px var(--k)}
-.rs-tag{font:700 .78rem var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--k)}
-.rs-nm{font:700 1.9rem/1.05 var(--f-disp)}.rs-nm small{font:600 .85rem var(--f-body);color:var(--ink2);margin-left:6px}
-.rs-pc{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:2px}
-.rs-pc b{font:800 2.8rem/1 var(--f-disp);color:var(--k)}.rs-pc span{color:var(--ink2)}
-.rs-c.seg{padding:10px 16px}.rs-c.seg img,.rs-c.seg .ph{width:64px;height:64px;box-shadow:0 0 0 3px var(--k)}
-.rs-c.seg .rs-nm{font-size:1.4rem}.rs-c.seg .rs-pc b{font-size:1.9rem}
-.rs-c.perde img,.rs-c.perde .ph{filter:grayscale(1);opacity:.55}.rs-c.perde .rs-pc b{color:var(--ink2)}
-#rsCards{display:grid;gap:10px}
-.rs-bar{position:relative;display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--track)}
-.rs-bar i{display:block;height:100%}.rs-bar u{position:absolute;left:50%;top:-2px;bottom:-2px;border-left:2px solid var(--panel)}
-.rs-t,.rs-t.um{margin-top:0;grid-template-columns:repeat(3,1fr)}
-.rs-t em{display:block;font-style:normal;color:var(--ink2);font-size:.75rem}
-.rs-rg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.rr{border:1px solid var(--line);border-radius:10px;padding:5px 10px;min-width:0}.rr span{font-size:.8rem;color:var(--ink2)}
-.rr-b{position:relative;display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--track);margin:4px 0}.rr-b i{display:block;height:100%}.rr-b u{position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--panel)}
-.rr-n{display:flex;justify-content:space-between;font:700 .95rem var(--f-disp)}
-@media (min-width:1000px){.rs-c{padding:10px 14px}.rs-c img,.rs-c .ph{width:86px;height:86px}.rs-pc b{font-size:2.4rem}.rs-nm{font-size:1.6rem}
-  .rs-c.seg{padding:8px 14px}.rs-c.seg img,.rs-c.seg .ph{width:50px;height:50px}.rs-c.seg .rs-nm{font-size:1.2rem}.rs-c.seg .rs-pc b{font-size:1.5rem}
-  .rs-t div{padding:5px 10px}.rs-t b{font-size:1.35rem}.rs-l{gap:10px}#rsCards{gap:8px}}
-@media (max-width:600px){.rs-rg{grid-template-columns:1fr 1fr}}
-.rs-fo{color:var(--ink2);font-size:.78rem;margin-top:2px}.rs-ac{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-#rsShare{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 14px;font:600 .9rem var(--f-body);cursor:pointer}
-@media (max-width:600px){.rs-c img,.rs-c .ph{width:72px;height:72px}.rs-nm{font-size:1.5rem}.rs-pc b{font-size:2.2rem}.rs-t{grid-template-columns:1fr 1fr}.rs-c.seg img,.rs-c.seg .ph{width:52px;height:52px}}
-
 /* ===== Resumo geral: os eleitos de todos os cargos ===== */
-.rz{display:grid;gap:22px}
+.rz-sec>.rz-h{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:10px}
+.rz-sec>.rz-h h3{font:700 1.25rem var(--f-disp);margin:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.rz-sec>.rz-h h3 small{font:500 .82rem var(--f-body);color:var(--ink2)}
+.rz-sw button{padding:5px 12px;font-size:.85rem}
+.rz-map{max-width:620px;margin:0 auto}
+.rz-leg{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:.85rem;margin-top:8px}.rz-leg i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}.rz-leg b{font-family:var(--f-disp);margin-left:3px}
+.rz-hemi{max-width:560px;margin:0 auto;display:block}.rz-hemi svg{display:block;width:100%;height:auto}
+.rz-tiles{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px;max-width:560px;margin:0 auto}
+.rz-tile{aspect-ratio:1.35;border-radius:8px;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--f-disp);color:#0b1118;border:1px solid rgba(0,0,0,.2)}
+@media (max-width:600px){.rz-tiles{grid-template-columns:repeat(6,minmax(0,1fr))}.rz-uf{grid-template-columns:1fr 1fr}.rz-uf details[open]{grid-column:1/-1}.rz-uf summary{flex-direction:column;gap:0}}
+
+.rz{display:grid;gap:22px;--jg-ink:var(--ink);--jg-mut:var(--ink2);--jg-ground:var(--track);--jg-bg:var(--panel)}
 .rz-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px 14px;flex-wrap:wrap}
 .rz-sec[hidden]{display:none}.rz-sec:empty{display:none}
 .rz-sec>h3{font:700 1.25rem var(--f-disp);margin:0 0 10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
@@ -723,7 +703,6 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     <div class="vsw" id="modoSw" role="group" aria-label="Forma de visualizar">
     <button type="button" data-modo="batalha" aria-pressed="true"><span class="ic">🎮 </span>Batalha</button>
     <button type="button" data-modo="classico" aria-pressed="false"><span class="ic">📊 </span>Clássico</button>
-    <button type="button" data-modo="resumo" aria-pressed="false"><span class="ic">🏁 </span>Resumo</button>
   </div>
   </div>
   <div id="notice" hidden></div>
@@ -749,14 +728,6 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
       <div class="cl-r"><div class="clc"><h3>Resultado por região</h3><div id="clReg"></div></div></div>
     </div>
     <div class="cl-bx"><div class="clc"><h3>Evolução da apuração</h3><div id="clChart"></div></div><div class="clc"><h3>Acontecimentos da apuração</h3><div id="clFeed"></div></div></div>
-    </div>
-    <div id="rsLayout" hidden>
-      <div class="rs-hd"><div><h2 id="rsTit">Resultado</h2><div class="rs-fo" id="rsFonte"></div></div><div class="rs-ac"><span id="rsSt"></span><button type="button" id="rsShare">Compartilhar resultado</button></div></div>
-      <div class="rs">
-        <div class="rs-l"><div id="rsCards"></div><div id="rsBar"></div><div class="gm-hud rs-t" id="rsTiles"></div>
-          <div class="rs-rg" id="rsReg"></div></div>
-        <div class="rs-r" id="rsMapSlot"></div>
-      </div>
     </div>
     <div class="gm-grid" id="gmGrid"><div class="gm-c1">
     <div id="gmBatBox"><div class="gm-hd"><h2 id="hGm">Batalha ao vivo</h2><div class="gm-lead" id="gmLead"></div></div>
@@ -793,7 +764,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
   </div>
   <div class="view" id="v-resumo" hidden>
   <section class="panel rz" aria-labelledby="hRz">
-    <div class="rz-hd"><div><h2 id="hRz">Resumo pelos boletins de urna</h2><div class="sub" id="rzSub">Quem está eleito ou à frente na soma dos boletins de urna lidos pelo coletor, antes da totalização oficial. Senadores e deputados não estão nos boletins do 2º turno: veja no painel Apuração Eleições 2026.</div></div><span id="rzSt"></span></div>
+    <div class="rz-hd"><div><h2 id="hRz">Resumo das eleições 2026</h2><div class="sub" id="rzSub">Presidente e governadores do turno em andamento pela soma dos boletins de urna, antes da totalização oficial. Os demais cargos e o 1º turno vêm da totalização oficial do TSE.</div></div><span id="rzSt"></span></div>
     <div class="rz-sec" id="rzPres"></div>
     <div class="rz-sec" id="rzGov"></div>
     <div class="rz-sec" id="rzSen"></div>
@@ -896,6 +867,9 @@ const FONTE = {
     this.pe = (async () => { try { const j = await this.pegar("exterior"); this.ext = (j[0] && j[0].data && j[0].data.zz) || (this.snap && this.snap.zz) || {}; this.extAt = Date.now(); return this.ext; } finally { this.pe = null; } })();
     return this.pe;
   },
+  // só os arquivos das eleições que o coletor está lendo vêm dos boletins; o resto (o outro turno, senadores, deputados) é o oficial do TSE
+  cobre(url) { if (!this.snap) return false; const m = url.match(/ele2026\/(\d+)\/dados\//); return !!m && (m[1] === String(this.snap.ele) || m[1] === String(this.snap.eleGov)); },
+  ativo() { return !!(this.snap && state.ele && String(state.ele.cd) === String(this.snap.ele)); },
   hora() { const g = this.snap && this.snap.gerado; return g ? new Date(g).toLocaleTimeString("pt-BR") : "—"; },
   oficial() { const b = this.snap && this.snap.pres && this.snap.pres.br; return b && b.ts ? pf((b.st || 0) / b.ts * 100) : "—"; },
   frente() { const b = this.snap && this.snap.pres && this.snap.pres.br; return b ? (b.lidas || 0) - (b.st || 0) : 0; },
@@ -934,7 +908,7 @@ const FONTE = {
   }
 };
 async function getJSON(url, jws, fetchFn) {
-  if (url.startsWith(BASE)) return FONTE.responder(url);
+  if (url.startsWith(BASE) && FONTE.cobre(url)) return FONTE.responder(url);
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
   try {
     const r = await fetchFn(url, { cache: "no-store", signal: ctl.signal });
@@ -946,7 +920,7 @@ async function getJSON(url, jws, fetchFn) {
   } finally { clearTimeout(t); }
 }
 async function getTSE(url, fetchFn) {
-  if (url.startsWith(BASE)) return FONTE.responder(url);
+  if (url.startsWith(BASE) && FONTE.cobre(url)) return FONTE.responder(url);
   if (!/-u\.json$/.test(url)) return getJSON(url, false, fetchFn);
   try { return await getJSON(url.replace(/\.json$/, ".jws") + "?nocache=" + Math.floor(Date.now() / 5000) * 5000, true, fetchFn); }
   catch (e) { return getJSON(url, false, fetchFn); }
@@ -1468,35 +1442,6 @@ function grafico(A, B) {
     <path d="${linha(1)}" fill="none" stroke="var(--a)" stroke-width="2.2"/><path d="${linha(2)}" fill="none" stroke="var(--b)" stroke-width="2.2"/>
     <circle cx="${X(u[0])}" cy="${Y(u[1])}" r="3.5" fill="var(--a)"/><circle cx="${X(u[0])}" cy="${Y(u[2])}" r="3.5" fill="var(--b)"/></svg>`;
 }
-const RS_FONTE = "Fonte: boletins de urna do TSE lidos pelo coletor, antes da totalização oficial";
-function renderResumo(r, A, B, sm) {
-  if (!A || !B) return;
-  const br = state.br, com = r.vv > 0, fim = br.tf === "s" || (br.pst || r.pst) >= 100;
-  const eleito = sm && sm.kind === "eleito" ? String(sm.cand.n) : null, t2 = sm && sm.kind === "turno2";
-  const ordem = r.b > r.a ? [[B, r.b, r.pb, "var(--b)"], [A, r.a, r.pa, "var(--a)"]] : [[A, r.a, r.pa, "var(--a)"], [B, r.b, r.pb, "var(--b)"]];
-  const foto = c => c && c.sq && state.ele ? `${BASE}${state.ele.ciclo}/${state.ele.cd}/fotos/br/${c.sq}.jpeg` : "";
-  const ini = c => esc(nomeCurto(c).slice(0, 2).toUpperCase());
-  const tag = (c, i) => !com ? "Aguardando votos"
-    : eleito ? (String(c.n) === eleito ? (fim && sm.tse !== false ? "Eleito presidente" : "Eleito presidente (matemático)") : "Derrotado")
-    : t2 ? "Vai ao 2º turno" : i === 0 ? "À frente" : "Em segundo";
-  $("rsTit").textContent = `Presidente · ${state.turno}º turno · Eleições 2026`;
-  $("rsSt").innerHTML = !com ? "" : fim ? '<span class="lp ok">Leitura concluída</span>' : `<span class="lp warn">Parcial · ${pf(br.pst || r.pst)} lido</span>`;
-  $("rsCards").innerHTML = ordem.map(([c, v, p, k], i) => `<div class="rs-c${i ? " seg" : ""}${eleito && String(c.n) !== eleito ? " perde" : ""}" style="--k:${k}">
-      ${foto(c) ? `<img src="${foto(c)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;></span>'">` : '<span class="ph"></span>'}
-      <div><div class="rs-tag">${tag(c, i)}</div><div class="rs-nm">${esc(nomeBonito(c.nm) || nomeCurto(c))}<small>${esc(c.sg || "")} ${esc(c.n)}</small></div>
-      <div class="rs-pc"><b>${com ? pf(p) : "—"}</b><span>${com ? nf.format(v) + " votos" : ""}</span></div></div></div>`).join("");
-  $("rsBar").innerHTML = com ? `<div class="rs-bar"><i style="width:${r.pa}%;background:var(--a)"></i><i style="width:${Math.max(0, 100 - r.pa - r.pb)}%"></i><i style="width:${r.pb}%;background:var(--b)"></i><u></u></div>` : "";
-  let ea = 0, eb = 0; for (const uf of UFS) { const f = state.files[uf]; if (!f) continue; const g = resumoFile(f, A.n, B.n); if (g.a > g.b) ea++; else if (g.b > g.a) eb++; }
-  $("rsTiles").innerHTML = `<div><small>Diferença</small><b>${com ? Math.abs(r.pa - r.pb).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " p.p." : "—"}</b><em>${com ? nf.format(Math.abs(r.a - r.b)) + " votos" : ""}</em></div>
-    <div><small>Estados vencidos</small><b><span style="color:var(--a)">${ea}</span> × <span style="color:var(--b)">${eb}</span></b><em>${esc(nomeCurto(A))} × ${esc(nomeCurto(B))}</em></div>
-    <div><small>Votos válidos</small><b>${com ? nf.format(r.vv) : "—"}</b><em>${com ? "sem brancos e nulos" : ""}</em></div>`;
-  $("rsReg").innerHTML = [...Object.entries(REGIOES), ["Exterior", ["zz"]]].map(([nome, ufs]) => {
-    const g = somar(state.files, ufs, A.n, B.n), t = g.a + g.b, pa = t ? g.a / t * 100 : 50;
-    return `<div class="rr"><span>${esc(nome)}</span><div class="rr-b"><i style="width:${pa}%;background:var(--a)"></i><i style="width:${100 - pa}%;background:var(--b)"></i><u></u></div>
-      <div class="rr-n"><b style="color:var(--a)">${g.vv ? pf(g.pa) : "—"}</b><b style="color:var(--b)">${g.vv ? pf(g.pb) : "—"}</b></div></div>`;
-  }).join("");
-  $("rsFonte").textContent = `${RS_FONTE} · atualizado às ${new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · fotos: TSE · mapa: Victor Cazanave (svg-maps), CC BY 4.0`;
-}
 function classicoExtras(r, A, B, sm) {
   if (!A || !B) return;
   const br = state.br, t = r.a + r.b, d = Math.abs(r.a - r.b), fim = br.tf === "s" || br.esnt === 0;
@@ -1646,8 +1591,8 @@ function jogoPres(r, A, B) {
   $("gmHud").innerHTML = (iguais ? `<div><small>Estados (todos definidos)</small><b><span style="color:var(--a)">${la}</span> × <span style="color:var(--b)">${lb}</span></b></div>`
     : `<div><small>Estados liderando</small><b><span style="color:var(--a)">${la}</span> × <span style="color:var(--b)">${lb}</span></b></div>
     <div><small>Estados garantidos</small><b><span style="color:var(--a)">${ga}</span> × <span style="color:var(--b)">${gb}</span></b></div>`) + `
-    <div><small>Urnas lidas · TSE ${FONTE.oficial()}</small><b>${pf(br.pst || r.pst)}</b></div>
-    <div><small>Urnas à frente do TSE</small><b style="color:${FONTE.frente() >= 0 ? "var(--ok)" : "var(--warn)"}">${FONTE.frente() >= 0 ? "+" : "−"}${nf.format(Math.abs(FONTE.frente()))}</b></div>`;
+    ${FONTE.ativo() ? `<div><small>Urnas lidas · TSE ${FONTE.oficial()}</small><b>${pf(br.pst || r.pst)}</b></div>
+    <div><small>Urnas à frente do TSE</small><b style="color:${FONTE.frente() >= 0 ? "var(--ok)" : "var(--warn)"}">${FONTE.frente() >= 0 ? "+" : "−"}${nf.format(Math.abs(FONTE.frente()))}</b></div>` : `<div><small>Totalização oficial do TSE</small><b>${pf(br.pst || r.pst)}</b></div>`}`;
   gmDetalhe(A, B);
   if (PALPITES_URL && !PAL.travado()) { $("gmPal").hidden = false; $("gmPalLink").href = "#" + state.turno + "turno/palpites"; $("gmPalLink").removeAttribute("target"); } else $("gmPal").hidden = true;
   if (!GM.ini) { GM.ini = true; renderFeed(); }
@@ -1753,7 +1698,6 @@ function render() {
   $("brPst").textContent = pf(br.pst || r.pst) + " lido";
   $("brSec").textContent = `· ${nf.format(br.st)} de ${nf.format(br.ts)} urnas (seções)`;
   try { classicoExtras(r, A, B, sm); } catch (e) { console.error(e); }
-  try { if (GM.modo === "resumo") renderResumo(r, A, B, sm); } catch (e) { console.error(e); }
   $("brBar").style.width = Math.min(100, br.pst || r.pst) + "%";
 
   $("regs").innerHTML = Object.entries(REGIOES).map(([nome, ufs]) => {
@@ -1785,7 +1729,7 @@ function render() {
       <td class="mini"><div class="split sm"><i class="sa" style="width:${g.pa / t * 100}%"></i><i class="sb" style="width:${g.pb / t * 100}%"></i></div></td>
       <td class="ld">${lid2}</td><td class="ap num"><i class="pp">${pf(g.pst)}</i><span class="qq">${nf.format(g.st)}/${nf.format(g.ts)}</span></td>`;
   }).map(h => `<tr>${h}</tr>`).join("");
-  setUpd(`Coletor: ${FONTE.hora()}`);
+  setUpd(FONTE.ativo() ? `Coletor: ${FONTE.hora()}` : `TSE (oficial): totalização ${br.ht || "—"}`);
   try { jogoPres(r, A, B); } catch (e) { console.error(e); }
 }
 
@@ -1854,7 +1798,10 @@ const busy = {};
 const hora = () => new Date().toLocaleTimeString("pt-BR");
 const f1 = v => v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 async function obterCfg() {
-  if (!state.cfg || Date.now() - state.cfgAt > 600000) { state.cfg = await getJSON(BASE + "comum/config/ele-c.json", false, fetch.bind(window)); state.cfgAt = Date.now(); }
+  if (!state.cfg || Date.now() - state.cfgAt > 600000) {
+    try { state.cfg = await getJSON(BASE + "comum/config/ele-c.json", false, fetch.bind(window)); state.cfgAt = Date.now(); }
+    catch (e) { if (state.cfg) return state.cfg; await FONTE.ler().catch(() => null); if (!FONTE.snap) throw e; return FONTE.responder(BASE + "comum/config/ele-c.json"); }
+  }
   return state.cfg;
 }
 
@@ -1940,7 +1887,7 @@ async function carregarMaj(tab) {
       }
     }
     const ref = S.files[UFS.find(u => S.files[u])];
-    setUpd(`Coletor: ${FONTE.hora()}`, tab.id);
+    setUpd(FONTE.ativo() ? `Coletor: ${FONTE.hora()}` : `TSE (oficial): totalização ${ref?.ht || "—"}`, tab.id);
     aviso(falhas ? `<b>${falhas} estado(s) sem leitura nesta rodada.</b>Ficam com a última leitura válida e a página tenta de novo.` : null, false, tab.id);
     setPill("live", "Ao vivo", tab.id);
     renderMaj(tab);
@@ -2082,12 +2029,34 @@ function lerHash() {
   return { turno: m && m[1] || null, tab: m && m[2] || "" };
 }
 function aplicarTurnoUI() {
-  document.querySelectorAll("#turnoSw button").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.t === (state.resumo ? "r" : state.turno))); if (b.dataset.t !== "r") b.hidden = !!FONTE.turno && b.dataset.t !== FONTE.turno; });
+  document.querySelectorAll("#turnoSw button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.t === (state.resumo ? "r" : state.turno))));
   TABS.forEach(t => { const b = $("tab_" + t.id); b.hidden = state.turno === "2" && SO_T1.includes(t.id); });
   const g = $("tab_governador"); if (g) g.textContent = "Governador";
 }
 
 /* ===== Resumo geral: lê o resultado de todos os cargos e mostra só quem foi eleito (ou está na frente) ===== */
+
+/* cores dos partidos (só para identificar; sem classificação ideológica) */
+const COR_PARTIDO = { PL: "#2f62d0", PT: "#d93a3a", "UNIÃO": "#33b5e5", PSD: "#7cbf4a", MDB: "#14874a", PP: "#8fd6f2", REPUBLICANOS: "#2a7aa8", PSB: "#f0a13a", PDT: "#e0658a", PSDB: "#5a8fe0", NOVO: "#f27a1f", PSOL: "#f2d33a", PODE: "#36b3a8", AVANTE: "#c9a227", CIDADANIA: "#e54d8a", PCdoB: "#b3262b", PV: "#4fbf6a", REDE: "#38b2a0", SOLIDARIEDADE: "#ef8a3a", PRD: "#3c5aa8", MISSÃO: "#8a5cd6", DC: "#8f7cc9", PMB: "#c45ab3", AGIR: "#6a9fd4", MOBILIZA: "#a6855c", PRTB: "#4a8c7a", PCO: "#a03030", PSTU: "#c23b3b", UP: "#d65555", PCB: "#9e2a2a" };
+const corPartido = sg => { const k = String(sg || "").toUpperCase(); if (COR_PARTIDO[k]) return COR_PARTIDO[k]; let h = 0; for (const c of k) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 60%)`; };
+function rzVis(k, pad) { try { return JSON.parse(localStorage.getItem("rzVis") || "{}")[k] || pad; } catch (e) { return pad; } }
+function rzSalvaVis(k, v) { try { const o = JSON.parse(localStorage.getItem("rzVis") || "{}"); o[k] = v; localStorage.setItem("rzVis", JSON.stringify(o)); } catch (e) { /* ok */ } }
+const rzSwitch = (k, ops, atual) => `<div class="vsw rz-sw" role="group" data-k="${k}">${ops.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${v === atual}">${t}</button>`).join("")}</div>`;
+// hemiciclo: cadeiras em arcos, distribuídas da esquerda para a direita na ordem dada
+function hemiciclo(grupos, total, maioria) {
+  const N = Math.max(1, total), R = N > 400 ? 12 : N > 120 ? 9 : N > 60 ? 6 : 4, r0 = 0.38, W = 360, H = 200, cx = W / 2, cy = H - 8, esc = 170;
+  const raios = Array.from({ length: R }, (_, i) => r0 + (1 - r0) * i / (R - 1)), soma = raios.reduce((a, b) => a + b, 0);
+  const qt = raios.map(r => Math.max(1, Math.round(N * r / soma))); let dif = N - qt.reduce((a, b) => a + b, 0); for (let i = R - 1; dif !== 0; i = (i - 1 + R) % R) { qt[i] += dif > 0 ? 1 : -1; dif += dif > 0 ? -1 : 1; }
+  const pts = []; raios.forEach((r, i) => { const n = qt[i]; for (let k = 0; k < n; k++) { const a = Math.PI * (n === 1 ? 0.5 : k / (n - 1)); pts.push({ a, x: cx - Math.cos(a) * r * esc, y: cy - Math.sin(a) * r * esc }); } });
+  pts.sort((p, q) => p.a - q.a || q.y - p.y);
+  const dr = (1 - r0) * esc / (R - 1 || 1), rr = Math.min(dr * 0.42, 9);
+  const cores = []; grupos.forEach(([sg, n]) => { for (let i = 0; i < n; i++) cores.push(corPartido(sg)); });
+  const dots = pts.map((p, i) => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rr.toFixed(1)}" fill="${cores[i] || "var(--track)"}"/>`).join("");
+  return `<div class="rz-hemi"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cadeiras por partido">${dots}
+    <text x="${cx}" y="${cy - 22}" text-anchor="middle" font-size="34" font-weight="700" fill="var(--ink)" font-family="var(--f-disp)">${nf.format(total)}</text>
+    <text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="11" fill="var(--ink2)">cadeiras · maioria ${maioria}</text></svg></div>`;
+}
+const legendaPartidos = grupos => `<div class="rz-leg">${grupos.map(([sg, n]) => `<span><i style="background:${corPartido(sg)}"></i>${esc(sg)}<b>${n}</b></span>`).join("")}</div>`;
 async function emLote(lista, n, fn) { const out = new Array(lista.length); let i = 0; await Promise.all(Array.from({ length: n }, async () => { while (i < lista.length) { const k = i++; try { out[k] = await fn(lista[k]); } catch (e) { out[k] = null; } } })); return out; }
 const fotoUF = (d, c) => d && d.fotoBase && c && c.sq ? d.fotoBase + c.sq + ".jpeg" : "";
 const imgOuIni = (u, c) => u ? `<img src="${u}" alt="" referrerpolicy="no-referrer" loading="lazy" onerror="this.outerHTML='<span class=&quot;ph&quot;></span>'">` : '<span class="ph"></span>';
@@ -2148,7 +2117,16 @@ function renderResumoGeral() {
       return `<div class="rz-g${ok ? " ok" : ""}">${imgOuIni(fotoUF(d, c), c)}<div><div class="u">${esc(UF_NAMES[u])}</div><div class="n">${c && c.vap > 0 ? esc(nomeBonito(c.nm)) : "—"}<small>${c ? esc(c.sg) : ""}</small></div></div>
         <div class="pc">${c && c.vap > 0 ? pf(pct) : "—"}<small>${esc(st)}</small></div></div>`;
     }).join("");
-    $("rzGov").innerHTML = `<h3>Governadores <small>${nEl} de ${gUF.length} definidos</small></h3><div class="rz-gov">${cards}</div>`;
+    const vg = rzVis("gov", "blocos");
+    $("rzGov").innerHTML = `<div class="rz-h"><h3>Governadores <small>${nEl} de ${gUF.length} definidos</small></h3>${rzSwitch("gov", [["blocos", "Blocos"], ["mapa", "Mapa"]], vg)}</div>`
+      + (vg === "mapa" ? `<div class="rz-map" id="rzGovMap"></div>` : `<div class="rz-gov">${cards}</div>`);
+    if (vg === "mapa") {
+      const dados = {}, cont = {};
+      for (const u of gUF) { const d = R.gov[u], c = d.cands[0]; if (!c || !(c.vap > 0)) continue; const ok = situacaoMaj(d.cands, 1, d).kind === "ok";
+        dados[u] = { cor: corPartido(c.sg), forca: ok ? 1 : 0.55, pct: c.sg, titulo: `${UF_NAMES[u]}: ${nomeBonito(c.nm)} (${c.sg}) · ${ok ? "eleito" : "à frente"}` }; cont[c.sg] = (cont[c.sg] || 0) + 1; }
+      const m = criarMapa($("rzGovMap"), null); m.set(dados, null);
+      $("rzGovMap").insertAdjacentHTML("beforeend", legendaPartidos(Object.entries(cont).sort((a, b) => b[1] - a[1])) + '<div class="sub" style="text-align:center;margin-top:4px">Cor forte = eleito; cor clara = à frente, ainda em disputa.</div>');
+    }
   } else $("rzGov").innerHTML = "";
   // Senado
   const sUF = ordemUF.filter(u => R.sen && R.sen[u]);
@@ -2156,8 +2134,13 @@ function renderResumoGeral() {
     const ban = cadeirasSenado(R.sen), nG = ban.reduce((a, p) => a + p.gar, 0), nT = ban.reduce((a, p) => a + p.proj, 0);
     if (nG < nT) todosFinais = false;
     const lista = sUF.map(u => { const d = R.sen[u]; return `<div class="rz-s"><div class="u">${esc(UF_NAMES[u])}</div>${d.cands.slice(0, d.nv).filter(c => c.vap > 0).map(c => `<div>${esc(nomeBonito(c.nm))}<small>${esc(c.sg)}</small>${c.fl === "tse" || c.fl === "gar" ? chip("eleito", true) : chip("à frente")}</div>`).join("") || '<div class="sub">sem votos</div>'}</div>`; }).join("");
-    $("rzSen").innerHTML = `<h3>Senado <small>${nT} vagas em disputa · ${nG} definidas</small></h3>
-      <div class="rz-ban">${ban.map(p => `<span>${esc(p.sg)}<b>${p.proj}</b></span>`).join("")}</div><div class="rz-sen">${lista}</div>`;
+    const vs = rzVis("sen", "blocos"), grupos = ban.map(p => [p.sg, p.proj]);
+    const tiles = sUF.map(u => { const d = R.sen[u], cs = d.cands.slice(0, d.nv).filter(c => c.vap > 0), c1 = corPartido(cs[0] && cs[0].sg), c2 = corPartido((cs[1] || cs[0] || {}).sg);
+      return `<div class="rz-tile" style="background:linear-gradient(135deg, ${c1} 50%, ${c2} 50%)" title="${esc(UF_NAMES[u])}: ${cs.map(c => esc(nomeBonito(c.nm) + " (" + c.sg + ")")).join(", ")}">${u.toUpperCase()}</div>`; }).join("");
+    $("rzSen").innerHTML = `<div class="rz-h"><h3>Senado <small>${nT} vagas em disputa · ${nG} definidas</small></h3>${rzSwitch("sen", [["blocos", "Blocos"], ["mapa", "Mapa"], ["cadeiras", "Cadeiras"]], vs)}</div>`
+      + (vs === "cadeiras" ? hemiciclo(grupos, nT, Math.floor(81 / 2) + 1) + legendaPartidos(grupos) + '<div class="sub" style="text-align:center;margin-top:4px">Só as vagas desta eleição. O Senado tem 81 cadeiras; a maioria (41) considera também os senadores eleitos em 2022.</div>'
+        : vs === "mapa" ? `<div class="rz-tiles">${tiles}</div>` + legendaPartidos(grupos) + '<div class="sub" style="text-align:center;margin-top:4px">Cada estado elege dois senadores: as duas cores são os partidos dos dois mais votados.</div>'
+        : `<div class="rz-ban">${ban.map(p => `<span>${esc(p.sg)}<b>${p.proj}</b></span>`).join("")}</div><div class="rz-sen">${lista}</div>`);
   } else $("rzSen").innerHTML = "";
   // Deputados
   for (const [k, , titulo, id] of RZ_CARGOS) {
@@ -2171,12 +2154,16 @@ function renderResumoGeral() {
     }).join("");
     if (def < tot) todosFinais = false;
     const ord = Object.entries(porSg).sort((a, b) => b[1] - a[1]), max = ord.length ? ord[0][1] : 1;
-    $(id).innerHTML = `<h3>${esc(titulo)} <small>${tot} cadeiras · ${def === tot ? "resultado definido" : `${def} definidas, o resto é projeção`}</small></h3>
-      <div class="rz-bars">${ord.map(([sg, n]) => `<div class="rz-bar"><span>${esc(sg)}</span><i style="width:${n / max * 100}%"></i><b>${n}</b></div>`).join("")}</div>
-      <div class="sub" style="margin:0 0 6px">Eleitos por estado (toque para abrir):</div><div class="rz-uf">${blocos}</div>`;
+    const vd = rzVis(k, "barras");
+    $(id).innerHTML = `<div class="rz-h"><h3>${esc(titulo)} <small>${tot} cadeiras · ${def === tot ? "resultado definido" : `${def} definidas, o resto é projeção`}</small></h3>${rzSwitch(k, [["barras", "Barras"], ["cadeiras", "Cadeiras"]], vd)}</div>`
+      + (vd === "cadeiras" ? hemiciclo(ord, tot, Math.floor(tot / 2) + 1) + legendaPartidos(ord)
+        : `<div class="rz-bars">${ord.map(([sg, n]) => `<div class="rz-bar"><span>${esc(sg)}</span><i style="width:${n / max * 100}%;background:${corPartido(sg)}"></i><b>${n}</b></div>`).join("")}</div>`)
+      + `
+<div class="sub" style="margin:10px 0 6px">Eleitos por estado (toque para abrir):</div><div class="rz-uf">${blocos}</div>`;
   }
   $("rzSt").innerHTML = todosFinais && R.at ? '<span class="lp ok">Resultado final</span>' : '<span class="lp warn">Parcial · atualiza a cada 2 min</span>';
 }
+document.addEventListener("click", e => { const b = e.target.closest(".rz-sw button"); if (!b) return; rzSalvaVis(b.closest(".rz-sw").dataset.k, b.dataset.v); renderResumoGeral(); });
 function abrirResumo() {
   state.resumo = true; state.tab = "resumo";
   document.querySelectorAll(".view").forEach(v => { v.hidden = v.id !== "v-resumo"; });
@@ -2205,7 +2192,6 @@ function irPara(id) {
   state.tab = id;
   document.querySelectorAll(".view").forEach(v => { v.hidden = v.id !== "v-" + id; });
   $("modoSw").hidden = !["presidente", "governador"].includes(id);
-  { const b = document.querySelector('#modoSw [data-modo="resumo"]'); if (b) b.hidden = id !== "presidente"; if (id !== "presidente" && GM.modo === "resumo") modoVisual("classico"); }
   TABS.forEach(t => $("tab_" + t.id).setAttribute("aria-pressed", String(t.id === id)));
   try { history.replaceState(null, "", "#" + state.turno + "turno/" + id); } catch (e) { /* ignora */ }
   setPill("", "Carregando"); aviso(null); setUpd("—");
@@ -2262,13 +2248,13 @@ function ajustarBatalhaCore() {
 }
 /* mapa (batalha e clássico) e colunas do clássico: só o necessário para caber na primeira tela */
 function ajustarMapaClassico() {
-  const lay = $("clLayout"), cl = (lay && !lay.hidden) || GM.modo === "resumo", svg = document.querySelector("#gmMap svg");
+  const lay = $("clLayout"), cl = lay && !lay.hidden, svg = document.querySelector("#gmMap svg");
   if (lay) lay.classList.remove("aperta");
   if (!svg) return;
   svg.style.height = ""; svg.style.width = ""; svg.style.marginInline = "";
   if (innerWidth < (cl ? 820 : 1180) || !svg.getBoundingClientRect().height) return;
   const limite = innerHeight - FOLGA_TELA;
-  if (cl && GM.modo === "classico" && innerWidth >= 1180) {
+  if (cl && innerWidth >= 1180) {
     const fimCol = () => Math.max(...[".cl-l", ".cl-r"].map(q => { const e = lay.querySelector(q); return e ? e.getBoundingClientRect().bottom + scrollY : 0; }));
     if (fimCol() > limite) lay.classList.add("aperta");
   }
@@ -2284,13 +2270,11 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarBat
 setInterval(ajustarBatalha, 2500); // garantia: reajusta depois de cada atualização dos dados
 if (window.ResizeObserver) addEventListener("DOMContentLoaded", () => { const m = document.getElementById("gmMap"); const ro = new ResizeObserver(ajustarBatalhaLogo); ["gmMap","gmBat","gmHud","gmLead"].forEach(id => { const e = document.getElementById(id); if (e) ro.observe(e); }); });
 function modoVisual(m) {
-  if (m !== "classico" && m !== "resumo") m = "batalha";
-  if (m === "resumo" && state.tab && state.tab !== "presidente") m = "classico";
+  if (m !== "classico") m = "batalha";
   document.querySelectorAll(".vsw:not(.tsw) button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === m)));
-  const cl = m === "classico", rs = m === "resumo"; GM.modo = m;
-  $("clLayout").hidden = !cl; $("rsLayout").hidden = !rs; $("gmCred").hidden = rs; $("gmGrid").hidden = cl || rs; $("gmFeedBox").hidden = cl || rs; $("secReg").hidden = cl || rs;
-  (cl ? $("clMapSlot") : rs ? $("rsMapSlot") : $("gmMapSlot")).appendChild($("mapBlock"));
-  if (rs && state.br) try { render(); } catch (e) { /* ainda sem dados */ }
+  const cl = m === "classico"; GM.modo = m;
+  $("clLayout").hidden = !cl; $("gmGrid").hidden = cl; $("gmFeedBox").hidden = cl; $("secReg").hidden = cl;
+  (cl ? $("clMapSlot") : $("gmMapSlot")).appendChild($("mapBlock"));
   if (GM.mapa) requestAnimationFrame(() => GM.mapa.reencaixar());
   const tg = TABS.find(t => t.id === "governador"); if (tg && state.maj && state.maj.governador) try { renderGovCards(tg); } catch (e) { /* ainda sem dados */ }
   try { localStorage.setItem("modoVisual", m); } catch (e) { /* ok */ }
@@ -2310,7 +2294,6 @@ $("exClose").onclick = fecharExterior;
 $("exBox").onclick = e => { if (e.target === $("exBox")) fecharExterior(); };
 document.addEventListener("keydown", e => { if (e.key === "Escape" && EX.aberto) fecharExterior(); });
 document.addEventListener("click", e => { if (e.target.closest("[data-ex]")) abrirExterior(); });
-$("rsShare").onclick = () => $("share").click();
 $("share").onclick = async () => {
   const url = location.href;
   try { if (navigator.share) { await navigator.share({ title: document.title, url }); return; } } catch (e) { return; }
