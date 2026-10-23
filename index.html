@@ -91,6 +91,9 @@ td.mini{width:130px;min-width:110px;padding-inline:6px}
 td.ap .bar{width:64px;display:inline-block;vertical-align:middle;margin:0 8px 0 0}
 /* tabela por estado (presidente): colunas dos candidatos, barrinha e líder centralizadas com os títulos; % lido sem barra */
 .tp th:nth-child(n+2):nth-child(-n+5),.tp td:nth-child(n+2):nth-child(-n+5){text-align:center}.tp td.mini .split{margin-inline:auto}.tp td.ap .bar{display:none}
+@media (min-width:821px){.tp td.ld{position:relative}.tp td.ld .gar{position:absolute;left:calc(50% + 54px);top:50%;transform:translateY(-50%);margin:0}}
+.tp td.ap .pp{font-style:normal;display:inline-block;min-width:4.6em;text-align:right}
+@media (min-width:821px){.tp td.ap .qq{display:inline-block;min-width:6.9em;margin-left:.45em;text-align:right;color:var(--ink2);font-size:.8rem;white-space:nowrap}}
 .foot{color:var(--ink2);font-size:.82rem}
 .foot a{color:inherit}
 [hidden]{display:none!important}
@@ -1644,14 +1647,14 @@ function render() {
   linhas.sort(ordem[state.sort]);
   $("rows").innerHTML = linhas.map(({ uf, g, reg }) => {
     const nome = `<td class="uf">${esc(UF_NAMES[uf])}<small>${esc(reg)}</small></td>`;
-    if (!g || !g.vv) return `${nome}<td class="a">—</td><td class="b">—</td><td class="mini"></td><td><span class="lp n">${g ? "sem votos" : "sem dado"}</span></td><td class="ap num">${g ? pf(g.pst) : "—"}</td>`;
+    if (!g || !g.vv) return `${nome}<td class="a">—</td><td class="b">—</td><td class="mini"></td><td class="ld"><span class="lp n">${g ? "sem votos" : "sem dado"}</span></td><td class="ap num"><i class="pp">${g ? pf(g.pst) : "—"}</i><span class="qq">${g && g.ts ? `${nf.format(g.st)}/${nf.format(g.ts)}` : ""}</span></td>`;
     const dd = g.pa - g.pb, t = g.pa + g.pb || 1;
     const lid = Math.abs(dd) < 0.005 ? `<span class="lp n">Empate</span>` : `<span class="lp ${dd > 0 ? "a" : "b"}">${esc(nomeCurto(dd > 0 ? A : B))} +${Math.abs(dd).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>`;
     const lg = liderGarantido(state.files[uf]);
-    const lid2 = lg ? lid + ` <span class="gar" title="Vencedor já definido neste estado: a vantagem é maior que todos os votos que faltam ler">✓</span>` : lid;
+    const lid2 = lid + (lg ? `<span class="gar" title="Vencedor já definido neste estado: a vantagem é maior que todos os votos que faltam ler">✓</span>` : "");
     return `${nome}<td class="a num">${pf(g.pa)}</td><td class="b num">${pf(g.pb)}</td>
       <td class="mini"><div class="split sm"><i class="sa" style="width:${g.pa / t * 100}%"></i><i class="sb" style="width:${g.pb / t * 100}%"></i></div></td>
-      <td>${lid2}</td><td class="ap num"><div class="bar"><i style="width:${Math.min(100, g.pst)}%"></i></div>${pf(g.pst)}<span style="color:var(--ink2);font-size:.8rem"> · ${nf.format(g.st)}/${nf.format(g.ts)}</span></td>`;
+      <td class="ld">${lid2}</td><td class="ap num"><i class="pp">${pf(g.pst)}</i><span class="qq">${nf.format(g.st)}/${nf.format(g.ts)}</span></td>`;
   }).map(h => `<tr>${h}</tr>`).join("");
   setUpd(`Coletor: ${FONTE.hora()}`);
   try { jogoPres(r, A, B); } catch (e) { console.error(e); }
