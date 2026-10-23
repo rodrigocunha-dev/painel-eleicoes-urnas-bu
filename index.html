@@ -834,7 +834,7 @@ const FONTE = {
     m = url.match(/\/(\d+)\/dados\/(\w\w)\/\w\w-c(\d{4})-e\d+-u\.json/);
     if (m) {
       const [, cd, uf, c] = m, cargo = String(+c);
-      if (cargo === "1" && cd === ele) { const b = uf === "br" ? snap.pres.br : (snap.pres.ufs || {})[uf]; if (!b) nao(); return this.arquivo(b, snap.pres.nomes || {}, "1"); }
+      if (cargo === "1" && cd === ele) { const b = uf === "br" ? snap.pres.br : (snap.pres.ufs || {})[uf] || { nom: {}, lidas: 0, ts: 0, rest: null }; return this.arquivo(b, snap.pres.nomes || {}, "1"); }
       if (cargo === "3" && cd === eleGov) { const b = ((snap.gov || {}).ufs || {})[uf]; if (!b) nao(); return this.arquivo(b, b.nomes || {}, "3"); }
     }
     nao();
