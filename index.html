@@ -635,7 +635,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="h1b"><h1>Urnas ao Vivo</h1><div class="warn">Soma dos boletins de urna divulgados pelo TSE, <b>antes da totalização oficial</b>. Não substitui o resultado oficial: acompanhe a totalização do TSE em <a href="https://painel-eleicoes.vercel.app/" target="_blank" rel="noopener">Apuração Eleições 2026</a> ou em <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a></div></div>
+    <div class="h1b"><h1>Urnas ao Vivo</h1><div class="warn">Soma dos boletins de urna do TSE, <b>antes da totalização oficial</b>. Resultado oficial: <a href="https://painel-eleicoes.vercel.app/" target="_blank" rel="noopener">Apuração Eleições 2026</a> · <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a></div></div>
     <div class="meta">
       <span class="pill" id="pill"><i></i><span id="pillTxt">Conectando</span></span>
       <span id="upd">—</span>
@@ -2021,7 +2021,7 @@ function ajustarMapaClassico() {
   // abaixo do mapa ainda vêm a faixa de chips (telas estreitas) e a legenda: tudo isso precisa caber
   const r = svg.getBoundingClientRect(), leg = $("gmLeg"), abaixo = leg && leg.offsetParent ? Math.max(0, leg.getBoundingClientRect().bottom - r.bottom) : 0;
   const disp = limite - (r.top + scrollY) - abaixo;
-  if (r.height > disp) { svg.style.height = Math.max(360, Math.round(disp)) + "px"; svg.style.width = "auto"; svg.style.marginInline = "auto"; }
+  if (r.height > disp) { svg.style.height = Math.max(300, Math.round(disp)) + "px"; svg.style.width = "auto"; svg.style.marginInline = "auto"; }
 }
 let _ajB; const ajustarBatalhaLogo = () => { clearTimeout(_ajB); _ajB = setTimeout(ajustarBatalha, 60); };
 addEventListener("resize", ajustarBatalhaLogo);
