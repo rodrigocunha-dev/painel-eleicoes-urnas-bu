@@ -603,9 +603,72 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 @keyframes gmfall{to{transform:translateY(105vh) rotate(720deg)}}
 @media (prefers-reduced-motion:reduce){.gm-cf{display:none}.gm-rope .fa,.gm-rope .fb,.gm-rope .mk{transition:none}}
 
+/* ===== Resumo: uma tela final com o resultado, para compartilhar ===== */
+#rsLayout{display:grid;gap:14px}#rsLayout[hidden]{display:none}
+.rs-hd{display:flex;justify-content:space-between;align-items:center;gap:8px 14px;flex-wrap:wrap}
+.rs{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:1000px){.rs{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:start}}
+.rs-l{display:grid;gap:12px;min-width:0}.rs-r{min-width:0}.rs-r #mapBlock>h2{display:none}
+.rs-c{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:14px 16px;border-radius:16px;border:1px solid color-mix(in srgb,var(--k) 45%,var(--line));background:color-mix(in srgb,var(--k) 12%,var(--panel))}
+.rs-c img,.rs-c .ph{width:104px;height:104px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--track);box-shadow:0 0 0 4px var(--k)}
+.rs-tag{font:700 .78rem var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--k)}
+.rs-nm{font:700 1.9rem/1.05 var(--f-disp)}.rs-nm small{font:600 .85rem var(--f-body);color:var(--ink2);margin-left:6px}
+.rs-pc{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:2px}
+.rs-pc b{font:800 2.8rem/1 var(--f-disp);color:var(--k)}.rs-pc span{color:var(--ink2)}
+.rs-c.seg{padding:10px 16px}.rs-c.seg img,.rs-c.seg .ph{width:64px;height:64px;box-shadow:0 0 0 3px var(--k)}
+.rs-c.seg .rs-nm{font-size:1.4rem}.rs-c.seg .rs-pc b{font-size:1.9rem}
+.rs-c.perde img,.rs-c.perde .ph{filter:grayscale(1);opacity:.55}.rs-c.perde .rs-pc b{color:var(--ink2)}
+#rsCards{display:grid;gap:10px}
+.rs-bar{position:relative;display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--track)}
+.rs-bar i{display:block;height:100%}.rs-bar u{position:absolute;left:50%;top:-2px;bottom:-2px;border-left:2px solid var(--panel)}
+.rs-t,.rs-t.um{margin-top:0;grid-template-columns:repeat(3,1fr)}
+.rs-t em{display:block;font-style:normal;color:var(--ink2);font-size:.75rem}
+.rs-rg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rr{border:1px solid var(--line);border-radius:10px;padding:5px 10px;min-width:0}.rr span{font-size:.8rem;color:var(--ink2)}
+.rr-b{position:relative;display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--track);margin:4px 0}.rr-b i{display:block;height:100%}.rr-b u{position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--panel)}
+.rr-n{display:flex;justify-content:space-between;font:700 .95rem var(--f-disp)}
+@media (min-width:1000px){.rs-c{padding:10px 14px}.rs-c img,.rs-c .ph{width:86px;height:86px}.rs-pc b{font-size:2.4rem}.rs-nm{font-size:1.6rem}
+  .rs-c.seg{padding:8px 14px}.rs-c.seg img,.rs-c.seg .ph{width:50px;height:50px}.rs-c.seg .rs-nm{font-size:1.2rem}.rs-c.seg .rs-pc b{font-size:1.5rem}
+  .rs-t div{padding:5px 10px}.rs-t b{font-size:1.35rem}.rs-l{gap:10px}#rsCards{gap:8px}}
+@media (max-width:600px){.rs-rg{grid-template-columns:1fr 1fr}}
+.rs-fo{color:var(--ink2);font-size:.78rem;margin-top:2px}.rs-ac{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#rsShare{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 14px;font:600 .9rem var(--f-body);cursor:pointer}
+@media (max-width:600px){.rs-c img,.rs-c .ph{width:72px;height:72px}.rs-nm{font-size:1.5rem}.rs-pc b{font-size:2.2rem}.rs-t{grid-template-columns:1fr 1fr}.rs-c.seg img,.rs-c.seg .ph{width:52px;height:52px}}
+
+/* ===== Resumo geral: os eleitos de todos os cargos ===== */
+.rz{display:grid;gap:22px}
+.rz-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px 14px;flex-wrap:wrap}
+.rz-sec[hidden]{display:none}.rz-sec:empty{display:none}
+.rz-sec>h3{font:700 1.25rem var(--f-disp);margin:0 0 10px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.rz-sec>h3 small{font:500 .82rem var(--f-body);color:var(--ink2)}
+.rz-pres{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center;padding:16px 18px;border-radius:16px;border:1px solid color-mix(in srgb,var(--ok) 40%,var(--line));background:color-mix(in srgb,var(--ok) 8%,var(--panel))}
+.rz-pres img,.rz-pres .ph{width:96px;height:96px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--track);box-shadow:0 0 0 4px var(--ok)}
+.rz-pres .t{font:700 .78rem var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--ok)}
+.rz-pres .n{font:700 2rem/1.05 var(--f-disp)}.rz-pres .n small{font:600 .9rem var(--f-body);color:var(--ink2);margin-left:6px}
+.rz-pres .p{color:var(--ink2);margin-top:4px}.rz-pres .p b{font:800 1.6rem var(--f-disp);color:var(--ink);margin-right:8px}
+.rz-gov{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.rz-g{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-width:0}
+.rz-g img,.rz-g .ph{width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--track)}
+.rz-g .u{font-size:.75rem;color:var(--ink2)}.rz-g .n{font-weight:700;line-height:1.15;overflow-wrap:anywhere}.rz-g .n small{font-weight:500;color:var(--ink2);font-size:.75rem;margin-left:4px}
+.rz-g .pc{text-align:right;font:700 1.05rem var(--f-disp)}.rz-g .pc small{display:block;font:500 .7rem var(--f-body);color:var(--ink2)}
+.rz-g.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}
+.rz-ban{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.rz-ban span{border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.85rem}.rz-ban span b{font-family:var(--f-disp);font-size:1rem;margin-left:4px}
+.rz-bars{display:grid;gap:5px;margin-bottom:10px}
+.rz-bar{display:grid;grid-template-columns:90px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:.85rem}
+.rz-bar i{display:block;height:12px;border-radius:6px;background:var(--c1);min-width:2px}.rz-bar b{text-align:right;font-family:var(--f-disp);font-size:1rem}
+.rz-uf{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;align-items:start}
+.rz-uf details{border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.rz-uf summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px;font-weight:600}.rz-uf summary small{color:var(--ink2);font-weight:400}
+.rz-uf ol{margin:6px 0 2px;padding-left:20px;font-size:.85rem;columns:1}.rz-uf li{padding:1px 0}.rz-uf li small{color:var(--ink2);margin-left:4px}
+.rz-sen{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
+.rz-s{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:.88rem}.rz-s .u{font-size:.75rem;color:var(--ink2)}.rz-s div small{color:var(--ink2);margin-left:4px}
+.rz-chip{font-size:.72rem;border-radius:999px;padding:1px 7px;margin-left:4px;background:var(--track);color:var(--ink2);white-space:nowrap}
+.rz-chip.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+@media (max-width:600px){.rz-pres img,.rz-pres .ph{width:68px;height:68px}.rz-pres .n{font-size:1.5rem}.rz-bar{grid-template-columns:70px minmax(0,1fr) 36px}}
+
 /* ===== Urnas ao Vivo ===== */
 .h1s{display:block;font:500 .8rem var(--f-body);color:var(--ink2);letter-spacing:0;margin-top:2px}
-#turnoSw{display:none}
 .h1b{min-width:0;flex:1 1 380px}
 @media (min-width:1180px) and (max-height:820px){.gm .bt-face{width:148px}.gm .bt-pc{font-size:50px}}
 .warn{border-left:3px solid var(--warn);padding:1px 0 1px 8px;margin-top:4px;font-size:.8rem;line-height:1.35;color:var(--ink2)}
@@ -654,11 +717,13 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     <div class="vsw tsw" id="turnoSw" role="group" aria-label="Turno">
       <button type="button" data-t="1" aria-pressed="false">1º turno</button>
       <button type="button" data-t="2" aria-pressed="false">2º turno</button>
+      <button type="button" data-t="r" aria-pressed="false">Resumo</button>
     </div>
     <nav class="tabs" id="tabs" aria-label="Cargo"></nav>
     <div class="vsw" id="modoSw" role="group" aria-label="Forma de visualizar">
     <button type="button" data-modo="batalha" aria-pressed="true"><span class="ic">🎮 </span>Batalha</button>
     <button type="button" data-modo="classico" aria-pressed="false"><span class="ic">📊 </span>Clássico</button>
+    <button type="button" data-modo="resumo" aria-pressed="false"><span class="ic">🏁 </span>Resumo</button>
   </div>
   </div>
   <div id="notice" hidden></div>
@@ -685,6 +750,14 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     </div>
     <div class="cl-bx"><div class="clc"><h3>Evolução da apuração</h3><div id="clChart"></div></div><div class="clc"><h3>Acontecimentos da apuração</h3><div id="clFeed"></div></div></div>
     </div>
+    <div id="rsLayout" hidden>
+      <div class="rs-hd"><div><h2 id="rsTit">Resultado</h2><div class="rs-fo" id="rsFonte"></div></div><div class="rs-ac"><span id="rsSt"></span><button type="button" id="rsShare">Compartilhar resultado</button></div></div>
+      <div class="rs">
+        <div class="rs-l"><div id="rsCards"></div><div id="rsBar"></div><div class="gm-hud rs-t" id="rsTiles"></div>
+          <div class="rs-rg" id="rsReg"></div></div>
+        <div class="rs-r" id="rsMapSlot"></div>
+      </div>
+    </div>
     <div class="gm-grid" id="gmGrid"><div class="gm-c1">
     <div id="gmBatBox"><div class="gm-hd"><h2 id="hGm">Batalha ao vivo</h2><div class="gm-lead" id="gmLead"></div></div>
     <div id="gmArena" style="margin-top:10px"><div id="gmBat"></div></div></div>
@@ -699,7 +772,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     </div></div>
     <details class="fx" id="gmFeedBox"><summary>🔄 Viradas e conquistas <span class="fxn" id="gmFeedN">0</span><span class="fxu" id="gmFeedU">Toque para ver</span></summary>
     <div class="gm-feed" id="gmFeed"></div></details>
-    <div class="sub" style="margin-top:10px">Fotos: divulgação oficial do TSE. Mapa: Victor Cazanave (svg-maps), licença CC BY 4.0, simplificado.</div>
+    <div class="sub" id="gmCred" style="margin-top:10px">Fotos: divulgação oficial do TSE. Mapa: Victor Cazanave (svg-maps), licença CC BY 4.0, simplificado.</div>
     <div class="gm-pal" id="gmPal" hidden><span>🎯 <b>Palpite da galera:</b> aposte em quem leva o Brasil, cada estado e os governadores, e dispute o ranking.</span><a id="gmPalLink" href="#" target="_blank" rel="noopener">Fazer meu palpite →</a></div>
   </section>
 
@@ -718,6 +791,16 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
   </section>
 
   </div>
+  <div class="view" id="v-resumo" hidden>
+  <section class="panel rz" aria-labelledby="hRz">
+    <div class="rz-hd"><div><h2 id="hRz">Resumo pelos boletins de urna</h2><div class="sub" id="rzSub">Quem está eleito ou à frente na soma dos boletins de urna lidos pelo coletor, antes da totalização oficial. Senadores e deputados não estão nos boletins do 2º turno: veja no painel Apuração Eleições 2026.</div></div><span id="rzSt"></span></div>
+    <div class="rz-sec" id="rzPres"></div>
+    <div class="rz-sec" id="rzGov"></div>
+    <div class="rz-sec" id="rzSen"></div>
+    <div class="rz-sec" id="rzFed"></div>
+    <div class="rz-sec" id="rzEst"></div>
+  </section>
+  </div>
   <div class="view" id="v-governador" hidden></div>
   <div class="view pal" id="v-palpites" hidden>
   <div class="card" id="palintro"></div>
@@ -729,7 +812,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
   <div class="card"><h3>Ranking</h3><div class="msg" id="rkinfo"></div><table class="rk" id="rk"></table></div>
   </div>
 
-  <div class="foot">Fonte: arquivos públicos de divulgação do TSE (resultados.tse.jus.br), lidos pelo seu navegador a cada 5 segundos (presidente) ou 10 segundos (demais cargos). Exterior aparece no total do Brasil e na última linha da tabela. Conferência oficial: <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a>.</div>
+  <div class="foot">Fonte: boletins de urna publicados pelo TSE, somados pelo coletor do Urnas ao Vivo, antes da totalização oficial; a página atualiza a cada 2 segundos. Não substitui o resultado oficial: <a href="https://painel-eleicoes.vercel.app/" target="_blank" rel="noopener">Apuração Eleições 2026</a> · <a href="https://resultados.tse.jus.br" target="_blank" rel="noopener">resultados.tse.jus.br</a>.</div>
 </div>
 
 <div class="exov" id="exBox" hidden role="dialog" aria-modal="true" aria-labelledby="exT">
@@ -784,7 +867,7 @@ const FONTE = {
         try {
           const r = await fetch(`/api/resumo?id=${id}`, { cache: "no-store", signal: ctl.signal });
           if (r.ok) return await r.json();
-          if (r.status === 404) this.semApi = true; else { const e = new Error("servidor " + r.status); e.status = r.status; throw e; }
+          if (r.status === 404) { if (id === "resumo") this.semApi = true; } else { const e = new Error("servidor " + r.status); e.status = r.status; throw e; }
         } catch (err) { if (err.status || err.name === "AbortError") throw err; this.semApi = true; }
       }
       const q = id === "ranking" ? "ranking?select=apelido,br,ufs,govs,criado&order=criado.asc&limit=5000" : `snapshot?id=eq.${id}&select=data`;
@@ -1354,8 +1437,24 @@ function histAnotar(r) {
   if (GM.hist.length > 600) GM.hist = GM.hist.filter((_, i) => i % 2 === 0);
   try { localStorage.setItem(GM.histK, JSON.stringify(GM.hist)); } catch (e) { /* ok */ }
 }
+/* histórico da noite inteira, gravado pelo coletor (o mesmo para todos os visitantes); o local completa os pontos mais novos */
+const HIST_URL = "/api/historico";
+async function histServidorLer() {
+  if (Date.now() - (GM.histSrvAt || 0) < 55000) return;
+  GM.histSrvAt = Date.now();
+  try { const j = await FONTE.pegar("hist-bu"); GM.histSrv = (Array.isArray(j) ? j[0] && j[0].data : null) || null; } catch (e) { /* fica só com o local */ }
+}
+function histMesclado(A, B) {
+  const loc = GM.hist || [], s = GM.histSrv;
+  if (!s || !s.cands || !state.ele || String(s.ele) !== String(state.ele.cd)) return loc;
+  const ia = s.cands.indexOf(String(A.n)), ib = s.cands.indexOf(String(B.n));
+  if (ia < 0 || ib < 0 || !(s.pts || []).length) return loc;
+  const pts = s.pts.map(p => [p[0], p[1 + ia], p[1 + ib]]), max = pts[pts.length - 1][0];
+  return pts.concat(loc.filter(h => h[0] > max + 0.005));
+}
 function grafico(A, B) {
-  const H = GM.hist || [], W = 300, Hh = 170, L = 30, R = 8, T = 8, Bm = 22;
+  histServidorLer();
+  const H = histMesclado(A, B), W = 300, Hh = 170, L = 30, R = 8, T = 8, Bm = 22;
   const lg = `<div class="lg"><span><i style="background:var(--a)"></i>${esc(nomeCurto(A))}</span><span><i style="background:var(--b)"></i>${esc(nomeCurto(B))}</span></div>`;
   if (H.length < 2) return lg + `<div class="sub">${state.br && state.br.tf === "s" && !H.length ? "A apuração deste turno já terminou. O gráfico é montado durante a apuração ao vivo, a partir do momento em que a página é aberta." : "O gráfico aparece conforme as urnas forem sendo lidas (a partir do momento em que você abriu a página)."}</div>`;
   const vals = H.flatMap(h => [h[1], h[2]]); let lo = Math.floor(Math.min(...vals) - 1), hi = Math.ceil(Math.max(...vals) + 1); if (hi - lo < 4) { lo -= 2; hi += 2; }
@@ -1368,6 +1467,35 @@ function grafico(A, B) {
   return lg + `<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Percentual de cada candidato ao longo da apuração">${grade}${ex}
     <path d="${linha(1)}" fill="none" stroke="var(--a)" stroke-width="2.2"/><path d="${linha(2)}" fill="none" stroke="var(--b)" stroke-width="2.2"/>
     <circle cx="${X(u[0])}" cy="${Y(u[1])}" r="3.5" fill="var(--a)"/><circle cx="${X(u[0])}" cy="${Y(u[2])}" r="3.5" fill="var(--b)"/></svg>`;
+}
+const RS_FONTE = "Fonte: boletins de urna do TSE lidos pelo coletor, antes da totalização oficial";
+function renderResumo(r, A, B, sm) {
+  if (!A || !B) return;
+  const br = state.br, com = r.vv > 0, fim = br.tf === "s" || (br.pst || r.pst) >= 100;
+  const eleito = sm && sm.kind === "eleito" ? String(sm.cand.n) : null, t2 = sm && sm.kind === "turno2";
+  const ordem = r.b > r.a ? [[B, r.b, r.pb, "var(--b)"], [A, r.a, r.pa, "var(--a)"]] : [[A, r.a, r.pa, "var(--a)"], [B, r.b, r.pb, "var(--b)"]];
+  const foto = c => c && c.sq && state.ele ? `${BASE}${state.ele.ciclo}/${state.ele.cd}/fotos/br/${c.sq}.jpeg` : "";
+  const ini = c => esc(nomeCurto(c).slice(0, 2).toUpperCase());
+  const tag = (c, i) => !com ? "Aguardando votos"
+    : eleito ? (String(c.n) === eleito ? (fim && sm.tse !== false ? "Eleito presidente" : "Eleito presidente (matemático)") : "Derrotado")
+    : t2 ? "Vai ao 2º turno" : i === 0 ? "À frente" : "Em segundo";
+  $("rsTit").textContent = `Presidente · ${state.turno}º turno · Eleições 2026`;
+  $("rsSt").innerHTML = !com ? "" : fim ? '<span class="lp ok">Leitura concluída</span>' : `<span class="lp warn">Parcial · ${pf(br.pst || r.pst)} lido</span>`;
+  $("rsCards").innerHTML = ordem.map(([c, v, p, k], i) => `<div class="rs-c${i ? " seg" : ""}${eleito && String(c.n) !== eleito ? " perde" : ""}" style="--k:${k}">
+      ${foto(c) ? `<img src="${foto(c)}" alt="" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;></span>'">` : '<span class="ph"></span>'}
+      <div><div class="rs-tag">${tag(c, i)}</div><div class="rs-nm">${esc(nomeBonito(c.nm) || nomeCurto(c))}<small>${esc(c.sg || "")} ${esc(c.n)}</small></div>
+      <div class="rs-pc"><b>${com ? pf(p) : "—"}</b><span>${com ? nf.format(v) + " votos" : ""}</span></div></div></div>`).join("");
+  $("rsBar").innerHTML = com ? `<div class="rs-bar"><i style="width:${r.pa}%;background:var(--a)"></i><i style="width:${Math.max(0, 100 - r.pa - r.pb)}%"></i><i style="width:${r.pb}%;background:var(--b)"></i><u></u></div>` : "";
+  let ea = 0, eb = 0; for (const uf of UFS) { const f = state.files[uf]; if (!f) continue; const g = resumoFile(f, A.n, B.n); if (g.a > g.b) ea++; else if (g.b > g.a) eb++; }
+  $("rsTiles").innerHTML = `<div><small>Diferença</small><b>${com ? Math.abs(r.pa - r.pb).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " p.p." : "—"}</b><em>${com ? nf.format(Math.abs(r.a - r.b)) + " votos" : ""}</em></div>
+    <div><small>Estados vencidos</small><b><span style="color:var(--a)">${ea}</span> × <span style="color:var(--b)">${eb}</span></b><em>${esc(nomeCurto(A))} × ${esc(nomeCurto(B))}</em></div>
+    <div><small>Votos válidos</small><b>${com ? nf.format(r.vv) : "—"}</b><em>${com ? "sem brancos e nulos" : ""}</em></div>`;
+  $("rsReg").innerHTML = [...Object.entries(REGIOES), ["Exterior", ["zz"]]].map(([nome, ufs]) => {
+    const g = somar(state.files, ufs, A.n, B.n), t = g.a + g.b, pa = t ? g.a / t * 100 : 50;
+    return `<div class="rr"><span>${esc(nome)}</span><div class="rr-b"><i style="width:${pa}%;background:var(--a)"></i><i style="width:${100 - pa}%;background:var(--b)"></i><u></u></div>
+      <div class="rr-n"><b style="color:var(--a)">${g.vv ? pf(g.pa) : "—"}</b><b style="color:var(--b)">${g.vv ? pf(g.pb) : "—"}</b></div></div>`;
+  }).join("");
+  $("rsFonte").textContent = `${RS_FONTE} · atualizado às ${new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · fotos: TSE · mapa: Victor Cazanave (svg-maps), CC BY 4.0`;
 }
 function classicoExtras(r, A, B, sm) {
   if (!A || !B) return;
@@ -1625,6 +1753,7 @@ function render() {
   $("brPst").textContent = pf(br.pst || r.pst) + " lido";
   $("brSec").textContent = `· ${nf.format(br.st)} de ${nf.format(br.ts)} urnas (seções)`;
   try { classicoExtras(r, A, B, sm); } catch (e) { console.error(e); }
+  try { if (GM.modo === "resumo") renderResumo(r, A, B, sm); } catch (e) { console.error(e); }
   $("brBar").style.width = Math.min(100, br.pst || r.pst) + "%";
 
   $("regs").innerHTML = Object.entries(REGIOES).map(([nome, ufs]) => {
@@ -1939,6 +2068,7 @@ async function carregarProp(tab, forcar) {
 
 /* --- abas --- */
 function atualizar(forcar) {
+  if (state.tab === "resumo") return carregarResumo(forcar === true);
   const tab = TABS.find(t => t.id === state.tab);
   if (tab.id === "presidente") return carregar();
   if (tab.id === "palpites") return PAL.abrir();
@@ -1952,11 +2082,112 @@ function lerHash() {
   return { turno: m && m[1] || null, tab: m && m[2] || "" };
 }
 function aplicarTurnoUI() {
-  document.querySelectorAll("#turnoSw button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.t === state.turno)));
+  document.querySelectorAll("#turnoSw button").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.t === (state.resumo ? "r" : state.turno))); if (b.dataset.t !== "r") b.hidden = !!FONTE.turno && b.dataset.t !== FONTE.turno; });
   TABS.forEach(t => { const b = $("tab_" + t.id); b.hidden = state.turno === "2" && SO_T1.includes(t.id); });
   const g = $("tab_governador"); if (g) g.textContent = "Governador";
 }
+
+/* ===== Resumo geral: lê o resultado de todos os cargos e mostra só quem foi eleito (ou está na frente) ===== */
+async function emLote(lista, n, fn) { const out = new Array(lista.length); let i = 0; await Promise.all(Array.from({ length: n }, async () => { while (i < lista.length) { const k = i++; try { out[k] = await fn(lista[k]); } catch (e) { out[k] = null; } } })); return out; }
+const fotoUF = (d, c) => d && d.fotoBase && c && c.sq ? d.fotoBase + c.sq + ".jpeg" : "";
+const imgOuIni = (u, c) => u ? `<img src="${u}" alt="" referrerpolicy="no-referrer" loading="lazy" onerror="this.outerHTML='<span class=&quot;ph&quot;></span>'">` : '<span class="ph"></span>';
+const RZ_CARGOS = [["fed", "6", "Câmara dos Deputados", "rzFed"], ["est", "7", "Assembleias Legislativas", "rzEst"]];
+async function carregarResumo(forcar) {
+  const R = state.rz || (state.rz = {});
+  if (!forcar && R.at && Date.now() - R.at < 110000) return;
+  if (busy.resumo) return; busy.resumo = true; $("refresh").disabled = true;
+  try {
+    const cfg = await obterCfg();
+    // presidente: o 2º turno, se houver votos; senão o 1º
+    const lerPres = async t => { const e = eleicaoTurno(cfg, t); if (!e) return null; const f = parseFile(await getTSE(dataUrl("br", e), fetch.bind(window))); return f && f.vv > 0 ? { f, e, t } : null; };
+    R.pres = (await lerPres("2").catch(() => null)) || (await lerPres("1").catch(() => null));
+    if (state.tab === "resumo") renderResumoGeral();
+    const lerCargo = async (uf, cargo, t, exato) => { const e = eleicaoDe(cfg, uf, cargo, t, exato); if (!e) return null; const d = parseCargo(await getTSE(cargoUrl(e, uf, cargo), fetch.bind(window))); d.fotoBase = `${BASE}${e.ciclo}/${e.cd}/fotos/${uf}/`; d.turno = String(e.t); return d; };
+    const gov = await emLote(UFS, 8, async uf => { const d2 = await lerCargo(uf, "3", "2", true).catch(() => null); if (d2 && d2.cands.some(c => c.vap > 0)) return d2; return lerCargo(uf, "3", "1", false); });
+    R.gov = {}; UFS.forEach((u, i) => { if (gov[i]) R.gov[u] = gov[i]; });
+    if (state.tab === "resumo") renderResumoGeral();
+    const sen = await emLote(UFS, 8, uf => lerCargo(uf, "5", "1", false));
+    R.sen = {}; UFS.forEach((u, i) => { if (sen[i]) R.sen[u] = sen[i]; });
+    if (state.tab === "resumo") renderResumoGeral();
+    for (const [k, cargo] of RZ_CARGOS) {
+      const arr = await emLote(UFS, 6, uf => lerCargo(uf, k === "est" && uf === "df" ? "8" : cargo, "1", false));
+      R[k] = {}; UFS.forEach((u, i) => { if (arr[i]) R[k][u] = arr[i]; });
+      if (state.tab === "resumo") renderResumoGeral();
+    }
+    R.at = Date.now();
+    setPill("live", "Ao vivo", "resumo"); setUpd(`Lido às ${hora()}. Atualiza a cada 2 min`, "resumo"); aviso(null, false, "resumo");
+  } catch (err) {
+    setPill("err", "Falha na leitura", "resumo");
+    aviso(`<b>Não consegui ler os dados do coletor (${esc(err.message)}).</b>A página tenta de novo sozinha.`, true, "resumo");
+  } finally { busy.resumo = false; $("refresh").disabled = false; }
+}
+function renderResumoGeral() {
+  const R = state.rz || {}, ordemUF = Object.values(REGIOES).flat(), pfx = x => pf(x || 0);
+  const chip = (txt, ok) => `<span class="rz-chip${ok ? " ok" : ""}">${esc(txt)}</span>`;
+  let todosFinais = true;
+  // Presidente
+  if (R.pres) {
+    const { f, e, t } = R.pres, cs = ordenarCands(f), top = cs[0], sm = statusMaioria(f), fim = f.tf === "s";
+    const el = sm && sm.kind === "eleito";
+    if (!(el && fim)) todosFinais = false;
+    const tag = el ? `Presidente eleito${t === "2" ? " no 2º turno" : " no 1º turno"}${fim ? "" : " (matemático)"}` : sm && sm.kind === "turno2" ? "Disputa vai ao 2º turno" : `À frente · ${pf(f.pst)} lido`;
+    const u = top && top.sq ? `${BASE}${e.ciclo}/${e.cd}/fotos/br/${top.sq}.jpeg` : "";
+    $("rzPres").innerHTML = top ? `<h3>Presidente da República</h3><div class="rz-pres">${imgOuIni(u, top)}<div><div class="t">${esc(tag)}</div>
+      <div class="n">${esc(nomeBonito(top.nm))}<small>${esc(top.sg)} ${esc(top.n)}</small></div>
+      <div class="p"><b>${pf(f.vv ? top.vap / f.vv * 100 : 0)}</b>${nf.format(top.vap)} votos · ${t}º turno</div></div></div>` : "";
+  } else $("rzPres").innerHTML = '<h3>Presidente da República</h3><div class="sub">Aguardando os dados do TSE.</div>';
+  // Governadores
+  const gUF = ordemUF.filter(u => R.gov && R.gov[u]);
+  if (gUF.length) {
+    let nEl = 0;
+    const cards = gUF.map(u => {
+      const d = R.gov[u], c = d.cands[0], si = situacaoMaj(d.cands, 1, d), ok = si.kind === "ok";
+      if (ok) nEl++; else todosFinais = false;
+      const pct = c && d.vv ? c.vap / d.vv * 100 : 0;
+      const st = ok ? `eleito · ${d.turno}º turno` : si.txt === "Em apuração" ? `à frente · ${pfx(d.pst)} lido` : si.txt;
+      return `<div class="rz-g${ok ? " ok" : ""}">${imgOuIni(fotoUF(d, c), c)}<div><div class="u">${esc(UF_NAMES[u])}</div><div class="n">${c && c.vap > 0 ? esc(nomeBonito(c.nm)) : "—"}<small>${c ? esc(c.sg) : ""}</small></div></div>
+        <div class="pc">${c && c.vap > 0 ? pf(pct) : "—"}<small>${esc(st)}</small></div></div>`;
+    }).join("");
+    $("rzGov").innerHTML = `<h3>Governadores <small>${nEl} de ${gUF.length} definidos</small></h3><div class="rz-gov">${cards}</div>`;
+  } else $("rzGov").innerHTML = "";
+  // Senado
+  const sUF = ordemUF.filter(u => R.sen && R.sen[u]);
+  if (sUF.length) {
+    const ban = cadeirasSenado(R.sen), nG = ban.reduce((a, p) => a + p.gar, 0), nT = ban.reduce((a, p) => a + p.proj, 0);
+    if (nG < nT) todosFinais = false;
+    const lista = sUF.map(u => { const d = R.sen[u]; return `<div class="rz-s"><div class="u">${esc(UF_NAMES[u])}</div>${d.cands.slice(0, d.nv).filter(c => c.vap > 0).map(c => `<div>${esc(nomeBonito(c.nm))}<small>${esc(c.sg)}</small>${c.fl === "tse" || c.fl === "gar" ? chip("eleito", true) : chip("à frente")}</div>`).join("") || '<div class="sub">sem votos</div>'}</div>`; }).join("");
+    $("rzSen").innerHTML = `<h3>Senado <small>${nT} vagas em disputa · ${nG} definidas</small></h3>
+      <div class="rz-ban">${ban.map(p => `<span>${esc(p.sg)}<b>${p.proj}</b></span>`).join("")}</div><div class="rz-sen">${lista}</div>`;
+  } else $("rzSen").innerHTML = "";
+  // Deputados
+  for (const [k, , titulo, id] of RZ_CARGOS) {
+    const F = R[k] || {}, us = ordemUF.filter(u => F[u]);
+    if (!us.length) { $(id).innerHTML = ""; continue; }
+    const porSg = {}; let tot = 0, def = 0;
+    const blocos = us.map(u => {
+      const d = F[u], el = d.cands.filter(c => c.fl === "tse" || c.fl === "gar" || c.fl === "proj").sort((a, b) => b.vap - a.vap);
+      el.forEach(c => { porSg[c.sg || "—"] = (porSg[c.sg || "—"] || 0) + 1; tot++; if (c.fl !== "proj") def++; });
+      return `<details><summary>${esc(UF_NAMES[u])}<small>${el.length} de ${d.nv} vagas</small></summary><ol>${el.map(c => `<li>${esc(nomeBonito(c.nm))}<small>${esc(c.sg)} · ${nf.format(c.vap)} votos${c.fl === "proj" ? " · projeção" : ""}</small></li>`).join("")}</ol></details>`;
+    }).join("");
+    if (def < tot) todosFinais = false;
+    const ord = Object.entries(porSg).sort((a, b) => b[1] - a[1]), max = ord.length ? ord[0][1] : 1;
+    $(id).innerHTML = `<h3>${esc(titulo)} <small>${tot} cadeiras · ${def === tot ? "resultado definido" : `${def} definidas, o resto é projeção`}</small></h3>
+      <div class="rz-bars">${ord.map(([sg, n]) => `<div class="rz-bar"><span>${esc(sg)}</span><i style="width:${n / max * 100}%"></i><b>${n}</b></div>`).join("")}</div>
+      <div class="sub" style="margin:0 0 6px">Eleitos por estado (toque para abrir):</div><div class="rz-uf">${blocos}</div>`;
+  }
+  $("rzSt").innerHTML = todosFinais && R.at ? '<span class="lp ok">Resultado final</span>' : '<span class="lp warn">Parcial · atualiza a cada 2 min</span>';
+}
+function abrirResumo() {
+  state.resumo = true; state.tab = "resumo";
+  document.querySelectorAll(".view").forEach(v => { v.hidden = v.id !== "v-resumo"; });
+  $("tabs").hidden = true; $("modoSw").hidden = true; aplicarTurnoUI();
+  try { history.replaceState(null, "", "#resumo"); } catch (e) { /* ignora */ }
+  setPill("", "Carregando", "resumo"); aviso(null, false, "resumo"); setUpd("—", "resumo");
+  if (state.rz) renderResumoGeral();
+  carregarResumo(true);
+}
 function trocarTurno(t, aba) {
+  if (t === "r") return irPara("resumo");
   t = t === "2" ? "2" : "1";
   if (t !== state.turno) {
     state.turno = t; state.ele = null; state.br = null; state.files = {}; state.par = [];
@@ -1965,13 +2196,16 @@ function trocarTurno(t, aba) {
     $("gmBat").innerHTML = ""; renderFeed();
   }
   aplicarTurnoUI();
-  irPara(aba || state.tab);
+  irPara(aba || (state.tab === "resumo" ? "presidente" : state.tab));
 }
 function irPara(id) {
+  if (id === "resumo") return abrirResumo();
+  if (state.resumo) { state.resumo = false; $("tabs").hidden = false; aplicarTurnoUI(); }
   if (!TABS.some(t => t.id === id) || (state.turno === "2" && SO_T1.includes(id))) id = "presidente";
   state.tab = id;
   document.querySelectorAll(".view").forEach(v => { v.hidden = v.id !== "v-" + id; });
   $("modoSw").hidden = !["presidente", "governador"].includes(id);
+  { const b = document.querySelector('#modoSw [data-modo="resumo"]'); if (b) b.hidden = id !== "presidente"; if (id !== "presidente" && GM.modo === "resumo") modoVisual("classico"); }
   TABS.forEach(t => $("tab_" + t.id).setAttribute("aria-pressed", String(t.id === id)));
   try { history.replaceState(null, "", "#" + state.turno + "turno/" + id); } catch (e) { /* ignora */ }
   setPill("", "Carregando"); aviso(null); setUpd("—");
@@ -2028,13 +2262,13 @@ function ajustarBatalhaCore() {
 }
 /* mapa (batalha e clássico) e colunas do clássico: só o necessário para caber na primeira tela */
 function ajustarMapaClassico() {
-  const lay = $("clLayout"), cl = lay && !lay.hidden, svg = document.querySelector("#gmMap svg");
+  const lay = $("clLayout"), cl = (lay && !lay.hidden) || GM.modo === "resumo", svg = document.querySelector("#gmMap svg");
   if (lay) lay.classList.remove("aperta");
   if (!svg) return;
   svg.style.height = ""; svg.style.width = ""; svg.style.marginInline = "";
   if (innerWidth < (cl ? 820 : 1180) || !svg.getBoundingClientRect().height) return;
   const limite = innerHeight - FOLGA_TELA;
-  if (cl && innerWidth >= 1180) {
+  if (cl && GM.modo === "classico" && innerWidth >= 1180) {
     const fimCol = () => Math.max(...[".cl-l", ".cl-r"].map(q => { const e = lay.querySelector(q); return e ? e.getBoundingClientRect().bottom + scrollY : 0; }));
     if (fimCol() > limite) lay.classList.add("aperta");
   }
@@ -2050,11 +2284,13 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarBat
 setInterval(ajustarBatalha, 2500); // garantia: reajusta depois de cada atualização dos dados
 if (window.ResizeObserver) addEventListener("DOMContentLoaded", () => { const m = document.getElementById("gmMap"); const ro = new ResizeObserver(ajustarBatalhaLogo); ["gmMap","gmBat","gmHud","gmLead"].forEach(id => { const e = document.getElementById(id); if (e) ro.observe(e); }); });
 function modoVisual(m) {
-  if (m !== "classico") m = "batalha";
+  if (m !== "classico" && m !== "resumo") m = "batalha";
+  if (m === "resumo" && state.tab && state.tab !== "presidente") m = "classico";
   document.querySelectorAll(".vsw:not(.tsw) button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === m)));
-  const cl = m === "classico"; GM.modo = m;
-  $("clLayout").hidden = !cl; $("gmGrid").hidden = cl; $("gmFeedBox").hidden = cl; $("secReg").hidden = cl;
-  (cl ? $("clMapSlot") : $("gmMapSlot")).appendChild($("mapBlock"));
+  const cl = m === "classico", rs = m === "resumo"; GM.modo = m;
+  $("clLayout").hidden = !cl; $("rsLayout").hidden = !rs; $("gmCred").hidden = rs; $("gmGrid").hidden = cl || rs; $("gmFeedBox").hidden = cl || rs; $("secReg").hidden = cl || rs;
+  (cl ? $("clMapSlot") : rs ? $("rsMapSlot") : $("gmMapSlot")).appendChild($("mapBlock"));
+  if (rs && state.br) try { render(); } catch (e) { /* ainda sem dados */ }
   if (GM.mapa) requestAnimationFrame(() => GM.mapa.reencaixar());
   const tg = TABS.find(t => t.id === "governador"); if (tg && state.maj && state.maj.governador) try { renderGovCards(tg); } catch (e) { /* ainda sem dados */ }
   try { localStorage.setItem("modoVisual", m); } catch (e) { /* ok */ }
@@ -2074,6 +2310,7 @@ $("exClose").onclick = fecharExterior;
 $("exBox").onclick = e => { if (e.target === $("exBox")) fecharExterior(); };
 document.addEventListener("keydown", e => { if (e.key === "Escape" && EX.aberto) fecharExterior(); });
 document.addEventListener("click", e => { if (e.target.closest("[data-ex]")) abrirExterior(); });
+$("rsShare").onclick = () => $("share").click();
 $("share").onclick = async () => {
   const url = location.href;
   try { if (navigator.share) { await navigator.share({ title: document.title, url }); return; } } catch (e) { return; }
