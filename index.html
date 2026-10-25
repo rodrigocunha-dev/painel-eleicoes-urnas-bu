@@ -601,7 +601,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .gm-toast:not(.on){opacity:0;pointer-events:none}.gm-toast{transition:transform .4s,opacity .4s}
 .gm-toast.on{transform:translate(-50%,0)}
 .rz-map .ext{display:none}
-.rz-svg{display:block;width:100%;height:auto;max-width:640px;margin:0 auto}.rz-svg text{text-anchor:middle}.rz-svg text.ini{text-anchor:start}.rz-svg path:hover{stroke:var(--ink);stroke-width:2}.rz-svg .rzm{cursor:default}
+.rz-svg{display:block;width:100%;height:auto;max-width:640px;margin:0 auto}.rz-svg text{text-anchor:middle}.rz-svg text.ini{text-anchor:start}.rz-svg path:hover{stroke:var(--ink);stroke-width:2}.rz-svg .rzm,.rz-svg path{cursor:pointer}
 
 .gm-cf{position:fixed;top:-14px;width:9px;height:14px;z-index:49;pointer-events:none;animation:gmfall 3.2s linear forwards}
 @keyframes gmfall{to{transform:translateY(105vh) rotate(720deg)}}
@@ -615,7 +615,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .ch-mini.oculto{display:none}
 .cl-bx:has(#clBig[hidden]){grid-template-columns:minmax(0,1fr)}#clBig[hidden],#clMini[hidden]{display:none}
 /* cartão do estado ao passar o mouse no mapa */
-.mt{position:fixed;z-index:60;pointer-events:none;min-width:250px;max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 12px 30px rgba(0,0,0,.45);opacity:0;transition:opacity .12s}
+.mt{position:fixed;z-index:200;pointer-events:none;min-width:250px;max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 12px 30px rgba(0,0,0,.45);opacity:0;transition:opacity .12s}
 .mt.on{opacity:1}
 .mt-h{display:flex;gap:10px;align-items:center;margin-bottom:8px}
 .mt-uf{min-width:34px;height:26px;padding:0 6px;border-radius:7px;display:flex;align-items:center;justify-content:center;font:800 .8rem var(--f-body);color:#0b1118}
@@ -625,7 +625,8 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 .mt-c .n{font-weight:700;line-height:1.15}.mt-c .n small{display:block;font-weight:600;font-size:.75rem}
 .mt-c .v{text-align:right}.mt-c .v b{display:block;font:700 1.1rem var(--f-disp)}.mt-c .v small{color:var(--ink2);font-size:.75rem}
 .mt-c.perde .n,.mt-c.perde .v b{opacity:.75}
-@media (hover:none){.mt{display:none}}
+@media (hover:none){.mt:not(.toque){display:none}}
+.mt .ok{font-size:.68rem;font-weight:700;color:var(--ok);margin-left:6px;text-transform:uppercase;letter-spacing:.04em}
 /* ===== Resumo geral: os eleitos de todos os cargos ===== */
 .rz-sec>.rz-h{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:10px}
 .rz-sec>.rz-h h3{font:700 1.25rem var(--f-disp);margin:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.rz-sec>.rz-h h3 small{font:500 .82rem var(--f-body);color:var(--ink2)}
@@ -1440,33 +1441,66 @@ async function histServidorLer() {
   try { const j = await FONTE.pegar("hist-bu"); GM.histSrv = (Array.isArray(j) ? j[0] && j[0].data : null) || null; } catch (e) { /* fica só com o local */ }
 }
 
-/* cartão do estado no mapa (ao passar o mouse): candidato na frente em cima, com foto, partido, % e votos */
-function mapaTooltip() {
-  const tip = document.createElement("div"); tip.className = "mt"; tip.setAttribute("role", "tooltip"); document.body.appendChild(tip);
-  const el = $("gmMap"); let atual = null;
-  const pos = e => { const w = tip.offsetWidth, h = tip.offsetHeight; let x = e.clientX + 16, y = e.clientY + 16; if (x + w > innerWidth - 8) x = e.clientX - w - 16; if (y + h > innerHeight - 8) y = innerHeight - h - 8; tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px"; };
-  const conteudo = uf => {
-    const f = state.files[uf], [A, B] = state.par || []; if (!A || !B) return "";
-    const g = f ? resumoFile(f, A.n, B.n) : null, nome = UF_NAMES[uf] || "Exterior";
-    const lado = g && g.vv && g.a !== g.b ? (g.a > g.b ? 0 : 1) : -1, cor = lado < 0 ? "var(--track)" : lado ? "var(--b)" : "var(--a)";
-    const linha = (c, v, p, k, perde) => `<div class="mt-c${perde ? " perde" : ""}">${fotoBr(c) ? `<img src="${fotoBr(c)}" alt="" referrerpolicy="no-referrer">` : '<span class="ph"></span>'}
-      <div class="n">${esc(nomeBonito(c.nm) || nomeCurto(c))}<small style="color:${k}">${esc(c.sg || "")} ${esc(c.n)}</small></div>
-      <div class="v"><b style="color:${k}">${g && g.vv ? pf(p) : "—"}</b><small>${g ? nf.format(v) : ""}</small></div></div>`;
-    const ls = [[A, g ? g.a : 0, g ? g.pa : 0, "var(--a)"], [B, g ? g.b : 0, g ? g.pb : 0, "var(--b)"]];
-    if (lado === 1) ls.reverse();
-    return `<div class="mt-h"><span class="mt-uf" style="background:${cor}">${uf === "zz" ? "EXT" : uf.toUpperCase()}</span><div><b>${esc(nome)}</b><small>${g ? pf(g.pst) + " das seções apuradas" : "sem dados ainda"}</small></div></div>`
-      + ls.map((x, i) => linha(x[0], x[1], x[2], x[3], lado >= 0 && i === 1)).join("");
-  };
+/* cartão ao passar o mouse nos mapas (um só elemento para todos os mapas do site) */
+const TIP = { el: null };
+function tipEl() { if (!TIP.el) { TIP.el = document.createElement("div"); TIP.el.className = "mt"; TIP.el.setAttribute("role", "tooltip"); document.body.appendChild(TIP.el); } return TIP.el; }
+function tipPos(x0, y0) { const t = tipEl(), w = t.offsetWidth, h = t.offsetHeight; let x = x0 + 16, y = y0 + 16; if (x + w > innerWidth - 8) x = x0 - w - 16; if (y + h > innerHeight - 8) y = innerHeight - h - 8; t.style.left = Math.max(8, x) + "px"; t.style.top = Math.max(8, y) + "px"; }
+function tipEsconde() { const t = tipEl(); t.classList.remove("on", "toque"); TIP.k = null; }
+// liga o cartão a um mapa: chave(alvo) diz qual região está sob o mouse; html(chave) monta o cartão
+function ligarTip(el, chave, html, toque) {
+  if (!el || el.dataset.tip) return; el.dataset.tip = "1";
   el.addEventListener("pointermove", e => {
     if (e.pointerType === "touch") return;
-    const t = e.target.closest("[data-uf]"), uf = t && t.dataset.uf;
-    if (!uf) { tip.classList.remove("on"); atual = null; return; }
-    if (uf !== atual) { atual = uf; tip.innerHTML = conteudo(uf); }
-    tip.classList.add("on"); pos(e);
+    const k = chave(e.target);
+    if (!k) { tipEsconde(); return; }
+    const t = tipEl(); if (k !== TIP.k) { TIP.k = k; t.innerHTML = html(k); if (!t.innerHTML) { tipEsconde(); return; } }
+    t.classList.add("on"); tipPos(e.clientX, e.clientY);
   });
-  el.addEventListener("pointerleave", () => { tip.classList.remove("on"); atual = null; });
+  el.addEventListener("pointerleave", e => { if (e.pointerType !== "touch") tipEsconde(); });
+  if (toque) el.addEventListener("click", e => {          // no celular, tocar mostra o cartão; tocar fora esconde
+    if (matchMedia("(hover:hover)").matches) return;
+    const k = chave(e.target); if (!k) { tipEsconde(); return; }
+    const t = tipEl(); t.innerHTML = html(k); TIP.k = k; if (!t.innerHTML) return; t.classList.add("on", "toque"); tipPos(e.clientX, e.clientY); e.stopPropagation();
+  });
   // o cartão substitui a dica padrão do navegador
-  new MutationObserver(() => el.querySelectorAll("title").forEach(x => { if (x.textContent) x.textContent = ""; })).observe(el, { subtree: true, childList: true, characterData: true });
+  const limpa = () => el.querySelectorAll("title").forEach(x => { if (x.textContent) x.textContent = ""; });
+  limpa(); new MutationObserver(limpa).observe(el, { subtree: true, childList: true, characterData: true });
+}
+document.addEventListener("click", () => { if (TIP.el && TIP.el.classList.contains("toque")) tipEsconde(); });
+addEventListener("scroll", () => { if (TIP.el && TIP.el.classList.contains("toque")) tipEsconde(); }, { passive: true });
+const tipFoto = u => u ? `<img src="${u}" alt="" referrerpolicy="no-referrer">` : '<span class="ph"></span>';
+const tipCab = (sigla, cor, nome, sub) => `<div class="mt-h"><span class="mt-uf" style="background:${cor}">${esc(sigla)}</span><div><b>${esc(nome)}</b><small>${sub}</small></div></div>`;
+const tipLinha = (foto, nome, part, cor, pct, votos, extra, perde) => `<div class="mt-c${perde ? " perde" : ""}">${tipFoto(foto)}<div class="n">${esc(nome)}${extra || ""}<small style="color:${cor}">${esc(part)}</small></div><div class="v"><b style="color:${cor}">${pct}</b><small>${votos}</small></div></div>`;
+// mapa do presidente (batalha e clássico)
+function mapaTooltip() {
+  ligarTip($("gmMap"), t => { const x = t.closest("[data-uf]"); return x && x.dataset.uf; }, uf => {
+    const f = state.files[uf], [A, B] = state.par || []; if (!A || !B) return "";
+    const g = f ? resumoFile(f, A.n, B.n) : null, lado = g && g.vv && g.a !== g.b ? (g.a > g.b ? 0 : 1) : -1;
+    const ls = [[A, g ? g.a : 0, g ? g.pa : 0, "var(--a)"], [B, g ? g.b : 0, g ? g.pb : 0, "var(--b)"]]; if (lado === 1) ls.reverse();
+    return tipCab(uf === "zz" ? "EXT" : uf.toUpperCase(), lado < 0 ? "var(--track)" : lado ? "var(--b)" : "var(--a)", UF_NAMES[uf] || "Exterior", g ? pf(g.pst) + " das seções apuradas" : "sem dados ainda")
+      + ls.map(([c, v, p, k], i) => tipLinha(fotoBr(c), nomeBonito(c.nm) || nomeCurto(c), `${c.sg || ""} ${c.n}`, k, g && g.vv ? pf(p) : "—", g ? nf.format(v) : "", "", lado >= 0 && i === 1)).join("");
+  });
+}
+// mapa-múndi do exterior
+function exteriorTooltip() {
+  ligarTip($("exMap"), t => { const p = t.closest("path[data-iso]"); return p && EX.dados[p.dataset.iso] ? p.dataset.iso : null; }, iso => {
+    const x = EX.dados[iso], [A, B] = state.par || []; if (!x || !A || !B) return "";
+    const lado = x.vv && x.a !== x.b ? (x.a > x.b ? 0 : 1) : -1, pa = x.vv ? x.a / x.vv * 100 : 0, pb = x.vv ? x.b / x.vv * 100 : 0;
+    const ls = [[A, x.a, pa, "var(--a)"], [B, x.b, pb, "var(--b)"]]; if (lado === 1) ls.reverse();
+    return tipCab(iso.toUpperCase(), lado < 0 ? "var(--track)" : lado ? "var(--b)" : "var(--a)", nomePais(iso), `${x.cid} ${x.cid === 1 ? "cidade" : "cidades"} · ${pf(x.ts ? x.st / x.ts * 100 : 0)} das seções apuradas`)
+      + ls.map(([c, v, p, k], i) => tipLinha(fotoBr(c), nomeBonito(c.nm) || nomeCurto(c), `${c.sg || ""} ${c.n}`, k, x.vv ? pf(p) : "—", nf.format(v), "", lado >= 0 && i === 1)).join("");
+  }, true);
+}
+// mapas do Resumo (governadores e senado)
+function resumoTooltip(el, tipo) {
+  ligarTip(el, t => { const x = t.closest("[data-uf]"); return x && x.dataset.uf; }, uf => {
+    const R = state.rz || {}, d = (tipo === "gov" ? R.gov : R.sen || {})[uf]; if (!d) return "";
+    const vagas = tipo === "gov" ? 1 : d.nv, cs = d.cands.filter(c => c.vap > 0).slice(0, vagas + 1), top = cs[0];
+    const el1 = c => c.fl === "tse" || c.fl === "gar";
+    const sub = tipo === "gov" ? `${d.turno}º turno · ${pf(d.pst)} das seções apuradas` : `${pf(d.pst)} das seções apuradas · ${vagas} vagas`;
+    return tipCab(uf.toUpperCase(), top ? corPartido(top.sg) : "var(--track)", UF_NAMES[uf], sub)
+      + cs.map((c, i) => tipLinha(fotoUF(d, c), nomeBonito(c.nm), `${c.sg} ${c.n}`, corPartido(c.sg), d.vv ? pf(c.vap / d.vv * 100) : "—", nf.format(c.vap) + " votos", el1(c) ? '<span class="ok">eleito</span>' : "", i >= vagas)).join("");
+  }, true);
 }
 function histMesclado(A, B) {
   const loc = GM.hist || [], s = GM.histSrv;
@@ -2122,26 +2156,26 @@ function rzMapa(id, dados, opts) {
     let fill = "var(--track)";
     if (cs && cs.length > 1 && cs[1] !== cs[0]) { defs.push(`<linearGradient id="${P}g${u}" x1="0" y1="0" x2="1" y2="1"><stop offset=".5" style="stop-color:${cs[0]}"/><stop offset=".5" style="stop-color:${cs[1]}"/></linearGradient>`); fill = `url(#${P}g${u})`; }
     else if (cs) fill = cs[0];
-    corpo.push(`<path d="${d}" style="fill:${fill}" stroke="var(--panel)" stroke-width="1.2"><title>${esc(x ? x.titulo : UF_NAMES[u])}</title></path>`);
+    corpo.push(`<path data-uf="${u}" d="${d}" style="fill:${fill}" stroke="var(--panel)" stroke-width="1.2"></path>`);
   }
   const foto = (cx, cy, r, url, k, cor) => { const cid = `${P}c${k}`; defs.push(`<clipPath id="${cid}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath>`);
     return `<circle cx="${cx}" cy="${cy}" r="${r + 1.6}" fill="${cor || "#fff"}"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="#2a3440"/>${url ? `<image href="${url}" x="${cx - r}" y="${cy - r}" width="${2 * r}" height="${2 * r}" preserveAspectRatio="xMidYMin slice" clip-path="url(#${cid})"/>` : ""}`; };
   for (const [u, x] of Object.entries(dados)) {
     if (!BR_PATHS[u]) continue;
-    const n = x.fotos.length, tit = `<title>${esc(x.titulo)}</title>`;
+    const n = x.fotos.length, tit = "";
     if (RZ_CHIP[u] != null) {                       // estados pequenos: chip ao lado, ligado ao estado
       const [x0, y0] = CENTRO_UF[u], y = RZ_CHIP[u], X = 606, r = 11;
       let h = `<line x1="${x0}" y1="${y0}" x2="${X}" y2="${y}" stroke="var(--ink2)" stroke-width=".8" opacity=".7"/><circle cx="${x0}" cy="${y0}" r="2" fill="var(--ink2)"/>`;
       h += `<rect x="${X}" y="${y - 15}" width="${n * 24 + (x.sub ? 66 : 36)}" height="30" rx="15" style="fill:${x.forte ? x.cores[0] : `color-mix(in srgb, ${x.cores[0]} 50%, #dfe3e8)`}"/>`;
       x.fotos.forEach((f, i) => { h += foto(X + 15 + i * 24, y, r, f, u + i, "#fff"); });
       h += `<text class="ini" x="${X + 8 + n * 24}" y="${y + 4.5}" font-size="13" font-weight="800" fill="#0b1118" font-family="var(--f-body)">${u.toUpperCase()}${x.sub ? ` <tspan font-weight="600">${esc(x.sub)}</tspan>` : ""}</text>`;
-      marcas.push(`<g class="rzm">${tit}${h}</g>`); continue;
+      marcas.push(`<g class="rzm" data-uf="${u}">${tit}${h}</g>`); continue;
     }
     const [cx, cy, rr] = CENTRO_UF[u], r = Math.max(9, Math.min(20, rr * 0.5)), gap = r * 2 + 3, x1 = cx - (n - 1) * gap / 2;
     let h = `<text x="${cx}" y="${cy - r - 5}" text-anchor="middle" font-size="${Math.max(12, Math.min(15, rr * 0.4))}" font-weight="800" fill="#0b1118" font-family="var(--f-body)">${u.toUpperCase()}</text>`;
     x.fotos.forEach((f, i) => { h += foto(x1 + i * gap, cy, r, f, u + i, "#fff"); });
     if (x.sub) h += `<text x="${cx}" y="${cy + r + 13}" text-anchor="middle" font-size="${Math.max(11, Math.min(14, rr * 0.36))}" font-weight="700" fill="#0b1118" font-family="var(--f-body)">${esc(x.sub)}</text>`;
-    marcas.push(`<g class="rzm">${tit}${h}</g>`);
+    marcas.push(`<g class="rzm" data-uf="${u}">${tit}${h}</g>`);
   }
   return `<svg class="rz-svg" viewBox="0 0 712 660" role="img" aria-label="${esc(opts.rotulo)}"><defs>${defs.join("")}</defs>${corpo.join("")}${marcas.join("")}</svg>`;
 }
@@ -2214,6 +2248,7 @@ function renderResumoGeral() {
         dados[u] = { cores: [corPartido(c.sg)], fotos: [fotoUF(d, c)], sub: c.sg, forte: ok, titulo: `${UF_NAMES[u]}: ${nomeBonito(c.nm)} (${c.sg}) · ${d.vv ? pf(c.vap / d.vv * 100) : ""} · ${ok ? `eleito no ${d.turno}º turno` : "à frente, ainda em disputa"}` }; cont[c.sg] = (cont[c.sg] || 0) + 1; }
       $("rzGovMap").innerHTML = rzMapa("gov", dados, { rotulo: "Mapa dos governadores por estado" }) + legendaPartidos(Object.entries(cont).sort((a, b) => b[1] - a[1]))
         + '<div class="sub" style="text-align:center;margin-top:4px">Cor forte = eleito; cor clara = à frente, ainda em disputa. Passe o mouse (ou toque) no estado para ver o detalhe.</div>';
+      resumoTooltip($("rzGovMap"), "gov");
     }
   } else $("rzGov").innerHTML = "";
   // Senado
@@ -2227,10 +2262,11 @@ function renderResumoGeral() {
       return `<div class="rz-tile" style="background:linear-gradient(135deg, ${c1} 50%, ${c2} 50%)" title="${esc(UF_NAMES[u])}: ${cs.map(c => esc(nomeBonito(c.nm) + " (" + c.sg + ")")).join(", ")}">${u.toUpperCase()}</div>`; }).join("");
     $("rzSen").innerHTML = `<div class="rz-h"><h3>Senado <small>${nT} vagas em disputa · ${nG} definidas</small></h3>${rzSwitch("sen", [["blocos", "Blocos"], ["mapa", "Mapa"], ["cadeiras", "Cadeiras"]], vs)}</div>`
       + (vs === "cadeiras" ? hemiciclo(grupos, nT, Math.floor(81 / 2) + 1) + legendaPartidos(grupos) + '<div class="sub" style="text-align:center;margin-top:4px">Só as vagas desta eleição. O Senado tem 81 cadeiras; a maioria (41) considera também os senadores eleitos em 2022.</div>'
-        : vs === "mapa" ? `<div class="rz-map">${rzMapa("sen", Object.fromEntries(sUF.map(u => { const d = R.sen[u], cs = d.cands.slice(0, d.nv).filter(c => c.vap > 0); if (!cs.length) return null;
+        : vs === "mapa" ? `<div class="rz-map" id="rzSenMap">${rzMapa("sen", Object.fromEntries(sUF.map(u => { const d = R.sen[u], cs = d.cands.slice(0, d.nv).filter(c => c.vap > 0); if (!cs.length) return null;
             const ok = cs.every(c => c.fl === "tse" || c.fl === "gar");
             return [u, { cores: cs.map(c => corPartido(c.sg)), fotos: cs.map(c => fotoUF(d, c)), forte: ok, titulo: `${UF_NAMES[u]}: ` + cs.map(c => `${nomeBonito(c.nm)} (${c.sg}) ${d.vv ? pf(c.vap / d.vv * 100) : ""}${c.fl === "tse" || c.fl === "gar" ? " eleito" : " à frente"}`).join(" · ") }]; }).filter(Boolean)), { rotulo: "Mapa dos senadores por estado" })}</div>` + legendaPartidos(grupos) + '<div class="sub" style="text-align:center;margin-top:4px">Cada estado elege dois senadores: as duas cores são os partidos deles. Passe o mouse (ou toque) no estado para ver nomes e votos.</div>'
         : `<div class="rz-ban">${ban.map(p => `<span>${esc(p.sg)}<b>${p.proj}</b></span>`).join("")}</div><div class="rz-sen">${lista}</div>`);
+    if ($("rzSenMap")) resumoTooltip($("rzSenMap"), "sen");
   } else $("rzSen").innerHTML = "";
   // Deputados
   for (const [k, , titulo, id] of RZ_CARGOS) {
@@ -2383,7 +2419,7 @@ montarAbas();
 document.querySelectorAll("#turnoSw button").forEach(b => b.onclick = () => trocarTurno(b.dataset.t));
 window.addEventListener("hashchange", () => { const h = lerHash(); trocarTurno(FONTE.turno || h.turno || state.turno, h.tab || "presidente"); });
 $("exClose").onclick = fecharExterior;
-mapaTooltip();
+mapaTooltip(); exteriorTooltip();
 function graficoGrande(on) {
   GM.chGrande = on; $("clBig").hidden = !on; $("clMini").hidden = on;
   try { render(); } catch (e) { /* sem dados ainda */ }
