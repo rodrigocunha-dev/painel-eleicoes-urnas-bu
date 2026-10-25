@@ -712,6 +712,7 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
       <span id="upd">—</span>
       <button type="button" id="gmSnd" title="Som dos eventos">🔇</button>
       <button type="button" id="share" title="Copiar o link desta tela">🔗<span class="bt-t"> Compartilhar</span></button>
+      <button type="button" id="telaCheia" title="Tela cheia" hidden>⛶<span class="bt-t"> Tela cheia</span></button>
       <button type="button" id="refresh" title="Atualizar agora">↻<span class="bt-t"> Atualizar agora</span></button>
     </div>
   </div>
@@ -2420,6 +2421,18 @@ document.querySelectorAll("#turnoSw button").forEach(b => b.onclick = () => troc
 window.addEventListener("hashchange", () => { const h = lerHash(); trocarTurno(FONTE.turno || h.turno || state.turno, h.tab || "presidente"); });
 $("exClose").onclick = fecharExterior;
 mapaTooltip(); exteriorTooltip();
+/* tela cheia (para TV ou projetor) */
+{
+  const d = document, raiz = d.documentElement, pode = !!(raiz.requestFullscreen || raiz.webkitRequestFullscreen), b = $("telaCheia");
+  const ativo = () => !!(d.fullscreenElement || d.webkitFullscreenElement);
+  const marca = () => { const on = ativo(); b.innerHTML = on ? '⤢<span class="bt-t"> Sair da tela cheia</span>' : '⛶<span class="bt-t"> Tela cheia</span>'; b.title = on ? "Sair da tela cheia (Esc)" : "Tela cheia"; };
+  if (pode) {
+    b.hidden = false;
+    b.onclick = () => { if (ativo()) (d.exitFullscreen || d.webkitExitFullscreen).call(d); else (raiz.requestFullscreen || raiz.webkitRequestFullscreen).call(raiz); };
+    d.addEventListener("fullscreenchange", () => { marca(); ajustarBatalhaLogo(); });
+    d.addEventListener("webkitfullscreenchange", () => { marca(); ajustarBatalhaLogo(); });
+  }
+}
 function graficoGrande(on) {
   GM.chGrande = on; $("clBig").hidden = !on; $("clMini").hidden = on;
   try { render(); } catch (e) { /* sem dados ainda */ }
