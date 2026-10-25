@@ -607,6 +607,25 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
 @keyframes gmfall{to{transform:translateY(105vh) rotate(720deg)}}
 @media (prefers-reduced-motion:reduce){.gm-cf{display:none}.gm-rope .fa,.gm-rope .fb,.gm-rope .mk{transition:none}}
 
+
+/* gráfico da apuração: pequeno na primeira tela, grande abaixo */
+.ch svg.mini{max-width:420px}.ch svg.big{max-width:900px}
+.ch-mini h3{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ch-amp{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:3px 10px;font:600 .75rem var(--f-body);cursor:pointer}
+.ch-mini.oculto{display:none}
+.cl-bx:has(#clBig[hidden]){grid-template-columns:minmax(0,1fr)}#clBig[hidden],#clMini[hidden]{display:none}
+/* cartão do estado ao passar o mouse no mapa */
+.mt{position:fixed;z-index:60;pointer-events:none;min-width:250px;max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 12px 30px rgba(0,0,0,.45);opacity:0;transition:opacity .12s}
+.mt.on{opacity:1}
+.mt-h{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.mt-uf{min-width:34px;height:26px;padding:0 6px;border-radius:7px;display:flex;align-items:center;justify-content:center;font:800 .8rem var(--f-body);color:#0b1118}
+.mt-h b{display:block;font:700 1.05rem var(--f-disp)}.mt-h small{color:var(--ink2);font-size:.78rem}
+.mt-c{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.mt-c img,.mt-c .ph{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--track)}
+.mt-c .n{font-weight:700;line-height:1.15}.mt-c .n small{display:block;font-weight:600;font-size:.75rem}
+.mt-c .v{text-align:right}.mt-c .v b{display:block;font:700 1.1rem var(--f-disp)}.mt-c .v small{color:var(--ink2);font-size:.75rem}
+.mt-c.perde .n,.mt-c.perde .v b{opacity:.75}
+@media (hover:none){.mt{display:none}}
 /* ===== Resumo geral: os eleitos de todos os cargos ===== */
 .rz-sec>.rz-h{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:10px}
 .rz-sec>.rz-h h3{font:700 1.25rem var(--f-disp);margin:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.rz-sec>.rz-h h3 small{font:500 .82rem var(--f-body);color:var(--ink2)}
@@ -725,11 +744,11 @@ details.fx .gm-feed,details.fx .feed{max-height:360px;overflow-y:auto;margin-top
     <div class="cl-ap"><div class="bar"><i id="brBar" style="width:0%"></i></div><div class="cl-apt"><b class="num" id="brPst">—</b> <span class="num" id="brSec"></span></div></div>
     </div>
     <div class="cl-grid">
-      <div class="cl-l"><div class="clc conta" id="clConta"></div><div class="clc" id="clOutros" hidden></div></div>
+      <div class="cl-l"><div class="clc conta" id="clConta"></div><div class="clc" id="clOutros" hidden></div><div class="clc ch-mini" id="clMini"><h3>Ao longo da apuração<button type="button" class="ch-amp" id="clAmp">Ampliar ↓</button></h3><div id="clChartMini"></div></div></div>
       <div class="cl-c" id="clMapSlot"></div>
       <div class="cl-r"><div class="clc"><h3>Resultado por região</h3><div id="clReg"></div></div></div>
     </div>
-    <div class="cl-bx"><div class="clc"><h3>Evolução da apuração</h3><div id="clChart"></div></div><div class="clc"><h3>Acontecimentos da apuração</h3><div id="clFeed"></div></div></div>
+    <div class="cl-bx"><div class="clc ch-mini" id="clBig" hidden><h3>Evolução da apuração<button type="button" class="ch-amp" id="clRec">Recolher ↑</button></h3><div id="clChart"></div></div><div class="clc"><h3>Acontecimentos da apuração</h3><div id="clFeed"></div></div></div>
     </div>
     <div class="gm-grid" id="gmGrid"><div class="gm-c1">
     <div id="gmBatBox"><div class="gm-hd"><h2 id="hGm">Batalha ao vivo</h2><div class="gm-lead" id="gmLead"></div></div>
@@ -1420,6 +1439,35 @@ async function histServidorLer() {
   GM.histSrvAt = Date.now();
   try { const j = await FONTE.pegar("hist-bu"); GM.histSrv = (Array.isArray(j) ? j[0] && j[0].data : null) || null; } catch (e) { /* fica só com o local */ }
 }
+
+/* cartão do estado no mapa (ao passar o mouse): candidato na frente em cima, com foto, partido, % e votos */
+function mapaTooltip() {
+  const tip = document.createElement("div"); tip.className = "mt"; tip.setAttribute("role", "tooltip"); document.body.appendChild(tip);
+  const el = $("gmMap"); let atual = null;
+  const pos = e => { const w = tip.offsetWidth, h = tip.offsetHeight; let x = e.clientX + 16, y = e.clientY + 16; if (x + w > innerWidth - 8) x = e.clientX - w - 16; if (y + h > innerHeight - 8) y = innerHeight - h - 8; tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px"; };
+  const conteudo = uf => {
+    const f = state.files[uf], [A, B] = state.par || []; if (!A || !B) return "";
+    const g = f ? resumoFile(f, A.n, B.n) : null, nome = UF_NAMES[uf] || "Exterior";
+    const lado = g && g.vv && g.a !== g.b ? (g.a > g.b ? 0 : 1) : -1, cor = lado < 0 ? "var(--track)" : lado ? "var(--b)" : "var(--a)";
+    const linha = (c, v, p, k, perde) => `<div class="mt-c${perde ? " perde" : ""}">${fotoBr(c) ? `<img src="${fotoBr(c)}" alt="" referrerpolicy="no-referrer">` : '<span class="ph"></span>'}
+      <div class="n">${esc(nomeBonito(c.nm) || nomeCurto(c))}<small style="color:${k}">${esc(c.sg || "")} ${esc(c.n)}</small></div>
+      <div class="v"><b style="color:${k}">${g && g.vv ? pf(p) : "—"}</b><small>${g ? nf.format(v) : ""}</small></div></div>`;
+    const ls = [[A, g ? g.a : 0, g ? g.pa : 0, "var(--a)"], [B, g ? g.b : 0, g ? g.pb : 0, "var(--b)"]];
+    if (lado === 1) ls.reverse();
+    return `<div class="mt-h"><span class="mt-uf" style="background:${cor}">${uf === "zz" ? "EXT" : uf.toUpperCase()}</span><div><b>${esc(nome)}</b><small>${g ? pf(g.pst) + " das seções apuradas" : "sem dados ainda"}</small></div></div>`
+      + ls.map((x, i) => linha(x[0], x[1], x[2], x[3], lado >= 0 && i === 1)).join("");
+  };
+  el.addEventListener("pointermove", e => {
+    if (e.pointerType === "touch") return;
+    const t = e.target.closest("[data-uf]"), uf = t && t.dataset.uf;
+    if (!uf) { tip.classList.remove("on"); atual = null; return; }
+    if (uf !== atual) { atual = uf; tip.innerHTML = conteudo(uf); }
+    tip.classList.add("on"); pos(e);
+  });
+  el.addEventListener("pointerleave", () => { tip.classList.remove("on"); atual = null; });
+  // o cartão substitui a dica padrão do navegador
+  new MutationObserver(() => el.querySelectorAll("title").forEach(x => { if (x.textContent) x.textContent = ""; })).observe(el, { subtree: true, childList: true, characterData: true });
+}
 function histMesclado(A, B) {
   const loc = GM.hist || [], s = GM.histSrv;
   if (!s || !s.cands || !state.ele || String(s.ele) !== String(state.ele.cd)) return loc;
@@ -1428,21 +1476,23 @@ function histMesclado(A, B) {
   const pts = s.pts.map(p => [p[0], p[1 + ia], p[1 + ib]]), max = pts[pts.length - 1][0];
   return pts.concat(loc.filter(h => h[0] > max + 0.005));
 }
-function grafico(A, B) {
+function grafico(A, B, o = {}) {
   histServidorLer();
-  const H = histMesclado(A, B), W = 300, Hh = 170, L = 30, R = 8, T = 8, Bm = 22;
+  const mini = !!o.mini, H = histMesclado(A, B);
+  const W = mini ? 320 : 720, Hh = mini ? 150 : 300, L = mini ? 36 : 44, R = mini ? 44 : 56, T = 10, Bm = mini ? 22 : 26, fs = mini ? 11.5 : 12.5, sw = mini ? 2.4 : 2.8;
   const lg = `<div class="lg"><span><i style="background:var(--a)"></i>${esc(nomeCurto(A))}</span><span><i style="background:var(--b)"></i>${esc(nomeCurto(B))}</span></div>`;
-  if (H.length < 2) return lg + `<div class="sub">${state.br && state.br.tf === "s" && !H.length ? "A apuração deste turno já terminou. O gráfico é montado durante a apuração ao vivo, a partir do momento em que a página é aberta." : "O gráfico aparece conforme as urnas forem sendo lidas (a partir do momento em que você abriu a página)."}</div>`;
+  if (H.length < 2) return lg + `<div class="sub">${mini ? "A linha aparece assim que a apuração começar." : state.br && state.br.tf === "s" && !H.length ? "A apuração deste turno já terminou. O gráfico é montado durante a apuração ao vivo." : "O gráfico aparece conforme as urnas forem sendo lidas."}</div>`;
   const vals = H.flatMap(h => [h[1], h[2]]); let lo = Math.floor(Math.min(...vals) - 1), hi = Math.ceil(Math.max(...vals) + 1); if (hi - lo < 4) { lo -= 2; hi += 2; }
   const X = p => L + (W - L - R) * p / 100, Y = v => T + (Hh - T - Bm) * (hi - v) / (hi - lo);
   const linha = k => H.map((h, i) => `${i ? "L" : "M"}${X(h[0]).toFixed(1)},${Y(h[k]).toFixed(1)}`).join("");
-  const passo = Math.max(1, Math.round((hi - lo) / 4)); let grade = "";
-  for (let v = Math.ceil(lo); v <= hi; v += passo) grade += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L - 4}" y="${Y(v) + 3}" font-size="9" text-anchor="end" fill="var(--ink2)">${v}%</text>`;
-  const ex = [0, 50, 100].map(p => `<text x="${X(p)}" y="${Hh - 6}" font-size="9" text-anchor="${p ? (p === 100 ? "end" : "middle") : "start"}" fill="var(--ink2)">${p}%${p ? "" : " das seções"}</text>`).join("");
-  const u = H[H.length - 1];
-  return lg + `<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Percentual de cada candidato ao longo da apuração">${grade}${ex}
-    <path d="${linha(1)}" fill="none" stroke="var(--a)" stroke-width="2.2"/><path d="${linha(2)}" fill="none" stroke="var(--b)" stroke-width="2.2"/>
-    <circle cx="${X(u[0])}" cy="${Y(u[1])}" r="3.5" fill="var(--a)"/><circle cx="${X(u[0])}" cy="${Y(u[2])}" r="3.5" fill="var(--b)"/></svg>`;
+  const passo = Math.max(1, Math.ceil((hi - lo) / (mini ? 3 : 5))); let grade = "";
+  for (let v = Math.ceil(lo / passo) * passo; v <= hi; v += passo) grade += `<line x1="${L}" x2="${W - R}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="var(--line)" stroke-width="1"/><text x="${L - 6}" y="${(Y(v) + fs * .35).toFixed(1)}" font-size="${fs}" text-anchor="end" fill="var(--ink2)">${v}%</text>`;
+  const ex = [0, 50, 100].map(p => `<text x="${X(p)}" y="${Hh - 5}" font-size="${fs}" text-anchor="${p ? "middle" : "start"}" fill="var(--ink2)">${p}%${p ? "" : " das seções"}</text>`).join("");
+  const u = H[H.length - 1], ya = Y(u[1]), yb = Y(u[2]), sep = fs + 2, [la, lb] = Math.abs(ya - yb) < sep ? (ya < yb ? [ya - sep / 2, yb + sep / 2] : [ya + sep / 2, yb - sep / 2]) : [ya, yb];
+  const rot = (y, v, c) => `<text x="${X(u[0]) + 7}" y="${(y + fs * .35).toFixed(1)}" font-size="${fs}" font-weight="700" fill="${c}">${v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%</text>`;
+  return lg + `<svg class="${mini ? "mini" : "big"}" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Percentual de cada candidato ao longo da apuração">${grade}${ex}
+    <path d="${linha(1)}" fill="none" stroke="var(--a)" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/><path d="${linha(2)}" fill="none" stroke="var(--b)" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(u[0])}" cy="${ya}" r="${sw + 1.6}" fill="var(--a)"/><circle cx="${X(u[0])}" cy="${yb}" r="${sw + 1.6}" fill="var(--b)"/>${rot(la, u[1], "var(--a)")}${rot(lb, u[2], "var(--b)")}</svg>`;
 }
 function classicoExtras(r, A, B, sm) {
   if (!A || !B) return;
@@ -1487,7 +1537,9 @@ function classicoExtras(r, A, B, sm) {
     return `<div class="rg2"><div class="h"><span>${nome === "Exterior" ? `<button type="button" class="lnk" data-ex="1">Exterior (ver países)</button>` : esc(nome)}</span><small>${pf(g.pst)} lido</small></div>
       <div class="tw2 ${lado}"><i style="left:0;width:${pa}%;background:var(--a)"></i><i style="right:0;width:${100 - pa}%;background:var(--b)"></i><u></u><b class="num">${g.vv ? pf(g.pa) : "—"}</b><b class="num">${g.vv ? pf(g.pb) : "—"}</b></div></div>`;
   }).join("");
-  $("clChart").innerHTML = `<div class="ch">${grafico(A, B)}</div>`;
+  // um gráfico só: pequeno na primeira tela ou, ao ampliar, grande lá embaixo
+  if (GM.chGrande) $("clChart").innerHTML = `<div class="ch">${grafico(A, B)}</div>`;
+  else $("clChartMini").innerHTML = `<div class="ch">${grafico(A, B, { mini: true })}</div>`;
 }
 /* ----- exterior: resultado por país ----- */
 const EX_CID = {"29254":"ci","29262":"ae","99198":"ng","29270":"gh","99325":"et","30457":"nl","29289":"jo","29297":"tr","29300":"dz","29319":"uy","29327":"py","39241":"kz","29335":"gr","39080":"us","99171":"iq","39128":"az","99350":"ml","29343":"th","29351":"es","99473":"bh","29360":"lb","29378":"rs","38881":"bz","29386":"de","29394":"gw","29408":"co","29416":"us","39209":"sk","39187":"cg","29424":"bb","29432":"be","29440":"ro","29459":"hu","29467":"ar","29475":"gf","29483":"eg","29491":"au","30651":"cn","29505":"ve","99384":"lc","29513":"us","29521":"uy","29530":"za","29556":"py","29564":"ve","99210":"bo","29572":"bo","30929":"lk","38903":"gn","29580":"py","29599":"dk","38920":"bj","29602":"ar","29610":"sn","29629":"bd","29637":"sy","38962":"tz","29653":"qa","29661":"ie","29645":"tl","99503":"gb","29670":"py","29688":"se","30961":"pt","29696":"de","30669":"bw","29700":"ch","29718":"gy","98000":"gt","29742":"jp","29750":"vn","29769":"zw","30902":"us","29777":"cu","29785":"fi","29793":"hk","29807":"us","29815":"cm","38989":"am","29823":"pe","29831":"pk","39306":"tr","29840":"id","29173":"np","29858":"ua","99430":"jm","29874":"cd","29882":"kw","29890":"my","29904":"bo","29912":"ng","29939":"ga","99341":"mw","29947":"pe","29955":"pt","39160":"si","29963":"tg","29971":"gb","29980":"us","29998":"ao","99287":"zm","30066":"es","39263":"gq","30082":"ph","30074":"ni","30090":"mz","99511":"fr","39102":"om","39004":"ar","30104":"mx","30112":"us","30120":"it","30147":"uy","30155":"ca","30163":"ru","30171":"in","30180":"de","30198":"jp","30201":"ke","99180":"bs","39322":"cy","30210":"in","30228":"us","99490":"us","30244":"no","30252":"ca","30260":"pa","30279":"sr","30287":"fr","30295":"ar","30309":"py","30317":"cn","30325":"tt","30341":"pt","30333":"ht","30350":"cz","30368":"cv","30376":"za","99155":"ar","99236":"bo","99295":"kp","30392":"ec","30406":"ma","30414":"ps","30422":"sa","30430":"uy","99244":"uy","30449":"it","99147":"ag","30465":"py","30473":"bo","99279":"ve","30481":"cl","30988":"ba","30538":"kr","29548":"sg","99333":"gf","30562":"au","30490":"do","30503":"us","30511":"cr","30520":"sv","39225":"st","30546":"bg","30570":"tw","99317":"ee","99104":"ge","30597":"ir","30600":"hn","30619":"il","99139":"al","30635":"ca","30686":"ly","30708":"tn","30627":"jp","39284":"bf","39063":"ca","30740":"pl","30767":"at","30783":"us","30805":"nz","30821":"na","30848":"cn","99376":"mm","39020":"hr","30864":"ch"};      // código TSE da cidade no exterior -> país (ISO)
@@ -2292,9 +2344,11 @@ function ajustarMapaClassico() {
   svg.style.height = ""; svg.style.width = ""; svg.style.marginInline = "";
   if (innerWidth < (cl ? 820 : 1180) || !svg.getBoundingClientRect().height) return;
   const limite = innerHeight - FOLGA_TELA;
+  const mini = $("clMini"); if (mini) mini.classList.remove("oculto");
   if (cl && innerWidth >= 1180) {
     const fimCol = () => Math.max(...[".cl-l", ".cl-r"].map(q => { const e = lay.querySelector(q); return e ? e.getBoundingClientRect().bottom + scrollY : 0; }));
     if (fimCol() > limite) lay.classList.add("aperta");
+    if (fimCol() > limite && mini) mini.classList.add("oculto");
   }
   // abaixo do mapa ainda vêm a faixa de chips (telas estreitas) e a legenda: tudo isso precisa caber
   const r = svg.getBoundingClientRect(), leg = $("gmLeg"), abaixo = leg && leg.offsetParent ? Math.max(0, leg.getBoundingClientRect().bottom - r.bottom) : 0;
@@ -2329,6 +2383,16 @@ montarAbas();
 document.querySelectorAll("#turnoSw button").forEach(b => b.onclick = () => trocarTurno(b.dataset.t));
 window.addEventListener("hashchange", () => { const h = lerHash(); trocarTurno(FONTE.turno || h.turno || state.turno, h.tab || "presidente"); });
 $("exClose").onclick = fecharExterior;
+mapaTooltip();
+function graficoGrande(on) {
+  GM.chGrande = on; $("clBig").hidden = !on; $("clMini").hidden = on;
+  try { render(); } catch (e) { /* sem dados ainda */ }
+  ajustarBatalhaLogo();
+  if (on) setTimeout(() => $("clBig").scrollIntoView({ behavior: "smooth", block: "center" }), 80);
+  else $("clLayout").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+$("clAmp").onclick = () => graficoGrande(true);
+$("clRec").onclick = () => graficoGrande(false);
 $("exBox").onclick = e => { if (e.target === $("exBox")) fecharExterior(); };
 document.addEventListener("keydown", e => { if (e.key === "Escape" && EX.aberto) fecharExterior(); });
 document.addEventListener("click", e => { if (e.target.closest("[data-ex]")) abrirExterior(); });
